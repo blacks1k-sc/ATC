@@ -1,0 +1,458 @@
+:root{
+  --neon:#00ff00;
+  --bg:#0a0a0a;
+  --panel:#1a1a2e;
+  --ink:#00ff00;
+  --dep:#00ff6a;      /* DEPARTURE green */
+  --arr:#ff4d4d;      /* ARRIVAL red   */
+  --dep-bg:rgba(0,255,106,.12);
+  --arr-bg:rgba(255,77,77,.12);
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Courier New',monospace;background:var(--bg);color:var(--ink);overflow:hidden}
+
+.atc-system{
+  display:grid; height:100vh; gap:2px;
+  grid-template-columns:1fr 1fr 300px;
+  grid-template-rows:60px 1fr 200px;
+}
+
+.main-header{
+  grid-column:1/-1; background:#1a1a2e; padding:10px 20px;
+  display:flex; justify-content:space-between; align-items:center;
+  border-bottom:2px solid var(--neon);
+}
+.controller-tabs{display:flex; gap:5px}
+.tab{padding:8px 15px; background:#2a2a4e; border:1px solid #004400; cursor:pointer; transition:.3s; font-size:12px}
+.tab.active{background:var(--neon); color:#000; border-color:var(--neon)}
+.tab:hover:not(.active){background:#3a3a6e}
+
+.system-status{display:flex; gap:15px; align-items:center}
+.status-indicator{display:flex; align-items:center; gap:5px; font-size:11px}
+.status-light{width:10px; height:10px; border-radius:50%; animation:pulse 2s infinite}
+.status-light.active{background:var(--neon); box-shadow:0 0 8px var(--neon)}
+.status-light.warning{background:#ffff00; box-shadow:0 0 8px #ffff00}
+.status-light.emergency{background:#ff0000; box-shadow:0 0 8px #ff0000}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+
+.display-area{background:#001122; border:2px solid var(--neon); position:relative; overflow:hidden}
+.ground-radar{background:#000811; border:2px solid #0066cc}
+
+/* Airport layout bits (unchanged from your original) */
+.airport-layout{position:absolute; inset:0}
+.runway{position:absolute; background:#333; border:2px solid #666}
+.runway-25L{width:60%; height:8px; top:30%; left:20%; transform:rotate(-10deg)}
+.runway-25R{width:55%; height:8px; top:60%; left:25%; transform:rotate(-10deg)}
+.runway-07L{width:50%; height:6px; top:45%; left:10%; transform:rotate(80deg)}
+.runway-label{position:absolute; color:#fff; font-size:10px; font-weight:bold; background:rgba(0,0,0,.7); padding:2px 5px}
+.taxiway{position:absolute; background:#444; border:1px solid #666}
+.taxiway-a{width:4px; height:40%; top:10%; left:15%}
+.taxiway-b{width:4px; height:30%; top:20%; left:30%}
+.taxiway-c{width:40%; height:4px; top:50%; left:10%}
+.taxiway-d{width:30%; height:4px; top:70%; left:20%}
+.taxiway-label{position:absolute; color:#ffff00; font-size:8px; background:rgba(0,0,0,.8); padding:1px 3px}
+.terminal{position:absolute; width:80px; height:40px; background:#2a2a2a; border:2px solid #888; top:10%; left:70%}
+.gate{position:absolute; width:8px; height:8px; background:#0066cc; border:1px solid #00aaff}
+
+.aircraft-ground{position:absolute; width:12px; height:12px; background:#ffff00; border:2px solid #ff8800;
+  transform:translate(-50%,-50%); cursor:pointer; transition:.5s}
+.aircraft-ground.taxiing{background:var(--neon); border-color:#008800}
+.aircraft-ground.takeoff{background:#ff0000; border-color:#cc0000; animation:takeoff 3s ease-out}
+@keyframes takeoff{0%{transform:translate(-50%,-50%) scale(1)}100%{transform:translate(-50%,-50%) scale(.5) translateY(-50px); opacity:.7}}
+
+.aircraft-airborne{position:absolute; width:16px; height:16px; background:#00ffff; transform:translate(-50%,-50%) rotate(45deg);
+  cursor:pointer; transition:.3s}
+.aircraft-airborne::before{content:''; position:absolute; inset:-3px; border:1px solid #00ffff; transform:rotate(-45deg)}
+.aircraft-label{position:absolute; background:rgba(0,0,0,.9); color:#fff; padding:2px 5px; font-size:9px; white-space:nowrap; border:1px solid; pointer-events:none}
+
+.ground-vehicle{position:absolute; width:8px; height:8px; background:#ff6600; border-radius:2px; animation:vehicle-move 10s linear infinite}
+@keyframes vehicle-move{0%{left:10%}50%{left:60%}100%{left:10%}}
+
+/* Radar sweep (unchanged visual) */
+.radar-sweep-wedge{position:absolute; top:50%; left:50%; width:640px; height:640px; transform-origin:center; animation:sweep 4s linear infinite; filter:drop-shadow(0 0 6px var(--neon))}
+.sweep-wedge{position:absolute; inset:0; border-radius:50%;
+  background:conic-gradient(from 0deg,
+    rgba(0,255,0,0) 0deg, rgba(0,255,0,.02) 6deg, rgba(0,255,0,.05) 12deg, rgba(0,255,0,.09) 18deg,
+    rgba(0,255,0,.14) 22deg, rgba(0,255,0,.20) 26deg, rgba(0,255,0,.28) 29deg, rgba(0,255,0,.38) 30.5deg,
+    rgba(0,255,0,.65) 31.5deg, rgba(0,255,0,.9) 32.25deg, rgba(0,255,0,1) 33deg, rgba(0,255,0,0) 33.2deg);
+  mix-blend-mode:screen}
+@keyframes sweep{from{transform:translate(-50%,-50%) rotate(0)}to{transform:translate(-50%,-50%) rotate(360deg)}}
+
+.radar-circles{position:absolute; top:50%; left:50%; transform:translate(-50%,-50%)}
+.radar-circle{border:1px solid #004400; border-radius:50%; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%)}
+.degree-markings{position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:640px; height:640px}
+.degree-mark{position:absolute; color:var(--neon); font-size:10px; text-shadow:0 0 3px var(--neon); opacity:.8}
+
+.control-panels{background:#0f0f23; display:flex; flex-direction:column; gap:2px; overflow-y:auto}
+.panel{background:#1a1a2e; border:1px solid var(--neon); padding:8px; flex-shrink:0}
+.panel h4{color:var(--neon); margin-bottom:8px; text-align:center; border-bottom:1px solid #004400; padding-bottom:3px; font-size:12px}
+.strip-container{max-height:120px; overflow-y:auto}
+.flight-strip{background:#2a2a4e; margin-bottom:3px; padding:5px; border-left:3px solid var(--neon); font-size:9px; cursor:pointer; transition:.2s}
+.flight-strip:hover{background:#3a3a6e}
+.flight-strip.active{border-left-color:#ffff00; background:#4a4a2e}
+.flight-strip.emergency{border-left-color:#ff0000; background:#4a2a2a; animation:flash 1s infinite}
+@keyframes flash{0%,100%{opacity:1}50%{opacity:.8}}
+.strip-phase{color:#888; font-size:8px}
+
+/* === NEW: Unified ATC Stage Logs (bottom) === */
+.communications-area{
+  grid-column:1/-1;
+  background:#0f0f23;
+  border-top:2px solid var(--neon);
+  display:grid;
+  grid-template-columns:repeat(6,1fr) 220px;  /* 6 stages + status */
+  gap:2px;
+}
+.comm-panel{background:#1a1a2e; padding:10px; border:1px solid #004400}
+.comm-panel h4{color:var(--neon); margin-bottom:8px; font-size:11px; text-align:center; border-bottom:1px solid #004400; padding-bottom:3px}
+.comm-messages{font-size:10px; max-height:140px; overflow-y:auto}
+
+.stage-message{margin-bottom:5px; padding:6px 6px 6px 8px; border-radius:2px; border-left:2px solid}
+.stage-message .badge{
+  font-weight:700; padding:1px 6px; border-radius:3px; border:1px solid; text-decoration:underline; text-underline-offset:2px;
+  margin-right:6px;
+}
+.stage-message .flight{
+  font-weight:700; text-decoration:underline; text-underline-offset:2px; padding:0 4px; border-radius:3px;
+}
+.stage-message .msg{opacity:.95}
+
+/* Color application */
+.dep{ color:var(--dep) }
+.arr{ color:var(--arr) }
+
+.stage-message.dep{ border-left-color:var(--dep); background:var(--dep-bg) }
+.stage-message.arr{ border-left-color:var(--arr); background:var(--arr-bg) }
+
+.badge.dep{ color:var(--dep); background:rgba(0,255,106,.08); border-color:var(--dep) }
+.badge.arr{ color:var(--arr); background:rgba(255,77,77,.08); border-color:var(--arr) }
+
+.flight.dep{ background:rgba(0,255,106,.12) }
+.flight.arr{ background:rgba(255,77,77,.12) }
+
+/* Existing comm color blocks kept for reference panels if needed */
+.comm-tower{border-left-color:var(--neon); background:rgba(0,255,0,.1)}
+.comm-ground{border-left-color:#0066cc; background:rgba(0,102,204,.1)}
+.comm-approach{border-left-color:#ff6600; background:rgba(255,102,0,.1)}
+.comm-center{border-left-color:#9900cc; background:rgba(153,0,204,.1)}
+.comm-emergency{border-left-color:#ff0000; background:rgba(255,0,0,.1); animation:flash 1s infinite}
+
+.weather-data{font-size:9px}
+.weather-item{display:flex; justify-content:space-between; margin-bottom:3px; padding:2px; background:rgba(0,100,100,.1)}
+
+.emergency-alert{position:absolute; top:20px; right:20px; background:#ff0000; color:#fff; padding:10px 15px; border:2px solid #fff;
+  border-radius:5px; animation:emergency-pulse 1s infinite; z-index:1000; font-weight:bold; display:none}
+.emergency-alert.show{display:block}
+@keyframes emergency-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+
+.control-buttons{position:absolute; top:10px; left:10px; display:flex; gap:10px; z-index:1000}
+.control-btn{padding:8px 12px; background:#2a2a4e; border:1px solid var(--neon); color:var(--neon); cursor:pointer; font-size:10px; transition:.3s}
+.control-btn:hover{background:var(--neon); color:#000}
+.control-btn.emergency{border-color:#ff0000; color:#ff0000}
+.control-btn.emergency:hover{background:#ff0000; color:#fff}
+
+/* === LOGS PAGE STYLES === */
+.logs-page{
+  height:100vh;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:'Courier New',monospace;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+.logs-header{
+  background:#1a1a2e;
+  padding:10px 20px;
+  border-bottom:2px solid var(--neon);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-shrink:0;
+}
+
+.logs-header-left{
+  display:flex;
+  align-items:center;
+  gap:15px;
+}
+
+.back-button{
+  color:var(--neon);
+  text-decoration:none;
+  padding:5px 10px;
+  border:1px solid var(--neon);
+  border-radius:3px;
+  font-size:12px;
+  transition:.3s;
+}
+
+.back-button:hover{
+  background:var(--neon);
+  color:#000;
+}
+
+.logs-header h1{
+  color:var(--neon);
+  font-size:18px;
+  margin:0;
+}
+
+.logs-header-right{
+  display:flex;
+  align-items:center;
+  gap:15px;
+}
+
+.utc-label{
+  color:#888;
+  font-size:11px;
+}
+
+.generate-mock-btn{
+  padding:6px 12px;
+  background:#2a2a4e;
+  border:1px solid var(--neon);
+  color:var(--neon);
+  cursor:pointer;
+  font-size:10px;
+  transition:.3s;
+  font-family:'Courier New',monospace;
+}
+
+.generate-mock-btn:hover{
+  background:var(--neon);
+  color:#000;
+}
+
+.logs-filters{
+  background:#0f0f23;
+  padding:10px 20px;
+  border-bottom:1px solid #004400;
+  display:flex;
+  gap:20px;
+  align-items:center;
+  flex-wrap:wrap;
+  flex-shrink:0;
+}
+
+.filter-group{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.filter-group label{
+  color:var(--neon);
+  font-size:10px;
+  white-space:nowrap;
+}
+
+.time-range-buttons, .sector-buttons, .type-buttons{
+  display:flex;
+  gap:5px;
+}
+
+.time-range-btn, .sector-btn, .type-btn{
+  padding:4px 8px;
+  background:#2a2a4e;
+  border:1px solid #004400;
+  color:var(--ink);
+  cursor:pointer;
+  font-size:9px;
+  transition:.3s;
+  font-family:'Courier New',monospace;
+}
+
+.time-range-btn.active, .sector-btn.active{
+  background:var(--neon);
+  color:#000;
+  border-color:var(--neon);
+}
+
+.type-btn.arrival.active{
+  background:var(--arr);
+  color:#fff;
+  border-color:var(--arr);
+}
+
+.type-btn.departure.active{
+  background:var(--dep);
+  color:#000;
+  border-color:var(--dep);
+}
+
+.frequency-input, .search-input{
+  padding:4px 8px;
+  background:#2a2a4e;
+  border:1px solid #004400;
+  color:var(--ink);
+  font-size:10px;
+  font-family:'Courier New',monospace;
+  width:120px;
+}
+
+.search-input{
+  width:200px;
+}
+
+.logs-content{
+  flex:1;
+  overflow:auto;
+  padding:10px;
+}
+
+.logs-table-container{
+  width:100%;
+  overflow:auto;
+}
+
+.logs-table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:9px;
+  background:#1a1a2e;
+  border:1px solid var(--neon);
+}
+
+.logs-table th{
+  background:#2a2a4e;
+  color:var(--neon);
+  padding:8px 6px;
+  text-align:left;
+  border-bottom:1px solid var(--neon);
+  font-weight:bold;
+  position:sticky;
+  top:0;
+  z-index:10;
+}
+
+.logs-table td{
+  padding:6px;
+  border-bottom:1px solid #004400;
+  vertical-align:top;
+}
+
+.log-row:hover{
+  background:#2a2a4e;
+}
+
+.time-cell{
+  color:#888;
+  white-space:nowrap;
+}
+
+.sector-cell{
+  color:var(--neon);
+  font-weight:bold;
+}
+
+.direction-badge{
+  padding:2px 6px;
+  border-radius:3px;
+  font-size:8px;
+  font-weight:bold;
+}
+
+.direction-badge.tx{
+  background:rgba(0,255,0,.2);
+  color:var(--neon);
+  border:1px solid var(--neon);
+}
+
+.direction-badge.rx{
+  background:rgba(0,102,204,.2);
+  color:#0066cc;
+  border:1px solid #0066cc;
+}
+
+.callsign-container{
+  display:flex;
+  align-items:center;
+  gap:5px;
+}
+
+.callsign{
+  font-weight:bold;
+  color:#fff;
+}
+
+.arr-dep-badge{
+  padding:1px 4px;
+  border-radius:2px;
+  font-size:7px;
+  font-weight:bold;
+}
+
+.arr-dep-badge.arrival{
+  background:var(--arr-bg);
+  color:var(--arr);
+  border:1px solid var(--arr);
+}
+
+.arr-dep-badge.departure{
+  background:var(--dep-bg);
+  color:var(--dep);
+  border:1px solid var(--dep);
+}
+
+.frequency-cell{
+  color:#0066cc;
+  font-weight:bold;
+}
+
+.summary-cell{
+  color:#fff;
+  max-width:200px;
+}
+
+.position-cell{
+  color:#888;
+  font-size:8px;
+}
+
+.flight-data{
+  display:flex;
+  flex-direction:column;
+  gap:1px;
+  font-size:8px;
+}
+
+.altitude{
+  color:#00ffff;
+}
+
+.speed{
+  color:#ffff00;
+}
+
+.heading{
+  color:#ff6600;
+}
+
+.empty-state{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100%;
+}
+
+.empty-state-card{
+  background:#1a1a2e;
+  border:2px solid var(--neon);
+  padding:40px;
+  text-align:center;
+  border-radius:5px;
+}
+
+.empty-state-card h3{
+  color:var(--neon);
+  margin-bottom:10px;
+}
+
+.empty-state-card p{
+  color:#888;
+  margin-bottom:20px;
+}
