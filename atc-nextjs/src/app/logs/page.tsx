@@ -47,10 +47,14 @@ function makeMockLogs(count: number): AtcLogEntry[] {
     
     switch (direction) {
       case 'TX':
-        summary = `${callsign}, wind 270 at 10, cleared to land 24R.`;
+        summary = arrival 
+          ? `${callsign}, wind 270 at 10, cleared to land 24R.`
+          : `${callsign}, wind 270 at 10, cleared for takeoff 24R.`;
         break;
       case 'RX':
-        summary = `Cleared to land 24R, ${callsign}.`;
+        summary = arrival
+          ? `Cleared to land 24R, ${callsign}.`
+          : `Cleared for takeoff 24R, ${callsign}.`;
         break;
       case 'CPDLC':
         summary = Math.random() > 0.5 ? 'Climb FL180.' : 'WILCO.';
@@ -100,11 +104,22 @@ export default function Logs() {
   const [logs, setLogs] = useState<AtcLogEntry[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilters, setActiveFilters] = useState<Set<LogDirection>>(new Set(['TX', 'RX', 'CPDLC', 'XFER', 'SYS']));
+  const [arrivalFilter, setArrivalFilter] = useState<'all' | 'arrival' | 'departure'>('all');
+  const [sectorFilter, setSectorFilter] = useState<Set<string>>(new Set(['TWR', 'GND', 'APP', 'CTR']));
   
   const filteredLogs = useMemo(() => {
     return logs.filter(log => {
       // Filter by direction
       if (!activeFilters.has(log.direction)) return false;
+      
+      // Filter by arrival/departure
+      if (arrivalFilter !== 'all') {
+        if (arrivalFilter === 'arrival' && log.arrival !== true) return false;
+        if (arrivalFilter === 'departure' && log.arrival !== false) return false;
+      }
+      
+      // Filter by sector
+      if (log.sector && !sectorFilter.has(log.sector)) return false;
       
       // Filter by search term
       if (searchTerm) {
@@ -118,7 +133,7 @@ export default function Logs() {
       
       return true;
     });
-  }, [logs, searchTerm, activeFilters]);
+  }, [logs, searchTerm, activeFilters, arrivalFilter, sectorFilter]);
   
   const handleGenerateMock = () => {
     setLogs(makeMockLogs(50));
@@ -210,7 +225,7 @@ export default function Logs() {
         
         {/* Top Controls */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-          {/* Filter Chips */}
+          {/* Direction Filter Chips */}
           <div style={{ display: 'flex', gap: '5px' }}>
             {(['TX', 'RX', 'CPDLC', 'XFER', 'SYS'] as LogDirection[]).map(direction => (
               <button
@@ -228,6 +243,59 @@ export default function Logs() {
                 }}
               >
                 {direction}
+              </button>
+            ))}
+          </div>
+          
+          {/* Arrival/Departure Filter */}
+          <div style={{ display: 'flex', gap: '5px' }}>
+            {(['all', 'arrival', 'departure'] as const).map(type => (
+              <button
+                key={type}
+                onClick={() => setArrivalFilter(type)}
+                style={{
+                  padding: '4px 8px',
+                  background: arrivalFilter === type ? (type === 'arrival' ? '#ff4444' : type === 'departure' ? '#00ff88' : '#00ff00') : '#2a2a4e',
+                  border: '1px solid #004400',
+                  color: arrivalFilter === type ? '#000' : '#00ff00',
+                  cursor: 'pointer',
+                  fontSize: '9px',
+                  borderRadius: '3px',
+                  transition: '0.3s',
+                  textTransform: 'capitalize'
+                }}
+              >
+                {type}
+              </button>
+            ))}
+          </div>
+          
+          {/* Sector Filter */}
+          <div style={{ display: 'flex', gap: '5px' }}>
+            {(['TWR', 'GND', 'APP', 'CTR']).map(sector => (
+              <button
+                key={sector}
+                onClick={() => {
+                  const newSectors = new Set(sectorFilter);
+                  if (newSectors.has(sector)) {
+                    newSectors.delete(sector);
+                  } else {
+                    newSectors.add(sector);
+                  }
+                  setSectorFilter(newSectors);
+                }}
+                style={{
+                  padding: '4px 8px',
+                  background: sectorFilter.has(sector) ? '#00ff00' : '#2a2a4e',
+                  border: '1px solid #004400',
+                  color: sectorFilter.has(sector) ? '#000' : '#00ff00',
+                  cursor: 'pointer',
+                  fontSize: '9px',
+                  borderRadius: '3px',
+                  transition: '0.3s'
+                }}
+              >
+                {sector}
               </button>
             ))}
           </div>
