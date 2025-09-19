@@ -19,6 +19,7 @@ npm run dev
 
 - **Main ATC System**: http://localhost:3000
 - **Logs/History Page**: http://localhost:3000/logs
+- **Ground Operations**: http://localhost:3000/ground
 - **Test Page**: http://localhost:3000/test
 
 ## 🎛️ Features
@@ -39,6 +40,7 @@ npm run dev
 - **Add Aircraft**: Generate new aircraft and add to sequencing
 - **Simulate Emergency**: Test emergency response with 10-second auto-resolution
 - **Logs**: Access comprehensive ATC communication logs and history
+- **Ground Ops**: Interactive airport map with runways, taxiways, and terminals
 
 ### Logs/History System
 - **Comprehensive Logging**: Track all ATC communications with timestamps
@@ -48,6 +50,23 @@ npm run dev
 - **Color-Coded Messages**: Red for arrivals, green for departures, neutral for system
 - **Mock Data Generation**: Generate realistic ATC communication logs
 - **Neon Dark Theme**: Consistent with main ATC interface styling
+
+### Enhanced Runway Display System
+- **SVG-Based Rendering**: High-quality vector graphics for precise runway visualization
+- **Exit Points**: Yellow dots showing where taxiways intersect runways for rapid exits
+- **Departure Points**: Green DEP badges at runway thresholds for takeoff positions
+- **Real Airport Data**: Uses OpenStreetMap data via Overpass API for accuracy
+- **Neon Styling**: Glowing effects matching the ATC theme
+- **Fitted Display**: Automatically scales and centers runways within the display pane
+- **Geometry Processing**: Advanced line intersection algorithms for exit point detection
+
+### Ground Operations System
+- **Interactive Airport Map**: Full-featured map with runways, taxiways, terminals, and gates
+- **Real Airport Data**: Uses OpenStreetMap data for accurate airport layouts
+- **Dual View Modes**: Toggle between light map view and dark ATC-themed view
+- **Runway Display**: Main OPS page shows airport runways with proper scaling
+- **Navigation**: Easy navigation between Ground Ops and main OPS views
+- **Live Data**: Real-time airport information from external APIs
 
 ## 🏗️ Architecture
 
@@ -68,21 +87,24 @@ npm run dev
 │   │   │   ├── page.tsx    # Main ATC system page
 │   │   │   ├── logs/
 │   │   │   │   └── page.tsx # Logs/History page
+│   │   │   ├── ground/
+│   │   │   │   ├── page.tsx # Ground Operations page
+│   │   │   │   └── layout.tsx # Ground Operations layout
+│   │   │   ├── api/
+│   │   │   │   └── airport/
+│   │   │   │       └── [icao]/
+│   │   │   │           └── route.ts # Airport data API endpoint
 │   │   │   └── test/
 │   │   │       └── page.tsx # Test page for functionality verification
 │   │   ├── components/    # React components
 │   │   │   ├── ATCSystem.tsx      # Main system component (state management)
 │   │   │   ├── Header.tsx         # Header with tabs and system status
 │   │   │   ├── RadarDisplay.tsx   # Airspace radar with sweep animation
-│   │   │   ├── GroundLayout.tsx   # Airport ground layout
+│   │   │   ├── RunwayDisplay.tsx  # Airport runway display component
+│   │   │   ├── GroundMapYYZ.tsx   # Interactive airport map component
 │   │   │   ├── ControlPanels.tsx  # Flight strips, coordination, weather
 │   │   │   ├── Communications.tsx # ATC message logs (6 panels)
-│   │   │   ├── ControlButtons.tsx # System control buttons
-│   │   │   ├── LogsPage.tsx       # Logs/History page component
-│   │   │   ├── LogsTable.tsx      # Logs table display component
-│   │   │   ├── LogFilters.tsx     # Logs filtering component
-│   │   │   └── stores/
-│   │   │       └── logsStore.ts   # Zustand store for logs management
+│   │   │   └── ControlButtons.tsx # System control buttons
 │   │   └── types/
 │   │       └── atc.ts     # TypeScript interfaces and types
 │   ├── package.json       # Dependencies and npm scripts
@@ -108,7 +130,8 @@ npm run dev
 2. **Open ATC system**: http://localhost:3000
 3. **Interact with system**: Use control buttons to manage traffic
 4. **View logs**: Click LOGS button or press L key to access logs/history
-5. **Test functionality**: Visit http://localhost:3000/test
+5. **Ground operations**: Click GROUND OPS button to view interactive airport map
+6. **Test functionality**: Visit http://localhost:3000/test
 
 ## 🚨 Emergency Simulation
 

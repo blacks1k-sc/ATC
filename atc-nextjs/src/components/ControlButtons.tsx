@@ -23,6 +23,9 @@ export default function ControlButtons({ onStartSystem, onAddAircraft, onSimulat
       <Link href="/logs" className="control-btn">
         LOGS
       </Link>
+      <Link href="/ground" className="control-btn">
+        GROUND OPS
+      </Link>
     </div>
   );
 }

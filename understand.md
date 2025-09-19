@@ -38,6 +38,13 @@ Based on scanning your actual repository, here's the real structure:
     │   │   ├── page.tsx         # Main ATC system page
     │   │   ├── logs/            # Logs/History page directory
     │   │   │   └── page.tsx     # Logs page route
+    │   │   ├── ground/          # Ground Operations page directory
+    │   │   │   ├── page.tsx     # Ground Operations page route
+    │   │   │   └── layout.tsx   # Ground Operations layout
+    │   │   ├── api/             # API endpoints directory
+    │   │   │   └── airport/     # Airport data API
+    │   │   │       └── [icao]/  # Dynamic airport code route
+    │   │   │           └── route.ts # Airport data API endpoint
     │   │   └── test/            # Test page directory
     │   │       └── page.tsx     # Functionality test page
     │   ├── components/          # Reusable UI pieces
@@ -45,14 +52,10 @@ Based on scanning your actual repository, here's the real structure:
     │   │   ├── Communications.tsx # ATC message panels
     │   │   ├── ControlButtons.tsx # System control buttons
     │   │   ├── ControlPanels.tsx # Flight strips and weather
-    │   │   ├── GroundLayout.tsx # Airport ground display
-    │   │   ├── Header.tsx       # Header with tabs and status
-    │   │   ├── LogsPage.tsx     # Logs/History page component
-    │   │   ├── LogsTable.tsx    # Logs table display
-    │   │   ├── LogFilters.tsx   # Logs filtering controls
-    │   │   ├── RadarDisplay.tsx # Airspace radar display
-    │   │   └── stores/          # State management
-    │   │       └── logsStore.ts # Logs data store
+    │   │   ├── RunwayDisplay.tsx # Enhanced runway display with exit/departure points
+    │   │   ├── GroundMapYYZ.tsx  # Interactive airport map component
+    │   │   ├── Header.tsx        # Header with tabs and status
+    │   │   └── RadarDisplay.tsx  # Airspace radar display
     │   └── types/               # Data structure definitions
     │       └── atc.ts           # TypeScript interfaces
     └── tsconfig.json            # TypeScript configuration

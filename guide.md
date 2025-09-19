@@ -65,7 +65,11 @@ This guide provides detailed documentation for every single file in the ATC syst
   "dependencies": {
     "next": "14.0.0",           # Next.js framework
     "react": "^18.2.0",         # React library
-    "react-dom": "^18.2.0"      # React DOM
+    "react-dom": "^18.2.0",     # React DOM
+    "zustand": "^4.4.0",        # State management for logs
+    "osmtogeojson": "^3.0.0",   # OpenStreetMap to GeoJSON converter
+    "react-leaflet": "^4.2.1",  # React components for Leaflet maps
+    "leaflet": "^1.9.4"         # Interactive maps library
   },
   "devDependencies": {
     "@types/node": "^20.0.0",   # Node.js types
@@ -221,15 +225,58 @@ export default function Home() {
 ### `/atc-nextjs/src/app/logs/page.tsx`
 **Purpose**: Logs/History page route
 **Contents**:
-```typescript
-import LogsPage from '@/components/LogsPage';
+- Self-contained client component with all logs functionality
+- Mock data generation and filtering
+- Real-time search and filtering capabilities
+- Color-coded message display
+- Audio playback support
 
-export default function Logs() {
-  return <LogsPage />;
+**Features**:
+- Direction filters (TX, RX, CPDLC, XFER, SYS)
+- Arrival/departure filtering
+- Sector filtering (TWR, GND, APP, CTR)
+- Search by callsign/transcript
+- Mock data generation with realistic ATC communications
+
+**URL**: Accessible at http://localhost:3000/logs
+
+### `/atc-nextjs/src/app/ground/page.tsx`
+**Purpose**: Ground Operations page route
+**Contents**:
+```typescript
+import dynamic from 'next/dynamic';
+
+const GroundMapYYZ = dynamic(() => import('@/components/GroundMapYYZ'), {
+  ssr: false,
+  loading: () => <div>Loading Ground Operations Map...</div>
+});
+
+export default function GroundPage() {
+  return <GroundMapYYZ airport="CYYZ" />;
 }
 ```
-**Role**: Server component wrapper that renders the client-side LogsPage component
-**URL**: Accessible at http://localhost:3000/logs
+**Role**: Server component that dynamically imports the interactive map
+**URL**: Accessible at http://localhost:3000/ground
+
+### `/atc-nextjs/src/app/ground/layout.tsx`
+**Purpose**: Ground Operations layout
+**Contents**:
+- Full-screen layout without global header
+- Custom HTML structure for map display
+- Optimized for full-screen map viewing
+
+### `/atc-nextjs/src/app/api/airport/[icao]/route.ts`
+**Purpose**: Airport data API endpoint
+**Contents**:
+- Fetches airport data from OpenStreetMap via Overpass API
+- Converts OSM JSON to GeoJSON format
+- Supports bounding box parameters
+- Caches responses for 15 minutes
+- Error handling and fallback responses
+
+**API Usage**:
+- `GET /api/airport/CYYZ` - Get YYZ airport data
+- `GET /api/airport/CYYZ?bbox=43.66,-79.65,43.69,-79.60` - Get data for specific area
 
 ### `/atc-nextjs/src/app/test/page.tsx`
 **Purpose**: Test page for functionality verification
@@ -299,18 +346,48 @@ export default function Logs() {
 - Emergency aircraft highlighting
 - Emergency alert banner
 
-### `/atc-nextjs/src/components/GroundLayout.tsx`
-**Purpose**: Airport ground layout display
+### `/atc-nextjs/src/components/RunwayDisplay.tsx`
+**Purpose**: Enhanced runway display with exit points and departure points
 **Props**:
-- `groundAircraft` - Array of ground aircraft
+- `icao` - Airport ICAO code (e.g., "CYYZ", defaults to "CYYZ")
+- `bbox` - Bounding box for airport data (defaults to YYZ bbox)
+- `className` - Optional CSS class
 
 **Features**:
-- Runway layout (25L, 25R, 07L)
-- Taxiway system (A, B, C, D)
-- Terminal and gate positions
-- Ground aircraft with status animations
-- Moving ground vehicles
-- Aircraft labels with flight information
+- **SVG Rendering**: High-quality vector graphics with neon styling
+- **Exit Points**: Yellow dots showing taxiway-runway intersections
+- **Departure Points**: Green DEP badges at runway thresholds
+- **Real Data**: Uses OpenStreetMap data via Overpass API
+- **Geometry Processing**: Advanced intersection algorithms
+- **Auto-scaling**: Fits runways to display pane with proper aspect ratio
+- Proper coordinate projection and scaling
+- Runway labels and center markers
+- Error handling and loading states
+
+**Data Flow**:
+1. Fetches GeoJSON from `/api/airport/[icao]`
+2. Filters features where `aeroway === 'runway'`
+3. Converts GPS coordinates to SVG coordinates
+4. Renders runways as green polylines with white center lines
+
+### `/atc-nextjs/src/components/GroundMapYYZ.tsx`
+**Purpose**: Interactive airport map component for Ground Operations page
+**Props**:
+- `airport` - Airport ICAO code (default: "CYYZ")
+
+**Features**:
+- Full-featured interactive map using Leaflet
+- Displays runways, taxiways, terminals, and gates
+- Dual view modes (light map view / dark ATC theme)
+- Real-time data from OpenStreetMap
+- Toggle button for view switching
+- Back button to return to main OPS
+- Tooltips and interactive elements
+
+**Dependencies**:
+- `react-leaflet` - React components for Leaflet
+- `leaflet` - Interactive maps library
+- `osmtogeojson` - OpenStreetMap data conversion
 
 ### `/atc-nextjs/src/components/ControlPanels.tsx`
 **Purpose**: Right-side control panels (flight strips, coordination, weather)

@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Aircraft, FlightStrip, StageMessage, SystemStatus, WeatherData } from '@/types/atc';
 import Header from './Header';
 import RadarDisplay from './RadarDisplay';
-import GroundLayout from './GroundLayout';
+import RunwayDisplay from './RunwayDisplay';
 import ControlPanels from './ControlPanels';
 import Communications from './Communications';
 import ControlButtons from './ControlButtons';
@@ -16,6 +16,7 @@ export default function ATCSystem() {
   const [emergencyAlert, setEmergencyAlert] = useState(false);
   const [emergencyCoord, setEmergencyCoord] = useState(false);
   const [systemEmergency, setSystemEmergency] = useState(false);
+  const [currentAirport, setCurrentAirport] = useState('CYYZ'); // Default to YYZ
 
   // Aircraft data
   const [aircraft, setAircraft] = useState<Aircraft[]>([
@@ -293,7 +294,7 @@ export default function ATCSystem() {
         emergencyAlert={emergencyAlert}
       />
 
-      <GroundLayout groundAircraft={groundAircraft} />
+      <RunwayDisplay icao={currentAirport} />
 
       <ControlPanels
         flightStrips={flightStrips}

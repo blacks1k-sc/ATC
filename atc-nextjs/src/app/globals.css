@@ -1,3 +1,58 @@
+/* Leaflet default styles */
+@import url('leaflet/dist/leaflet.css');
+
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+}
+
+/* runway mini-map */
+.runway-svg text.runway-label {
+  font-size: 12px;               /* SMALLER LABELS */
+  fill: #7dffc8;                 /* mint-neon; match your palette */
+  letter-spacing: 0.4px;
+  paint-order: stroke;           /* halo so it pops on glow */
+  stroke: rgba(0,0,0,0.65);
+  stroke-width: 1px;
+}
+
+/* Dark tooltip styling for ATC mode */
+.dark-tooltip {
+  background: #1a1a2e !important;
+  color: #00ff00 !important;
+  border: 1px solid #00ff00 !important;
+  font-family: 'Courier New', monospace !important;
+  font-size: 11px !important;
+  box-shadow: 0 0 8px #00ff00 !important;
+}
+
+/* Runway Display Component */
+.runway-display {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  background: #000811;
+  border: 2px solid #0066cc;
+  overflow: hidden;
+}
+
+/* Enhanced Runway Pane Styling */
+.runway-pane {
+  background: #05090f;
+  border: 2px solid #00ff00;
+  border-radius: 5px;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.runway-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 :root{
   --neon:#00ff00;
   --bg:#0a0a0a;
