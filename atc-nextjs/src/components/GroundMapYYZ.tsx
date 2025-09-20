@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import { MapContainer, TileLayer, GeoJSON, Tooltip, CircleMarker } from 'react-leaflet';
-import type { GeoJsonObject, Feature, Geometry } from 'geojson';
-import L from 'leaflet';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { MapContainer, TileLayer, GeoJSON } from 'react-leaflet';
+import L, { GeoJSON as LGeoJSON, Layer, PathOptions, LatLng } from 'leaflet';
+import type { Feature, FeatureCollection, Geometry, GeoJsonObject } from 'geojson';
 import 'leaflet/dist/leaflet.css';
 
 // Fix for default markers in react-leaflet
@@ -15,6 +15,53 @@ L.Icon.Default.mergeOptions({
 });
 
 import { calculateBoundsFromRunways } from '../utils/coordinateUtils';
+
+type AnyFeat = Feature<Geometry, Record<string, any>>;
+type FC = FeatureCollection<Geometry, Record<string, any>>;
+
+const featureId = (f: AnyFeat) =>
+  (f.properties?.id as string) ||
+  (f.properties?.['@id'] as string) ||
+  `${f.geometry?.type}-${Math.random().toString(36).slice(2)}`;
+
+const tooltipHTML = (p: Record<string, any>) => {
+  const rows = Object.entries(p)
+    .filter(([k]) => !k.startsWith('@')) // hide internal keys
+    .map(([k, v]) => `<tr><td>${k}</td><td>${String(v)}</td></tr>`)
+    .join('');
+  return `<div class="dark-tooltip__inner"><table>${rows}</table></div>`;
+};
+
+const styleFor =
+  (selectedId: string | null) =>
+  (f: AnyFeat): PathOptions => {
+    const t = f.properties?.aeroway;
+    const id = featureId(f);
+    const sel = selectedId && id === selectedId;
+
+    if (t === 'runway')  return { color: sel ? '#00ffaa' : '#00ff66', weight: sel ? 5 : 4, opacity: 0.95 };
+    if (t === 'taxiway') return { color: sel ? '#55ccff' : '#00b3ff', weight: sel ? 4 : 2.5, opacity: 0.85 };
+    if (t === 'apron')   return { color: sel ? '#22aa88' : '#0b2b2b', weight: sel ? 3 : 2, fillColor: '#0b2b2b', fillOpacity: 0.5, opacity: 0.7 };
+    if (f.properties?.building === 'terminal')
+      return { color: sel ? '#eeeeee' : '#cccccc', weight: sel ? 2.5 : 1.5, fillColor: '#222', fillOpacity: 0.6, opacity: 0.9 };
+
+    // roads (service/unclassified/etc.) keep your red theme
+    if (f.properties?.highway)
+      return { color: sel ? '#ff8080' : '#ff2d2d', weight: sel ? 2 : 1, opacity: 0.6 };
+
+    return { color: '#444', weight: 1, opacity: 0.5 };
+  };
+
+// Keep only GATE nodes as points; strip other point features.
+const onlyGatesForPoints = (fc: FC): FC => ({
+  type: 'FeatureCollection',
+  features: fc.features.map((f) => {
+    if (f.geometry?.type === 'Point' && f.properties?.aeroway !== 'gate') {
+      return { ...f, geometry: { type: 'Point', coordinates: [Infinity, Infinity] } as any }; // effectively hidden
+    }
+    return f;
+  }),
+});
 
 // No hardcoded center or bbox - everything calculated from API data
 
@@ -29,6 +76,8 @@ export default function GroundMapYYZ({ airport = 'CYYZ' }: GroundMapYYZProps) {
   const [error, setError] = useState<string | null>(null);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [mapCenter, setMapCenter] = useState<[number, number]>([43.675, -79.63]); // Default fallback
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const geoRef = useRef<LGeoJSON | null>(null);
 
   // Fetch GeoJSON from our API
   useEffect(() => {
@@ -39,7 +88,8 @@ export default function GroundMapYYZ({ airport = 'CYYZ' }: GroundMapYYZProps) {
         return r.json();
       })
       .then((geo) => {
-        setData(geo);
+        const filtered = onlyGatesForPoints(geo);
+        setData(filtered);
         
         // Calculate center dynamically from the actual API data
         if (geo.features && geo.features.length > 0) {
@@ -54,151 +104,7 @@ export default function GroundMapYYZ({ airport = 'CYYZ' }: GroundMapYYZProps) {
       .catch((e) => setError(e.message || 'Failed to load'));
   }, [airport]);
 
-  // Styling by feature tags - different themes
-  // Style function for GeoJSON features (non-runways)
-  const styleFn = useMemo(
-    () =>
-      ((feat: AnyFeature) => {
-        const aeroway = feat.properties?.aeroway || feat.properties?.tags?.aeroway;
-        const building = feat.properties?.building || feat.properties?.tags?.building;
-        const highway = feat.properties?.highway || feat.properties?.tags?.highway;
-        
-        if (isDarkMode) {
-          // Dark ATC theme
-          if (aeroway === 'taxiway') {
-            return { color: '#00b3ff', weight: 2, opacity: 0.8 };
-          }
-          if (aeroway === 'apron') {
-            return { color: '#00ff00', weight: 1, fillColor: '#1a1a2e', fillOpacity: 0.3 };
-          }
-          if (building === 'terminal') {
-            return { color: '#00ff00', weight: 2, fillColor: '#2a2a4e', fillOpacity: 0.7 };
-          }
-          // Highway/road styling - red with less thickness than taxiways
-          if (highway) {
-            return { color: '#ff4444', weight: 1, opacity: 0.7 };
-          }
-          return { color: '#00ff00', weight: 1, opacity: 0.6 };
-        } else {
-          // Light theme (original)
-          if (aeroway === 'taxiway') {
-            return { color: '#00b3ff', weight: 2, opacity: 0.7 };
-          }
-          if (aeroway === 'apron') {
-            return { color: '#006400', weight: 1, fillColor: '#0b2b2b', fillOpacity: 0.5 };
-          }
-          if (building === 'terminal') {
-            return { color: '#cccccc', weight: 1, fillColor: '#222', fillOpacity: 0.6 };
-          }
-          // Highway/road styling - red with less thickness than taxiways
-          if (highway) {
-            return { color: '#ff4444', weight: 1, opacity: 0.6 };
-          }
-          return { color: '#555', weight: 1, opacity: 0.5 };
-        }
-      }) as L.StyleFunction,
-    [isDarkMode]
-  );
 
-  // Style function for runways with white highlight
-  const runwayStyleFn = useMemo(
-    () =>
-      ((feat: AnyFeature) => {
-        const aeroway = feat.properties?.aeroway || feat.properties?.tags?.aeroway;
-        
-        if (isDarkMode) {
-          // Dark ATC theme - white highlight for runways
-          return { 
-            color: '#ffffff', 
-            weight: 6, 
-            opacity: 1.0, 
-            lineCap: 'round',
-            lineJoin: 'round'
-          };
-        } else {
-          // Light theme - white highlight for runways
-          return { 
-            color: '#ffffff', 
-            weight: 5, 
-            opacity: 1.0,
-            lineCap: 'round',
-            lineJoin: 'round'
-          };
-        }
-      }) as L.StyleFunction,
-    [isDarkMode]
-  );
-
-  // Style function for runways with original green color
-  const runwayGreenStyleFn = useMemo(
-    () =>
-      ((feat: AnyFeature) => {
-        const aeroway = feat.properties?.aeroway || feat.properties?.tags?.aeroway;
-        
-        if (isDarkMode) {
-          // Dark ATC theme - original green for runways
-          return { 
-            color: '#00ff00', 
-            weight: 4, 
-            opacity: 1.0, 
-            lineCap: 'round',
-            lineJoin: 'round'
-          };
-        } else {
-          // Light theme - original green for runways
-          return { 
-            color: '#00ff00', 
-            weight: 3, 
-            opacity: 0.9,
-            lineCap: 'round',
-            lineJoin: 'round'
-          };
-        }
-      }) as L.StyleFunction,
-    [isDarkMode]
-  );
-
-  // Helper function to filter runways from data
-  const getRunwayData = useMemo(() => {
-    if (!data || !data.features) return null;
-    return {
-      ...data,
-      features: data.features.filter((feat: AnyFeature) => 
-        feat.properties?.aeroway === 'runway' || feat.properties?.tags?.aeroway === 'runway'
-      )
-    };
-  }, [data]);
-
-  // Helper function to filter non-runways from data
-  const getNonRunwayData = useMemo(() => {
-    if (!data || !data.features) return null;
-    return {
-      ...data,
-      features: data.features.filter((feat: AnyFeature) => 
-        feat.properties?.aeroway !== 'runway' && feat.properties?.tags?.aeroway !== 'runway'
-      )
-    };
-  }, [data]);
-
-  // Points (gates) as circle markers with labels
-  const pointToLayer = (feat: AnyFeature, latlng: L.LatLng) => {
-    const props = feat.properties || {};
-    const ref = props.ref || props.tags?.ref || props.name || props.tags?.name || 'Gate';
-    const marker = L.circleMarker(latlng, {
-      radius: 4,
-      color: isDarkMode ? '#00ff00' : '#222',
-      weight: 1,
-      fillColor: isDarkMode ? '#00ff00' : '#ffff00',
-      fillOpacity: 0.9
-    });
-    marker.bindTooltip(ref, { 
-      permanent: false, 
-      direction: 'top', 
-      offset: L.point(0, -6),
-      className: isDarkMode ? 'dark-tooltip' : ''
-    });
-    return marker;
-  };
 
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
@@ -267,7 +173,7 @@ export default function GroundMapYYZ({ airport = 'CYYZ' }: GroundMapYYZProps) {
       </button>
 
       <MapContainer
-        center={mapCenter}
+        {...({ center: mapCenter } as any)}
         zoom={14}
         minZoom={11}
         maxZoom={19}
@@ -279,7 +185,7 @@ export default function GroundMapYYZ({ airport = 'CYYZ' }: GroundMapYYZProps) {
         }}
       >
         <TileLayer
-          attribution="&copy; OpenStreetMap contributors"
+          {...({ attribution: "&copy; OpenStreetMap contributors" } as any)}
           url={isDarkMode 
             ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
             : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -308,65 +214,70 @@ export default function GroundMapYYZ({ airport = 'CYYZ' }: GroundMapYYZProps) {
 
         {data && (
           <>
-            {/* Render runways with white highlight (background layer) */}
-            {getRunwayData && (
-              <GeoJSON
-                data={getRunwayData as GeoJsonObject}
-                style={runwayStyleFn}
-                // Optional: show some tooltips for runways
-                onEachFeature={(feature, layer) => {
-                  const props = (feature as AnyFeature).properties || {};
-                  const label = props.ref || props.tags?.ref || props.name || props.tags?.name || 'Runway';
-                  if (label && layer instanceof L.Path) {
-                    layer.bindTooltip(String(label), { direction: 'auto' });
-                  }
-                }}
-              />
-            )}
+            {/* Background aprons - non-interactive */}
+            <GeoJSON
+              data={{
+                type: 'FeatureCollection',
+                features: (data as any).features.filter((f: AnyFeat) => f.properties?.aeroway === 'apron')
+              }}
+              style={() => ({ 
+                color: '#0b2b2b', 
+                weight: 2, 
+                fillColor: '#0b2b2b', 
+                fillOpacity: 0.5, 
+                opacity: 0.7 
+              })}
+              interactive={false}
+            />
             
-            {/* Render runways with original green color (foreground layer) */}
-            {getRunwayData && (
-              <GeoJSON
-                data={getRunwayData as GeoJsonObject}
-                style={runwayGreenStyleFn}
-                // Optional: show some tooltips for runways
-                onEachFeature={(feature, layer) => {
-                  const props = (feature as AnyFeature).properties || {};
-                  const label = props.ref || props.tags?.ref || props.name || props.tags?.name || 'Runway';
-                  if (label && layer instanceof L.Path) {
-                    layer.bindTooltip(String(label), { direction: 'auto' });
-                  }
-                }}
-              />
-            )}
-            
-            {/* Render non-runway features (taxiways, aprons, terminals, gates) */}
-            {getNonRunwayData && (
-              <GeoJSON
-                data={getNonRunwayData as GeoJsonObject}
-                style={styleFn}
-                pointToLayer={pointToLayer as any}
-                // Optional: show some tooltips for polys/lines
-                onEachFeature={(feature, layer) => {
-                  const props = (feature as AnyFeature).properties || {};
-                  const label =
-                    props.ref ||
-                    props.tags?.ref ||
-                    props.name ||
-                    props.tags?.name ||
-                    props.aeroway ||
-                    props.tags?.aeroway ||
-                    props.building ||
-                    props.tags?.building ||
-                    props.highway ||
-                    props.tags?.highway ||
-                    (feature.geometry.type as string);
-                  if (label && layer instanceof L.Path) {
-                    layer.bindTooltip(String(label), { direction: 'auto' });
-                  }
-                }}
-              />
-            )}
+            {/* Interactive features (everything except aprons) */}
+            <GeoJSON
+              {...({ ref: geoRef, data: {
+                type: 'FeatureCollection',
+                features: (data as any).features.filter((f: AnyFeat) => f.properties?.aeroway !== 'apron')
+              }, style: styleFor(selectedId) } as any)}
+              pointToLayer={(feature: AnyFeat, latlng: LatLng) => {
+                if (feature.properties?.aeroway === 'gate') {
+                  return L.circleMarker(latlng, {
+                    radius: 3.5,
+                    color: '#111',
+                    weight: 1,
+                    fillColor: '#e6ff00',
+                    fillOpacity: 0.95,
+                  });
+                }
+                // hide any other points safely
+                return L.circleMarker(latlng, { radius: 0, opacity: 0, fillOpacity: 0 });
+              }}
+              onEachFeature={(feature: AnyFeat, layer: Layer) => {
+                layer.on('mouseover', (e: any) => {
+                  const l = e.target;
+                  const html = tooltipHTML(feature.properties || {});
+                  l.bindTooltip(html, {
+                    className: 'dark-tooltip',
+                    sticky: true,
+                    direction: 'top',
+                    opacity: 0.95,
+                  }).openTooltip();
+
+                  // bump style on hover
+                  const base = styleFor(selectedId)(feature);
+                  const hover: PathOptions = { ...base, weight: (base.weight || 1) + 1, color: '#ffffff' };
+                  // setStyle is only for Path layers
+                  (l as any).setStyle?.(hover);
+                  (l as any).bringToFront?.();
+                });
+
+                layer.on('mouseout', (e: any) => {
+                  e.target.closeTooltip?.();
+                  (geoRef.current as any)?.resetStyle?.(e.target);
+                });
+
+                layer.on('click', () => {
+                  setSelectedId(featureId(feature));
+                });
+              }}
+            />
           </>
         )}
       </MapContainer>

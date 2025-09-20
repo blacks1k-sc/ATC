@@ -20,18 +20,29 @@ export async function GET(req: NextRequest, { params }: { params: { icao: string
       ? bboxParam.split(',').map(Number)
       : DEFAULT_BBOX;
 
-  const [sLat, sLon, nLat, nLon] = bbox as [number, number, number, number];
+  // Build Overpass QL using aerodrome *area* (no city roads outside the fence)
+  const icao = (params.icao || 'CYYZ').toUpperCase();
 
-  // Build Overpass QL
   const overpassQL = `
-[out:json][timeout:40];
+[out:json][timeout:60];
+
+// Find the airport polygon by ICAO, then bind it as .a
+area["aeroway"="aerodrome"]["icao"="${icao}"]->.a;
+
+// Fallback if some airports miss ICAO (optional): uncomment to try IATA or name
+// area["aeroway"="aerodrome"]["iata"="${icao}"]->.a;
+// area["aeroway"="aerodrome"]["name"~"${icao}", i]->.a;
+
 (
-  way["aeroway"="runway"](${sLat},${sLon},${nLat},${nLon});
-  way["aeroway"="taxiway"](${sLat},${sLon},${nLat},${nLon});
-  way["aeroway"="apron"](${sLat},${sLon},${nLat},${nLon});
-  node["aeroway"="gate"](${sLat},${sLon},${nLat},${nLon});
-  way["building"="terminal"](${sLat},${sLon},${nLat},${nLon});
-  relation["building"="terminal"](${sLat},${sLon},${nLat},${nLon});
+  // Core airport features
+  way["aeroway"="runway"](area.a);
+  way["aeroway"="taxiway"](area.a);
+  way["aeroway"="apron"](area.a);
+  node["aeroway"="gate"](area.a);
+
+  // Terminals and related buildings
+  way["building"="terminal"](area.a);
+  relation["building"="terminal"](area.a);
 );
 out body geom;
   `.trim();

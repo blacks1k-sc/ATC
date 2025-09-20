@@ -12,7 +12,6 @@ type LonLat = [number, number];
 
 interface RunwayDisplayProps {
   icao?: string;
-  bbox?: string;          // "SWlat,SWlon,NElat,NElon"
   className?: string;
 }
 
@@ -190,11 +189,8 @@ function computeDeparturePointsLL(runways: AnyFeature[]): DeparturePointLL[] {
    Component
 ---------------------------- */
 
-const DEFAULT_BBOX = '43.66,-79.65,43.69,-79.60';
-
 export default function RunwayDisplay({
   icao = 'CYYZ',
-  bbox = DEFAULT_BBOX,
   className = '',
 }: RunwayDisplayProps) {
   const [runways, setRunways] = useState<AnyFeature[]>([]);
@@ -224,7 +220,7 @@ export default function RunwayDisplay({
       try {
         setLoading(true);
         setError(null);
-        const res = await fetch(`/api/airport/${icao}?bbox=${bbox}`);
+        const res = await fetch(`/api/airport/${icao}`);
         if (!res.ok) throw new Error(`API ${res.status}`);
         const gj = await res.json();
 
@@ -244,7 +240,7 @@ export default function RunwayDisplay({
         setLoading(false);
       }
     })();
-  }, [icao, bbox]);
+  }, [icao]);
 
   const bboxAll = useMemo(() => bboxOf([...runways, ...taxiways]), [runways, taxiways]);
   const project = useMemo(() => makeProjector(pane.w, pane.h, bboxAll, 0.06), [pane, bboxAll]);
@@ -309,7 +305,7 @@ export default function RunwayDisplay({
           const start = coords[0], end = coords[coords.length - 1];
           const { x, y } = project(mid[0], mid[1]);
           const refText = rw.properties?.ref || deriveRunwayRef(start, end);
-          return (
+        return (
             <text
               key={`lbl-${i}`}
               x={x}
@@ -328,8 +324,8 @@ export default function RunwayDisplay({
             >
               {refText}
             </text>
-          );
-        })}
+        );
+      })}
       </svg>
     </div>
   );
