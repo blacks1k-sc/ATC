@@ -1,294 +1,255 @@
-"""
-ICAO 8643 aircraft type data loader with real global CSV sources + fallback to planes.dat.
-"""
-
-import csv
 import os
+import csv
 import requests
-import logging
 from pathlib import Path
-from typing import Dict, List, Optional, Set
-from urllib.parse import urlparse
+from typing import Iterator, Tuple, Optional, Dict
+import logging
 
-from ..models import TypeSpec, EngineSpec
-
-# ------------------------------------------------------------------------------
-# Paths & constants
-# ------------------------------------------------------------------------------
-CACHE_DIR = Path(__file__).resolve().parents[2] / "cache"
-CACHE_DIR.mkdir(parents=True, exist_ok=True)
-
-OPENFLIGHTS_PLANES_URL = "https://raw.githubusercontent.com/jpatokal/openflights/master/data/planes.dat"
-PLANES_CACHE = CACHE_DIR / "planes.dat"
-
-ICAO_8643_URL_ENV = "ICAO_8643_URL"
-ICAO_8643_CACHE = CACHE_DIR / "icao_8643.csv"
-
-# ------------------------------------------------------------------------------
-# Logging
-# ------------------------------------------------------------------------------
 logger = logging.getLogger(__name__)
-if not logger.handlers:
-    logging.basicConfig(level=logging.INFO)
 
+def get_planes_dat_url() -> str:
+    """Get planes.dat URL from environment."""
+    return os.getenv("PLANES_DAT_URL", "https://raw.githubusercontent.com/jpatokal/openflights/master/data/planes.dat")
 
-# ------------------------------------------------------------------------------
-# Downloads
-# ------------------------------------------------------------------------------
-def _load_local_csv(path_like: str) -> str:
-    """Load a local CSV file and copy it to cache."""
-    p = Path(path_like.replace("file://", ""))
-    p = p.resolve()
-    if not p.exists():
-        raise FileNotFoundError(f"Local ICAO 8643 CSV not found: {p}")
-    # ensure cached copy lives at CACHE_DIR/icao_8643.csv
-    ICAO_8643_CACHE.write_bytes(p.read_bytes())
-    logger.info(f"Copied local ICAO 8643 CSV from {p} to {ICAO_8643_CACHE}")
-    return str(ICAO_8643_CACHE)
+def get_icao_8643_csv_path() -> Optional[str]:
+    """Get ICAO 8643 CSV path from environment."""
+    return os.getenv("ICAO_8643_CSV")
 
+def ensure_fallbacks() -> None:
+    """Download fallback data files if not present."""
+    cache_dir = Path("cache")
+    cache_dir.mkdir(exist_ok=True)
+    
+    # Download planes.dat if not present
+    planes_dat_path = cache_dir / "planes.dat"
+    if not planes_dat_path.exists():
+        logger.info("Downloading planes.dat...")
+        try:
+            url = get_planes_dat_url()
+            response = requests.get(url, timeout=30)
+            response.raise_for_status()
+            
+            with open(planes_dat_path, 'w', encoding='utf-8') as f:
+                f.write(response.text)
+            logger.info(f"Downloaded planes.dat to {planes_dat_path}")
+        except Exception as e:
+            logger.error(f"Failed to download planes.dat: {e}")
+    
+    # Copy ICAO 8643 CSV if specified and not present
+    icao_csv_path = get_icao_8643_csv_path()
+    if icao_csv_path and Path(icao_csv_path).exists():
+        target_path = cache_dir / "icao_8643.csv"
+        if not target_path.exists():
+            logger.info(f"Copying ICAO 8643 CSV to {target_path}")
+            try:
+                import shutil
+                shutil.copy2(icao_csv_path, target_path)
+                logger.info("Copied ICAO 8643 CSV")
+            except Exception as e:
+                logger.error(f"Failed to copy ICAO 8643 CSV: {e}")
 
-def download_icao_8643_data(url: str) -> str:
+def iter_icao_candidates() -> Iterator[Tuple[str, str, str]]:
     """
-    Download ICAO 8643 CSV from the provided URL into cache and return its path.
-    Handles both HTTP(S) URLs and local file paths.
+    Iterate over ICAO type candidates from planes.dat.
+    
+    Yields:
+        Tuple of (icao_type, manufacturer_guess, model_guess)
     """
-    parsed = urlparse(url)
-    if parsed.scheme in ("file", ""):
-        return _load_local_csv(url)
+    planes_dat_path = Path("cache") / "planes.dat"
+    if not planes_dat_path.exists():
+        logger.warning("planes.dat not found, cannot generate ICAO candidates")
+        return
     
     try:
-        logger.info(f"Downloading ICAO 8643 data from: {url}")
-        response = requests.get(url, timeout=45)
-        response.raise_for_status()
-        ICAO_8643_CACHE.write_text(response.text, encoding="utf-8")
-        logger.info(f"Cached ICAO 8643 data to {ICAO_8643_CACHE}")
-        return str(ICAO_8643_CACHE)
-    except Exception as e:
-        logger.warning(f"Failed to download ICAO 8643 data: {e}")
-        raise
-
-
-def _download_planes_dat() -> Optional[Path]:
-    """
-    Download OpenFlights planes.dat into cache and return its path (or None on failure).
-    """
-    try:
-        logger.info(f"Downloading planes.dat from: {OPENFLIGHTS_PLANES_URL}")
-        r = requests.get(OPENFLIGHTS_PLANES_URL, timeout=30)
-        r.raise_for_status()
-        PLANES_CACHE.write_bytes(r.content)
-        logger.info(f"Saved planes.dat to {PLANES_CACHE}")
-        return PLANES_CACHE
-    except Exception as e:
-        logger.warning(f"Failed to download planes.dat: {e}")
-        return None
-
-
-# ------------------------------------------------------------------------------
-# Fallback loader (planes.dat)
-# ------------------------------------------------------------------------------
-def _load_types_from_planes_dat() -> List[TypeSpec]:
-    """
-    Fallback loader using OpenFlights planes.dat (Name, IATA, ICAO).
-    Only the ICAO type code (3rd column) is trusted/used.
-    Other fields (wake/engines/dimensions/mtow) remain None and will be filtered out.
-    This is only used to expand the list of known ICAO type codes.
-    """
-    if not PLANES_CACHE.exists():
-        if _download_planes_dat() is None:
-            logger.error("No planes.dat available (download failed).")
-            return []
-
-    types: List[TypeSpec] = []
-    seen: Set[str] = set()
-
-    with PLANES_CACHE.open("r", encoding="utf-8", newline="") as f:
-        reader = csv.reader(f)
-        for row in reader:
-            if not row or len(row) < 3:
-                continue
-            icao = (row[2] or "").strip().upper()
-            if not icao or icao in ("\\N", "NULL"):
-                continue
-            if icao in seen:
-                continue
-            seen.add(icao)
-            types.append(
-                TypeSpec(
-                    icao_type=icao,
-                    wake=None,  # Will be filtered out - no guessing
-                    engines=None,  # Will be filtered out - no guessing
-                    dimensions=None,
-                    mtow_kg=None,
-                )
-            )
-
-    logger.info(f"Loaded {len(types)} ICAO type codes from planes.dat (fallback - incomplete data)")
-    return types
-
-
-# ------------------------------------------------------------------------------
-# ICAO 8643 CSV loader
-# ------------------------------------------------------------------------------
-def load_icao_8643_data(csv_path: Optional[str] = None) -> List[TypeSpec]:
-    """
-    Preferred: load ICAO 8643 CSV (via env URL or cache file).
-    Fallback:  load OpenFlights planes.dat for ICAO type codes only.
-    """
-    # 1) Resolve preferred CSV path
-    if csv_path is None:
-        url = os.getenv(ICAO_8643_URL_ENV)
-        if url:
-            try:
-                csv_path = download_icao_8643_data(url)
-            except Exception:
-                csv_path = None  # fall through to cache/fallback
-        if csv_path is None and ICAO_8643_CACHE.exists():
-            csv_path = str(ICAO_8643_CACHE)
-
-    # 2) If CSV available, parse ICAO 8643 data
-    if csv_path and os.path.exists(csv_path):
-        logger.info(f"Loading ICAO 8643 data from: {csv_path}")
-
-        types: List[TypeSpec] = []
-        seen_types: Set[str] = set()
-        skipped = 0
-
-        with open(csv_path, "r", encoding="utf-8") as f:
-            sample = f.read(1024)
-            f.seek(0)
-            delimiter = "," if "," in sample else "\t"
-            reader = csv.DictReader(f, delimiter=delimiter)
-
-            for row_num, row in enumerate(reader, 1):
-                try:
-                    icao_type = _extract_field(row, [
-                        "Type Designator", "Type", "Aircraft Type", "AircraftType",
-                        "icao_type", "ICAO_Type", "Designator", "TypeDesignator",
-                    ])
-                    wake = _extract_field(row, [
-                        "WTC", "Wake", "Wake Category", "WakeCategory", "wake",
-                        "Wake_Category", "WakeCategoryCode", "WakeCode",
-                    ])
-                    engines_count = _extract_field(row, [
-                        "Engines", "Engine Count", "EngineCount", "engines_count",
-                        "Engine_Count", "EnginesCount", "NoEngines", "EngineNumber",
-                    ])
-                    engines_type = _extract_field(row, [
-                        "Engine Type", "EngineType", "Engine", "engines_type",
-                        "Engine_Type", "EngineCategory", "EngineClass",
-                    ])
-
-                    # Validate ICAO type
-                    if not icao_type or len(icao_type.strip()) < 3:
-                        logger.debug(f"Row {row_num}: Invalid ICAO type: {icao_type}")
-                        skipped += 1
-                        continue
-                    icao_type = icao_type.strip().upper()
-
-                    # Dedup
-                    if icao_type in seen_types:
-                        skipped += 1
-                        continue
-
-                    # Validate wake - must be present and valid
-                    if not wake:
-                        logger.debug(f"Row {row_num}: Missing wake category for {icao_type}")
-                        skipped += 1
-                        continue
-                    wake = wake.strip().upper()
-                    if wake not in {"L", "M", "H", "J"}:
-                        logger.debug(f"Row {row_num}: Invalid wake category '{wake}' for {icao_type}")
-                        skipped += 1
-                        continue
-
-                    # Validate engines count - must be present and valid
-                    if not engines_count:
-                        logger.debug(f"Row {row_num}: Missing engine count for {icao_type}")
-                        skipped += 1
-                        continue
-                    try:
-                        engines_count = int(engines_count)
-                        if engines_count < 1:
-                            logger.debug(f"Row {row_num}: Invalid engine count {engines_count} for {icao_type}")
-                            skipped += 1
-                            continue
-                    except (ValueError, TypeError):
-                        logger.debug(f"Row {row_num}: Invalid engine count '{engines_count}' for {icao_type}")
-                        skipped += 1
-                        continue
-
-                    # Validate engines type - must be present and valid
-                    if not engines_type:
-                        logger.debug(f"Row {row_num}: Missing engine type for {icao_type}")
-                        skipped += 1
-                        continue
-                    engines_type_norm = _normalize_engine_type(engines_type.strip().upper())
-                    if not engines_type_norm:
-                        logger.debug(f"Row {row_num}: Unknown engine type '{engines_type}' for {icao_type}")
-                        skipped += 1
-                        continue
-
-                    engines = EngineSpec(count=engines_count, type=engines_type_norm)
-                    types.append(
-                        TypeSpec(
-                            icao_type=icao_type,
-                            wake=wake,
-                            engines=engines,
-                            dimensions=None,  # to be enriched by OurAirports
-                            mtow_kg=None,     # to be enriched by OurAirports
-                        )
-                    )
-                    seen_types.add(icao_type)
-
-                except Exception as e:
-                    logger.debug(f"Row {row_num}: Error: {e}")
-                    skipped += 1
+        with open(planes_dat_path, 'r', encoding='utf-8') as f:
+            for line_num, line in enumerate(f, 1):
+                line = line.strip()
+                if not line or line.startswith('#'):
                     continue
+                
+                # Parse CSV line properly - handle quoted fields
+                parts = []
+                current_part = ""
+                in_quotes = False
+                
+                for char in line:
+                    if char == '"' and not in_quotes:
+                        in_quotes = True
+                    elif char == '"' and in_quotes:
+                        in_quotes = False
+                    elif char == ',' and not in_quotes:
+                        parts.append(current_part.strip())
+                        current_part = ""
+                        continue
+                    current_part += char
+                
+                # Add the last part
+                if current_part:
+                    parts.append(current_part.strip())
+                
+                if len(parts) < 3:
+                    continue
+                
+                # Extract fields: "Aircraft Name", "IATA Code", "ICAO Code"
+                aircraft_name = parts[0].strip('"')
+                iata_code = parts[1].strip('"')
+                icao_code = parts[2].strip('"')
+                
+                # Skip if no ICAO code (\\N means null)
+                if not icao_code or icao_code == "\\N":
+                    continue
+                
+                # Extract manufacturer and model from aircraft name
+                manufacturer_guess, model_guess = _extract_manufacturer_model(aircraft_name)
+                
+                if manufacturer_guess and model_guess:
+                    yield (icao_code, manufacturer_guess, model_guess)
+                
+    except Exception as e:
+        logger.error(f"Error reading planes.dat: {e}")
 
-        logger.info(f"Loaded {len(types)} unique ICAO 8643 types, skipped {skipped} rows")
-        return types
+def _extract_manufacturer_model(aircraft_name: str) -> Tuple[str, str]:
+    """
+    Extract manufacturer and model from aircraft name.
+    
+    Examples:
+        "Boeing 737" -> ("Boeing", "737")
+        "Airbus A320" -> ("Airbus", "A320")
+        "Aerospatiale (Nord) 262" -> ("Aerospatiale", "262")
+        "Aerospatiale/Alenia ATR 42-300" -> ("ATR", "42-300")
+    """
+    aircraft_name = aircraft_name.strip()
+    
+    # Handle complex manufacturer patterns with parentheses and slashes
+    complex_patterns = [
+        # Aerospatiale variants
+        ("Aerospatiale (Nord)", "Aerospatiale"),
+        ("Aerospatiale (Sud Aviation)", "Aerospatiale"), 
+        ("Aerospatiale/Alenia", "ATR"),
+        ("Aerospatiale", "Aerospatiale"),
+        
+        # British Aerospace variants
+        ("British Aerospace (BAC)", "British Aerospace"),
+        ("British Aerospace", "British Aerospace"),
+        ("BAe", "British Aerospace"),
+        
+        # McDonnell Douglas variants
+        ("McDonnell Douglas", "McDonnell Douglas"),
+        ("Douglas", "McDonnell Douglas"),
+        
+        # Lockheed variants
+        ("Lockheed", "Lockheed"),
+        
+        # De Havilland variants
+        ("De Havilland Canada", "De Havilland"),
+        ("De Havilland", "De Havilland"),
+        
+        # Canadair variants
+        ("Canadair", "Bombardier"),
+        
+        # Fairchild variants
+        ("Fairchild Dornier", "Fairchild"),
+        ("Fairchild", "Fairchild"),
+        
+        # Gulfstream variants
+        ("Gulfstream Aerospace", "Gulfstream"),
+        ("Gulfstream/Rockwell", "Gulfstream"),
+        ("Gulfstream", "Gulfstream"),
+        
+        # Harbin variants
+        ("Harbin Yunshuji", "Harbin"),
+        ("Harbin", "Harbin"),
+        
+        # Pilatus variants
+        ("Pilatus Britten-Norman", "Pilatus"),
+        ("Pilatus", "Pilatus"),
+        
+        # Shorts variants
+        ("Shorts", "Shorts"),
+        
+        # Sikorsky variants
+        ("Sikorsky", "Sikorsky"),
+        
+        # Bell variants
+        ("Bell", "Bell"),
+        
+        # NAMC variants
+        ("NAMC", "NAMC"),
+        
+        # Partenavia variants
+        ("Partenavia", "Partenavia"),
+        
+        # COMAC variants
+        ("COMAC", "COMAC"),
+        
+        # Concorde variants
+        ("Concorde", "Concorde"),
+        
+        # Standard manufacturers
+        ("Boeing", "Boeing"),
+        ("Airbus", "Airbus"),
+        ("Embraer", "Embraer"),
+        ("Bombardier", "Bombardier"),
+        ("ATR", "ATR"),
+        ("Cessna", "Cessna"),
+        ("Piper", "Piper"),
+        ("Beechcraft", "Beechcraft"),
+        ("Dassault", "Dassault"),
+        ("Learjet", "Learjet"),
+        ("Saab", "Saab"),
+        ("Fokker", "Fokker"),
+        ("Antonov", "Antonov"),
+        ("Ilyushin", "Ilyushin"),
+        ("Tupolev", "Tupolev"),
+        ("Yakovlev", "Yakovlev"),
+        ("Sukhoi", "Sukhoi"),
+        ("Avro", "Avro"),
+    ]
+    
+    # Find manufacturer using complex patterns
+    manufacturer = "Unknown"
+    model = aircraft_name
+    
+    for pattern, normalized_manufacturer in complex_patterns:
+        if aircraft_name.startswith(pattern):
+            manufacturer = normalized_manufacturer
+            # Extract model (everything after the pattern)
+            model = aircraft_name[len(pattern):].strip()
+            break
+    
+    # Clean up model name
+    if model:
+        # Remove common suffixes that aren't part of the model
+        model = model.replace(" series", "").replace(" (above 200 hp)", "").replace(" (up to 180 hp)", "")
+        model = model.strip()
+    
+    return manufacturer, model
 
-    # 3) Fallback to planes.dat if no CSV available
-    logger.warning("No ICAO 8643 CSV available. Falling back to planes.dat.")
-    types = _load_types_from_planes_dat()
-    if not types:
-        raise FileNotFoundError(
-            "No ICAO 8643 data and planes.dat fallback failed. "
-            "Set ICAO_8643_URL or ensure cache/planes.dat is present."
-        )
-    return types
-
-
-# ------------------------------------------------------------------------------
-# Helpers
-# ------------------------------------------------------------------------------
-def _extract_field(row: Dict[str, str], field_names: List[str]) -> Optional[str]:
-    """Extract field value using multiple possible field names."""
-    for name in field_names:
-        if name in row and row[name] and row[name].strip():
-            return row[name].strip()
+def lookup_8643_row(icao_type: str) -> Optional[Dict[str, str]]:
+    """
+    Look up ICAO type in 8643 CSV if available.
+    
+    Args:
+        icao_type: ICAO type designator
+        
+    Returns:
+        Dictionary with wake, engines info or None if not found
+    """
+    icao_csv_path = Path("cache") / "icao_8643.csv"
+    if not icao_csv_path.exists():
+        return None
+    
+    try:
+        with open(icao_csv_path, 'r', encoding='utf-8') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                if row.get("Type Designator", "").strip().upper() == icao_type.upper():
+                    return {
+                        "wake": row.get("WTC", "").strip(),
+                        "engines": row.get("Engines", "").strip(),
+                        "engine_type": row.get("Engine Type", "").strip()
+                    }
+    except Exception as e:
+        logger.error(f"Error reading ICAO 8643 CSV: {e}")
+    
     return None
-
-
-def _normalize_engine_type(engine_type: str) -> Optional[str]:
-    """Normalize engine type to enum values."""
-    jet_variants = {"JET", "JET ENGINE", "TURBOJET", "TURBOFAN", "TURBO-FAN", "TURBO-JET", "FANJET"}
-    turboprop_variants = {"TURBOPROP", "TURBO-PROP", "TURBOPROPELLER", "PROP", "PROPELLER"}
-    piston_variants = {"PISTON", "PISTON ENGINE", "RECIPROCATING", "RECIP"}
-    electric_variants = {"ELECTRIC", "ELECTRIC MOTOR", "BATTERY", "HYBRID"}
-
-    if any(v in engine_type for v in jet_variants):
-        return "JET"
-    if any(v in engine_type for v in turboprop_variants):
-        return "TURBOPROP"
-    if any(v in engine_type for v in piston_variants):
-        return "PISTON"
-    if any(v in engine_type for v in electric_variants):
-        return "ELECTRIC"
-    return "OTHER"
-
-
-def get_icao_8643_types() -> List[TypeSpec]:
-    """Public entrypoint."""
-    return load_icao_8643_data()

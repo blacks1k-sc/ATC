@@ -1,217 +1,286 @@
-# ATC Data Pipeline
+# Aircraft Data Pipeline
 
-A Python data pipeline that enriches aircraft types using API Ninjas and OurAirports data, validates with Pydantic, and generates synthetic aircraft records for ATC simulation.
+A comprehensive data pipeline for collecting, processing, and generating aircraft type information from multiple sources.
+
+## Overview
+
+This pipeline aggregates aircraft specifications from various APIs and fallback sources, normalizes the data, and generates synthetic aircraft records for testing and simulation purposes.
 
 ## Features
 
-- **Live API Integration**: Real-time aircraft data enrichment via API Ninjas Aircraft API
-- **Intelligent Caching**: Caches API responses locally to minimize network calls and costs
-- **Data Derivation**: Automatically derives wake categories and climb rates from MTOW and engine data
-- **Validation**: Pydantic models ensure data integrity with robust error handling
-- **Synthetic Generation**: Creates realistic aircraft records with unique registrations and ICAO24 codes
-- **Geographic Routing**: YYZ-centric route generation with realistic positions
-- **Rate Limiting**: Built-in API rate limiting and exponential backoff for reliable operation
-
-## Output Files
-
-- `dist/aircraft_types.json` - Global aircraft type specifications (thousands of types)
-- `dist/airlines.json` - Global airline directory (thousands of airlines)
-- `dist/sample_records.jsonl` - Synthetic aircraft records (one per line)
-- `dist/meta.json` - Build metadata (timestamp, counts)
+- **Multi-source data collection**: API Ninjas, AeroDataBox, ICAO 8643, and OpenFlights data
+- **Intelligent merging**: Combines data from multiple sources with precedence rules
+- **Automatic derivations**: Calculates missing fields like wake categories and climb rates
+- **Caching**: HTTP response caching with configurable TTL
+- **Rate limiting**: Respects API rate limits with exponential backoff
+- **Quality validation**: Ensures minimum data quality standards
+- **Synthetic data generation**: Creates realistic aircraft records for testing
 
 ## Quick Start
 
+### 1. Setup
+
 ```bash
-# Setup environment
+cd data-pipeline
 make setup
+```
 
-# Set your API keys (at least one required)
-export API_NINJAS_KEY="YOUR_REAL_KEY"
-export AERODATABOX_KEY="your_rapidapi_key_here"
-export AERODATABOX_HOST="aerodatabox.p.rapidapi.com"
+### 2. Configure API Keys
 
-# Fetch data from official sources (optional - will auto-download if needed)
+```bash
+# Copy environment template
+cp env.example .env
+
+# Edit .env with your API keys
+# API_NINJAS_KEY=your_api_ninjas_key_here
+# AERODATABOX_KEY=your_rapidapi_key_here
+```
+
+### 3. Run Pipeline
+
+```bash
+# Set environment variables
+export $(grep -v '^#' .env | xargs)
+
+# Download fallback data
 make fetch
 
-# Build aircraft types and airlines data (uses API Ninjas)
+# Build aircraft types database
 make build
 
 # Generate synthetic records
 make generate
-
-# Or generate custom amount
-python -m src.generate --n 100 --origin CYYZ --op PASSENGER
-```
-
-### Complete Setup Example
-
-```bash
-# 1) Activate venv (if not already)
-python3 -m venv .venv && . .venv/bin/activate
-pip install -r requirements.txt
-
-# 2) Set your API keys (at least one required)
-export API_NINJAS_KEY="YOUR_REAL_KEY"
-export AERODATABOX_KEY="your_rapidapi_key_here"
-export AERODATABOX_HOST="aerodatabox.p.rapidapi.com"
-
-# 3) Build data
-make clean && make build && make generate
 ```
 
 ## Data Sources
 
-The pipeline enriches aircraft data from multiple sources:
+### Primary Sources
 
-### Aircraft Type Enrichment (Multi-API)
-- **Primary**: API Ninjas Aircraft API for real-time aircraft specifications
-- **Secondary**: AeroDataBox API as fallback for missing data
-- **Cached**: `cache/api_ninjas/` and `cache/aerodatabox/` directories with JSON responses
-- **Query Method**: Uses `model=` and `manufacturer=` parameters (never `icao=`)
-- **Rate Limiting**: 1-2 requests per second with exponential backoff
-- **Fallback**: Comprehensive fallback data for common aircraft types
+1. **API Ninjas** - Primary source for aircraft specifications
+   - Endpoint: `https://api.api-ninjas.com/v1/aircraft`
+   - Requires: `API_NINJAS_KEY`
+   - Provides: Dimensions, weights, speeds, engine info
 
-**⚠️ API Keys Required:**
-- **API_NINJAS_KEY** environment variable (primary source)
-- **AERODATABOX_KEY** and **AERODATABOX_HOST** environment variables (secondary fallback)
-- Get your free API keys at [API Ninjas](https://api-ninjas.com/) and [AeroDataBox](https://rapidapi.com/aerodatabox/api/aerodatabox)
-- API calls are cached to minimize costs and improve performance
+2. **AeroDataBox** - Secondary source via RapidAPI
+   - Endpoint: `https://aerodatabox.p.rapidapi.com/aircrafts/{manufacturer}/{model}`
+   - Requires: `AERODATABOX_KEY`, `AERODATABOX_HOST`
+   - Provides: Comprehensive aircraft specifications
 
-**Data Enrichment Process:**
-1. **Collect ICAO codes** from existing data, planes.dat, and OurAirports
-2. **Query API Ninjas** for each ICAO type (cached responses reused)
-3. **Query AeroDataBox** to fill gaps in API Ninjas data
-4. **Derive missing data** using MTOW and engine information
-5. **Enrich with OurAirports** for additional dimensions and specifications
-6. **Validate and filter** to ensure complete wake and engine data
+### Fallback Sources
 
-**Caching Behavior:**
-- API responses cached in `cache/api_ninjas/` and `cache/aerodatabox/` as JSON files
-- Cache keys based on manufacturer and model names
-- Failed queries cached as empty objects to avoid retries
-- Manual cache clearing: `rm -rf cache/api_ninjas/ cache/aerodatabox/`
+3. **ICAO 8643** - Wake categories and engine information
+   - Local CSV file (if provided via `ICAO_8643_CSV`)
+   - Provides: Wake categories, engine counts, engine types
 
-**Data Derivation:**
-- **Wake categories** derived from MTOW: <7t=L, 7-136t=M, >136t=H, special cases=J
-- **Climb rates** estimated from engine type and MTOW with realistic scaling
-- **Engine types** normalized to JET/TURBOPROP/PISTON/ELECTRIC categories
+4. **OpenFlights planes.dat** - ICAO type candidates
+   - Auto-downloaded from GitHub
+   - Provides: ICAO type designators, manufacturer/model guesses
 
-### OurAirports Aircraft Data
-- **Primary**: OurAirports aircraft specifications database
-- **Fallback**: Open source aircraft dimension databases
-- **Cached**: `cache/ourairports_aircraft.csv`
+5. **OpenFlights airlines.dat** - Airline information
+   - Auto-downloaded from GitHub
+   - Provides: Airline codes, names, countries
 
-### Global Airlines
-- **Primary**: OurAirports airlines database
-- **Fallback**: OpenFlights airlines data
-- **Cached**: `cache/airlines.csv`
+## Data Processing
+
+### Source Precedence
+
+1. **API Ninjas** (primary)
+2. **AeroDataBox** (secondary)
+3. **ICAO 8643** (fallback for wake/engines)
+4. **Derived calculations** (final fallback)
+
+### Automatic Derivations
+
+- **Wake categories**: Derived from MTOW using ICAO standards
+  - Light (L): < 7,000 kg
+  - Medium (M): 7,000 - 136,000 kg
+  - Heavy (H): ≥ 136,000 kg
+  - Super (J): A380 special case
+
+- **Climb rates**: Estimated based on engine type and MTOW
+  - Base rates by engine type with MTOW scaling
+
+- **Unit conversions**: Automatic conversion between units
+  - lbs ↔ kg, ft ↔ m, nm ↔ km
+
+### Quality Standards
+
+Records must have:
+- Wake category
+- Engine type
+- Maximum takeoff weight (MTOW)
+
+Records missing these fields are excluded from the final dataset.
+
+## Output Files
+
+### `dist/aircraft_types.json`
+Normalized aircraft type specifications with fields:
+- `icao_type`: ICAO type designator
+- `wake`: Wake turbulence category (L/M/H/J)
+- `engines`: Engine specification (count, type)
+- `dimensions`: Physical dimensions (length, wingspan, height)
+- `mtow_kg`: Maximum takeoff weight
+- `cruise_speed_kts`, `max_speed_kts`: Speed specifications
+- `range_nm`: Range in nautical miles
+- `ceiling_ft`: Service ceiling
+- `climb_rate_fpm`: Estimated climb rate
+- `takeoff_ground_run_ft`, `landing_ground_roll_ft`: Ground performance
+- `engine_thrust_lbf`: Engine thrust
+- `notes`: Source information
+
+### `dist/airlines.json`
+Airline information with fields:
+- `icao`: ICAO airline code
+- `iata`: IATA airline code
+- `name`: Airline name
+- `callsign`: Radio callsign
+- `country`: Country of registration
+- `active`: Active status
+
+### `dist/meta.json`
+Build metadata including:
+- Build timestamp
+- Record counts
+- Source information
+- Quality criteria
+
+### `dist/sample_records.jsonl`
+Synthetic aircraft records (one per line) with fields:
+- `id`: Unique aircraft identifier
+- `callsign`: Flight callsign
+- `aircraft_type`: ICAO type designator
+- `airline`: ICAO airline code
+- `origin`, `destination`: Airport codes
+- `position`: Lat/lon, altitude, heading, speed
+- `status`: Flight status
+- `timestamp`: Record timestamp
 
 ## Configuration
 
 ### Environment Variables
 
-Required and optional configuration:
-
 ```bash
-# Required: API Ninjas key for aircraft data enrichment
-export API_NINJAS_KEY="your_api_key_here"
+# API Keys
+API_NINJAS_KEY=your_api_ninjas_key_here
+AERODATABOX_KEY=your_rapidapi_key_here
+AERODATABOX_HOST=aerodatabox.p.rapidapi.com
 
-# Optional: Other data sources
-export OURAIRPORTS_AIRCRAFT_CSV="path/to/ourairports_aircraft.csv"
-export AIRLINES_CSV="path/to/airlines.csv"
+# Fallback Data
+ICAO_8643_CSV=cache/icao_8643.csv
+PLANES_DAT_URL=https://raw.githubusercontent.com/jpatokal/openflights/master/data/planes.dat
 
-# Optional: Random seed for reproducible generation
-export RANDOM_SEED="42"
+# Performance Tuning
+HTTP_TIMEOUT=30
+RATE_LIMIT_QPS=2
+CACHE_TTL_HOURS=72
 ```
 
-### Data Supply Methods
+### Makefile Targets
 
-1. **Automatic Download** (default): Pipeline downloads from official sources
-2. **Local CSV Files**: Place CSVs in `cache/` directory and set environment variables
-3. **Custom Paths**: Use environment variables to point to any CSV location
+- `make setup`: Create virtual environment and install dependencies
+- `make fetch`: Download fallback data files
+- `make build`: Build aircraft types database
+- `make generate`: Generate synthetic records
+- `make clean`: Remove generated files
 
-### Cache Management
+## API Keys
 
-- Data is automatically cached in the `cache/` directory
-- Cached files are reused on subsequent runs
-- Use `make clean` to remove cached data and force re-download
-- Cache files are git-ignored to avoid committing large datasets
+### API Ninjas
+1. Visit [api-ninjas.com](https://api-ninjas.com/api/aircraft)
+2. Sign up for free account
+3. Get API key from dashboard
+4. Set `API_NINJAS_KEY` in `.env`
 
-## Project Structure
+### AeroDataBox (RapidAPI)
+1. Visit [RapidAPI AeroDataBox](https://rapidapi.com/aerodatabox/api/aerodatabox)
+2. Subscribe to plan (free tier available)
+3. Get API key from dashboard
+4. Set `AERODATABOX_KEY` and `AERODATABOX_HOST` in `.env`
+
+## Development
+
+### Project Structure
 
 ```
 data-pipeline/
 ├── README.md
-├── requirements.txt
+├── .gitignore
 ├── Makefile
-├── src/
-│   ├── models.py          # Pydantic models
-│   ├── sources/           # Data loaders
-│   │   ├── icao_8643.py
-│   │   ├── ourairports.py
-│   │   └── airlines.py
-│   ├── utils/             # Helper modules
-│   │   ├── registries.py
-│   │   ├── randomizers.py
-│   │   └── geo.py
-│   ├── emit.py            # Data joining and validation
-│   └── generate.py        # CLI for synthetic generation
-└── dist/                  # Output directory (git-ignored)
+├── requirements.txt
+├── env.example
+├── cache/                # HTTP/cache files (git-ignored)
+├── dist/                 # Outputs (git-ignored)
+└── src/
+    ├── __init__.py
+    ├── models.py         # Pydantic data models
+    ├── emit.py           # Main orchestration
+    ├── generate.py       # CLI for synthetic data
+    ├── sources/
+    │   ├── __init__.py
+    │   ├── api_ninjas.py
+    │   ├── aerodatabox.py
+    │   ├── icao_8643.py
+    │   └── airlines.py
+    └── utils/
+        ├── __init__.py
+        ├── http.py       # HTTP client with retries
+        ├── cache.py      # JSON caching
+        ├── derive.py     # Field derivations
+        └── merge.py      # Data merging logic
 ```
 
-## Environment Variables
+### Adding New Sources
 
-- `RANDOM_SEED`: Set for deterministic generation (default: 42)
+1. Create new module in `src/sources/`
+2. Implement `fetch_by_model(manufacturer, model)` function
+3. Return `TypeSpec` object with available data
+4. Add to orchestration in `src/emit.py`
 
-## Requirements
+### Testing
 
-- Python 3.8+
-- pandas, pydantic, requests, beautifulsoup4, python-slugify, typer, rtoml
+```bash
+# Test individual components
+python -c "from src.sources.api_ninjas import fetch_by_model; print(fetch_by_model('Boeing', '737'))"
 
-## Error Handling
+# Test full pipeline
+make build
+make generate --n 10
+```
 
-The pipeline includes robust error handling:
+## Troubleshooting
 
-- **API Failures**: Automatic retry with exponential backoff for API Ninjas requests
-- **Rate Limiting**: Built-in rate limiting to respect API quotas (1-2 req/sec)
-- **Cache Fallback**: Failed API queries are cached to avoid repeated failures
-- **Data Derivation**: Missing wake categories and climb rates are derived from available data
-- **Invalid Data**: Rows with missing or invalid fields are logged and skipped
-- **Network Issues**: Automatic fallback to alternative data sources
-- **Missing Files**: Graceful degradation with sample data for development
-- **Validation Errors**: Pydantic validation ensures data integrity
-- **Quality Control**: Pipeline fails if fewer than 10 aircraft types have complete wake/engine data
+### Common Issues
 
-## New Features
+1. **API Key Errors**
+   - Verify keys are set in `.env`
+   - Check API key validity and quotas
+   - Ensure no extra spaces in `.env` file
 
-### Multi-API Integration
-- **Primary Source**: API Ninjas for real-time aircraft specifications
-- **Secondary Fallback**: AeroDataBox to fill gaps in API Ninjas data
-- **Model-Based Queries**: Uses `model=` and `manufacturer=` parameters (no more `icao=` calls)
-- **Intelligent Caching**: Minimizes API calls and costs with separate cache directories
-- **Smart Fallbacks**: Uses OurAirports and derived data when API data is incomplete
-- **Rate Limiting**: Respects API quotas with built-in throttling and exponential backoff
-- **Engine Inference**: Smart engine count inference when API doesn't provide it
-- **Data Merging**: Seamlessly combines data from multiple APIs for comprehensive coverage
+2. **No Data Found**
+   - Check internet connection
+   - Verify API endpoints are accessible
+   - Review rate limiting settings
 
-### Data Derivation
-- **Wake Categories**: Automatically derived from MTOW and ICAO type
-- **Climb Rates**: Estimated from engine type and aircraft weight
-- **Engine Normalization**: Standardized engine type classification
+3. **Build Failures**
+   - Check Python version (3.8+)
+   - Verify all dependencies installed
+   - Review error logs for specific issues
 
-### Enhanced Output
-- **Climb Rate Data**: New `climb_rate_fpm` field in aircraft records
-- **Larger Dataset**: More aircraft types through API enrichment
-- **Better Coverage**: Improved data completeness through multiple sources
+4. **Low Quality Results**
+   - Increase `RATE_LIMIT_QPS` for better API coverage
+   - Provide ICAO 8643 CSV for better fallback data
+   - Check manufacturer/model name normalization
 
-### Testing & Validation
-- **Smoke Test**: Built-in API integration testing with `make smoke`
-- **Acceptance Criteria**: Validates common aircraft types have complete data
+### Logs
 
-## Performance
+The pipeline uses Python logging. Set log level for more details:
 
-- **API Caching**: Responses cached locally to minimize network calls
-- **Rate Limiting**: Built-in throttling prevents API quota exhaustion
-- **Parallel Processing**: Large datasets are processed efficiently
-- **Memory Efficient**: Streaming processing for large files
-- **Logging**: Comprehensive logging for debugging and monitoring
+```bash
+export PYTHONPATH=.
+python -c "import logging; logging.basicConfig(level=logging.DEBUG); from src.emit import main; main()"
+```
+
+## License
+
+This project is part of the ATC simulation system. See main project license for details.

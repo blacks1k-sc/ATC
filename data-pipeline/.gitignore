@@ -1,12 +1,14 @@
-# Python
+.venv/
 __pycache__/
-*.py[cod]
-*$py.class
-*.so
+dist/
+cache/
+.env
+*.pyc
+*.pyo
+*.pyd
 .Python
 build/
 develop-eggs/
-dist/
 downloads/
 eggs/
 .eggs/
@@ -19,34 +21,3 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-MANIFEST
-
-# Virtual environment
-.venv/
-venv/
-ENV/
-env/
-.env
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# OS
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# Output files (except meta.json)
-dist/*
-!dist/meta.json
-
-# Cached data files
-cache/
