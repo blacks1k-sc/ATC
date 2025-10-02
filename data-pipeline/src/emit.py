@@ -138,8 +138,8 @@ def build_aircraft_types() -> List[Dict[str, Any]]:
         TaskProgressColumn(),
         console=console
     ) as progress:
-        # Process aircraft in smaller batches to avoid rate limiting
-        max_candidates = min(50, len(candidates))  # Process 50 at a time
+        # Process ALL aircraft from the pipeline
+        max_candidates = len(candidates)  # Process ALL candidates
         task = progress.add_task("Processing aircraft from planes.dat...", total=max_candidates)
 
         for i, (icao_type, manufacturer_guess, model_guess) in enumerate(candidates[:max_candidates]):
@@ -150,10 +150,8 @@ def build_aircraft_types() -> List[Dict[str, Any]]:
                 logger.debug(f"Skipping {icao_type} - no valid manufacturer/model")
                 continue
                 
-            # Skip very old or obscure aircraft
-            if any(skip in model_guess.lower() for skip in ["an-", "il-", "tu-", "yak-", "su-"]):
-                logger.debug(f"Skipping {icao_type} - likely obscure aircraft")
-                continue
+            # Include all aircraft types - no filtering
+            # (Previously skipped obscure aircraft, now including all)
 
             processed_count += 1
 

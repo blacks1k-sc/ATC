@@ -8,15 +8,29 @@
     "start": "next start",
     "lint": "next lint",
     "test": "next dev --port 3001",
-    "setup": "npm install && npm run dev"
+    "setup": "npm install && npm run dev",
+    "db:setup": "node scripts/setup-db.js",
+    "db:create": "createdb atc_system || echo 'Database may already exist'",
+    "db:migrate": "node scripts/migrate.js",
+    "db:seed": "node scripts/seed.js",
+    "db:reset": "npm run db:migrate && npm run db:seed",
+    "redis:start": "redis-server --daemonize yes || echo 'Redis may already be running'",
+    "health": "curl -s http://localhost:3000/api/health | jq .",
+    "setup:full": "npm install && npm run db:migrate && npm run db:seed && npm run dev"
   },
   "dependencies": {
+    "@types/pg": "^8.15.5",
+    "@types/uuid": "^10.0.0",
+    "dotenv": "^17.2.2",
+    "ioredis": "^5.8.0",
     "leaflet": "^1.9.4",
-    "next": "14.0.0",
+    "next": "^14.2.33",
     "osmtogeojson": "^3.0.0-beta.5",
+    "pg": "^8.16.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-leaflet": "^4.2.1",
+    "uuid": "^13.0.0",
     "zustand": "^4.4.0"
   },
   "devDependencies": {

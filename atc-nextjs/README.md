@@ -1,12 +1,26 @@
 # ATC Next.js Application
 
-This is the Next.js 14 + React + TypeScript application that powers the ATC system.
+A comprehensive Air Traffic Control simulation system with real-time persistence, event streaming, and modern web technologies.
 
 ## 🚀 Quick Start
+
+### Prerequisites
+- Node.js 18+
+- PostgreSQL 12+
+- Redis 6+
+
+### Installation
 
 ```bash
 # Install dependencies
 npm install
+
+# Setup environment
+cp env.example .env
+# Edit .env with your database and Redis settings
+
+# Initialize database
+npm run setup:full
 
 # Start development server
 npm run dev
@@ -55,15 +69,23 @@ npm run dev
 
 ## 🎯 Key Features
 
-- **Pixel-perfect recreation** of original ATC interface
-- **Live UTC system clock** updating every second
-- **Radar sweep animation** with neon glow effects
-- **Emergency simulation** with flashing alerts
-- **ATC communication logs** with color-coded messages
-- **Flight strips** with active, emergency, and normal states
-- **Ground layout** with runways, taxiways, terminals, gates
-- **Weather data** and NOTAMS display
-- **System status indicators** for all AI controllers
+### Real-time Persistence
+- **PostgreSQL Database**: Normalized schema with aircraft types, airlines, instances, and events
+- **Redis Event Bus**: Real-time pub/sub messaging for live updates
+- **REST API**: Full CRUD operations for aircraft management
+- **SSE Streaming**: Server-Sent Events for real-time communication logs
+
+### Interactive UI
+- **Aircraft Generator**: Create aircraft with unique identifiers and specifications
+- **Real-time Logs**: Live communication logs with filtering and search
+- **Ground Map**: Interactive airport layout with aircraft positioning
+- **Health Monitoring**: System status and connection indicators
+
+### Advanced Features
+- **Event System**: Comprehensive logging with multiple event types
+- **Data Pipeline Integration**: Aircraft types and airlines from external sources
+- **Environment-driven**: Fully configurable via environment variables
+- **Connection Management**: Automatic reconnection and error handling
 
 ## 🛠️ Development
 
@@ -74,6 +96,13 @@ npm run dev
 - `npm run lint` - Run ESLint
 - `npm run test` - Start test server on port 3001
 
+### Database Scripts
+- `npm run db:migrate` - Run database migrations
+- `npm run db:seed` - Seed reference data
+- `npm run db:reset` - Reset and reseed database
+- `npm run setup:full` - Full setup with database
+- `npm run health` - Check system health
+
 ### Adding Features
 - **UI Changes**: Modify components in `src/components/`
 - **Data Structure**: Update types in `src/types/atc.ts`
@@ -82,9 +111,53 @@ npm run dev
 
 ## 🧪 Testing
 
-- **Main System**: http://localhost:3000
-- **Logs/History**: http://localhost:3000/logs
-- **Test Page**: http://localhost:3000/test
+- **Main System**: http://localhost:3001 (Note: Port 3000 was in use, so using 3001)
+- **Logs/History**: http://localhost:3001/logs
+- **Test Page**: http://localhost:3001/test
+- **Health Check**: http://localhost:3001/api/health
+- **Event Stream**: http://localhost:3001/api/events/stream
+
+## 🔧 Configuration
+
+All configuration is environment-driven. Copy `env.example` to `.env`:
+
+```bash
+# Database Configuration
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=atc_system
+DB_USER=postgres
+DB_PASSWORD=password
+DB_POOL_SIZE=20
+
+# Redis Configuration
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=
+
+# Data Pipeline Paths
+AIRCRAFT_TYPES_PATH=../data-pipeline/dist/aircraft_types.json
+AIRLINES_PATH=../data-pipeline/dist/airlines.json
+
+# Development Flags
+SKIP_DB=false
+SKIP_REDIS=false
+```
+
+## 📡 API Endpoints
+
+### Aircraft Management
+- `POST /api/aircraft/generate` - Create new aircraft
+- `GET /api/aircraft` - List active aircraft
+- `GET /api/aircraft/[id]` - Get specific aircraft
+- `PUT /api/aircraft/[id]` - Update aircraft state
+
+### Events
+- `GET /api/events` - List events with filters
+- `GET /api/events/stream` - SSE endpoint for real-time events
+
+### Health
+- `GET /api/health` - System health check
 
 ## 📚 Documentation System
 

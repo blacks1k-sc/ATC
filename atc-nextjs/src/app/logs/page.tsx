@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { AtcLogEntry, LogDirection } from '@/types/atc';
 
@@ -22,82 +22,12 @@ function DirBadge({ d }: { d: LogDirection }) {
   );
 }
 
-// Mock data generator
-function makeMockLogs(count: number): AtcLogEntry[] {
-  const callsigns = ['DAL123', 'UAL456', 'AAL789', 'SWA234', 'JBU567', 'VRG890', 'ASA123', 'QFA456'];
-  const aircraftTypes = ['A320', 'B738', 'E175', 'A321', 'B737', 'A220', 'B757', 'A388'];
-  const sectors = ['TWR', 'GND', 'APP', 'CTR'];
-  const frequencies = ['118.7', '120.95', '121.65', '124.47', '127.0', '119.1', '122.8', '125.2'];
-  const directions: LogDirection[] = ['TX', 'RX', 'CPDLC', 'XFER', 'SYS'];
-  
-  const logs: AtcLogEntry[] = [];
-  
-  for (let i = 0; i < count; i++) {
-    const callsign = callsigns[Math.floor(Math.random() * callsigns.length)];
-    const aircraftType = aircraftTypes[Math.floor(Math.random() * aircraftTypes.length)];
-    const sector = sectors[Math.floor(Math.random() * sectors.length)];
-    const frequency = frequencies[Math.floor(Math.random() * frequencies.length)];
-    const direction = directions[Math.floor(Math.random() * directions.length)];
-    const arrival = Math.random() > 0.5;
-    const hasAudio = Math.random() < 0.1; // 10% have audio
-    
-    let summary = '';
-    let handoffFrom = '';
-    let handoffTo = '';
-    
-    switch (direction) {
-      case 'TX':
-        summary = arrival 
-          ? `${callsign}, wind 270 at 10, cleared to land 24R.`
-          : `${callsign}, wind 270 at 10, cleared for takeoff 24R.`;
-        break;
-      case 'RX':
-        summary = arrival
-          ? `Cleared to land 24R, ${callsign}.`
-          : `Cleared for takeoff 24R, ${callsign}.`;
-        break;
-      case 'CPDLC':
-        summary = Math.random() > 0.5 ? 'Climb FL180.' : 'WILCO.';
-        break;
-      case 'XFER':
-        handoffFrom = 'TWR';
-        handoffTo = 'APP';
-        summary = `${callsign} handoff ${handoffFrom} → ${handoffTo}`;
-        break;
-      case 'SYS':
-        summary = 'RWY 24R RVR < 1200, Low Vis Ops active.';
-        break;
-    }
-    
-    // Add arrival/departure prefix for some entries
-    if (direction === 'TX' || direction === 'RX') {
-      const prefix = arrival ? 'ARRIVAL:' : 'DEPARTURE:';
-      summary = `${prefix} ${callsign} (${aircraftType}) ${summary}`;
-    }
-    
-    logs.push({
-      id: `log_${Date.now()}_${i}`,
-      ts: new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000).toISOString(),
-      callsign,
-      sector,
-      frequency,
-      direction,
-      summary,
-      arrival: direction === 'TX' || direction === 'RX' ? arrival : undefined,
-      flight: {
-        type: aircraftType,
-        from: 'KJFK',
-        to: 'KLAX',
-        squawk: Math.floor(Math.random() * 9000 + 1000).toString()
-      },
-      audioUrl: hasAudio ? `/audio/sample${Math.floor(Math.random() * 5) + 1}.mp3` : undefined,
-      transcript: hasAudio ? summary : undefined,
-      handoffFrom: direction === 'XFER' ? handoffFrom : undefined,
-      handoffTo: direction === 'XFER' ? handoffTo : undefined
-    });
-  }
-  
-  return logs.sort((a, b) => new Date(b.ts).getTime() - new Date(a.ts).getTime());
+// Event interface for SSE
+interface SSEEvent {
+  type: 'initial' | 'realtime' | 'initial_complete' | 'error';
+  event?: any;
+  count?: number;
+  message?: string;
 }
 
 export default function Logs() {
@@ -106,6 +36,10 @@ export default function Logs() {
   const [activeFilters, setActiveFilters] = useState<Set<LogDirection>>(new Set(['TX', 'RX', 'CPDLC', 'XFER', 'SYS']));
   const [arrivalFilter, setArrivalFilter] = useState<'all' | 'arrival' | 'departure'>('all');
   const [sectorFilter, setSectorFilter] = useState<Set<string>>(new Set(['TWR', 'GND', 'APP', 'CTR']));
+  const [loading, setLoading] = useState(true);
+  const [connected, setConnected] = useState(false);
+  const [error, setError] = useState<string>('');
+  const eventSourceRef = useRef<EventSource | null>(null);
   
   const filteredLogs = useMemo(() => {
     return logs.filter(log => {
@@ -134,9 +68,139 @@ export default function Logs() {
       return true;
     });
   }, [logs, searchTerm, activeFilters, arrivalFilter, sectorFilter]);
-  
+
+  // Convert database event to AtcLogEntry
+  const convertEventToLog = (event: any): AtcLogEntry => {
+    return {
+      id: event.id.toString(),
+      ts: event.timestamp,
+      callsign: event.aircraft?.callsign || event.callsign,
+      sector: event.sector,
+      frequency: event.frequency,
+      direction: event.direction || 'SYS',
+      summary: event.message,
+      arrival: event.details?.arrival,
+      flight: event.aircraft ? {
+        type: event.aircraft.aircraft_type?.icao_type,
+        from: event.details?.from,
+        to: event.details?.to,
+        squawk: event.aircraft.squawk_code
+      } : undefined,
+      audioUrl: event.details?.audioUrl,
+      transcript: event.details?.transcript,
+      handoffFrom: event.details?.handoffFrom,
+      handoffTo: event.details?.handoffTo
+    };
+  };
+
+  // Load initial events and setup SSE
+  useEffect(() => {
+    const loadInitialEvents = async () => {
+      try {
+        setLoading(true);
+        setError('');
+        
+        // Build query parameters
+        const params = new URLSearchParams();
+        params.set('limit', '100');
+        if (activeFilters.size < 5) {
+          // If not all directions are selected, we'd need to filter on the server
+          // For now, we'll load all and filter client-side
+        }
+        
+        const response = await fetch(`/api/events?${params.toString()}`);
+        if (!response.ok) {
+          throw new Error('Failed to load events');
+        }
+        
+        const data = await response.json();
+        if (data.success) {
+          const convertedLogs = data.events.map(convertEventToLog);
+          setLogs(convertedLogs);
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load events');
+        console.error('Error loading initial events:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadInitialEvents();
+  }, []);
+
+  // Setup SSE connection
+  useEffect(() => {
+    const setupSSE = () => {
+      try {
+        // Build SSE URL with filters
+        const params = new URLSearchParams();
+        params.set('limit', '50');
+        
+        const eventSource = new EventSource(`/api/events/stream?${params.toString()}`);
+        eventSourceRef.current = eventSource;
+        
+        eventSource.onopen = () => {
+          setConnected(true);
+          setError('');
+        };
+        
+        eventSource.onmessage = (event) => {
+          try {
+            const data: SSEEvent = JSON.parse(event.data);
+            
+            if (data.type === 'initial') {
+              // Add initial event
+              const log = convertEventToLog(data.event);
+              setLogs(prev => [log, ...prev]);
+            } else if (data.type === 'realtime') {
+              // Add real-time event
+              const log = convertEventToLog(data.event);
+              setLogs(prev => [log, ...prev]);
+            } else if (data.type === 'initial_complete') {
+              console.log(`Loaded ${data.count} initial events`);
+            } else if (data.type === 'error') {
+              setError(data.message || 'SSE error');
+            }
+          } catch (err) {
+            console.error('Error parsing SSE event:', err);
+          }
+        };
+        
+        eventSource.onerror = (err) => {
+          console.error('SSE error:', err);
+          setConnected(false);
+          setError('Connection lost');
+          
+          // Attempt to reconnect after 5 seconds
+          setTimeout(() => {
+            if (eventSourceRef.current) {
+              eventSourceRef.current.close();
+            }
+            setupSSE();
+          }, 5000);
+        };
+        
+      } catch (err) {
+        console.error('Error setting up SSE:', err);
+        setError('Failed to connect to real-time stream');
+      }
+    };
+
+    setupSSE();
+
+    // Cleanup on unmount
+    return () => {
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+        eventSourceRef.current = null;
+      }
+    };
+  }, []);
+
   const handleGenerateMock = () => {
-    setLogs(makeMockLogs(50));
+    // This is now handled by the real API, but we can keep it for testing
+    console.log('Mock generation is now handled by the real API');
   };
   
   const toggleFilter = (direction: LogDirection) => {
@@ -221,6 +285,37 @@ export default function Logs() {
             ← OPS
           </Link>
           <h1 style={{ color: '#00ff00', fontSize: '18px', margin: 0 }}>COMMUNICATION LOGS</h1>
+          
+          {/* Connection Status */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{
+              width: '8px',
+              height: '8px',
+              borderRadius: '50%',
+              background: connected ? '#00ff00' : loading ? '#ffaa00' : '#ff4444',
+              opacity: connected ? 1 : 0.7,
+              transition: 'opacity 0.5s ease-in-out'
+            }} />
+            <span style={{
+              fontSize: '10px',
+              color: connected ? '#00ff00' : loading ? '#ffaa00' : '#ff4444'
+            }}>
+              {loading ? 'LOADING...' : connected ? 'LIVE' : 'DISCONNECTED'}
+            </span>
+          </div>
+          
+          {error && (
+            <div style={{
+              fontSize: '10px',
+              color: '#ff4444',
+              background: '#2a1a1a',
+              padding: '2px 6px',
+              border: '1px solid #ff4444',
+              borderRadius: '3px'
+            }}>
+              {error}
+            </div>
+          )}
         </div>
         
         {/* Top Controls */}
@@ -352,23 +447,30 @@ export default function Logs() {
               textAlign: 'center',
               borderRadius: '5px'
             }}>
-              <h3 style={{ color: '#00ff00', marginBottom: '10px' }}>No logs yet</h3>
-              <p style={{ color: '#888', marginBottom: '20px' }}>Generate mock logs to see communication history</p>
-              <button
-                onClick={handleGenerateMock}
-                style={{
-                  padding: '8px 16px',
-                  background: '#2a2a4e',
-                  border: '1px solid #00ff00',
-                  color: '#00ff00',
-                  cursor: 'pointer',
-                  fontSize: '12px',
-                  transition: '0.3s',
-                  fontFamily: 'Courier New, monospace'
-                }}
-              >
-                Generate Mock Logs
-              </button>
+              <h3 style={{ color: '#00ff00', marginBottom: '10px' }}>
+                {loading ? 'Loading events...' : 'No events yet'}
+              </h3>
+              <p style={{ color: '#888', marginBottom: '20px' }}>
+                {loading 
+                  ? 'Connecting to real-time event stream...' 
+                  : connected 
+                    ? 'Waiting for events to appear...' 
+                    : 'Unable to connect to event stream'
+                }
+              </p>
+              {!connected && !loading && (
+                <div style={{
+                  background: '#2a1a1a',
+                  border: '1px solid #ff4444',
+                  padding: '10px',
+                  borderRadius: '3px',
+                  marginBottom: '20px'
+                }}>
+                  <p style={{ color: '#ff4444', fontSize: '12px', margin: 0 }}>
+                    Check database and Redis connections
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         ) : (
@@ -450,8 +552,8 @@ export default function Logs() {
               </tr>
             </thead>
             <tbody>
-              {filteredLogs.map((log) => (
-                <tr key={log.id} style={{
+              {filteredLogs.map((log, index) => (
+                <tr key={`${log.id}-${log.ts}-${index}`} style={{
                   borderBottom: '1px solid #004400'
                 }}>
                   <td style={{

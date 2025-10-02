@@ -1,0 +1,335 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "aeroway": "runway",
+        "name": "Runway 05L/23R",
+        "ref": "05L/23R",
+        "length": "11000",
+        "width": "200"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-79.6248, 43.6777],
+          [-79.6048, 43.6677]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "aeroway": "runway",
+        "name": "Runway 05R/23L",
+        "ref": "05R/23L",
+        "length": "11000",
+        "width": "200"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-79.6148, 43.6777],
+          [-79.5948, 43.6677]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "aeroway": "runway",
+        "name": "Runway 06L/24R",
+        "ref": "06L/24R",
+        "length": "9000",
+        "width": "200"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-79.6248, 43.6677],
+          [-79.6048, 43.6577]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "aeroway": "runway",
+        "name": "Runway 06R/24L",
+        "ref": "06R/24L",
+        "length": "9000",
+        "width": "200"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-79.6148, 43.6677],
+          [-79.5948, 43.6577]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "aeroway": "runway",
+        "name": "Runway 15L/33R",
+        "ref": "15L/33R",
+        "length": "11000",
+        "width": "200"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-79.6248, 43.6777],
+          [-79.6248, 43.6577]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "aeroway": "runway",
+        "name": "Runway 15R/33L",
+        "ref": "15R/33L",
+        "length": "11000",
+        "width": "200"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-79.6148, 43.6777],
+          [-79.6148, 43.6577]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "aeroway": "taxiway",
+        "name": "Taxiway A",
+        "ref": "A"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-79.6248, 43.6777],
+          [-79.6248, 43.6677],
+          [-79.6248, 43.6577]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "aeroway": "taxiway",
+        "name": "Taxiway B",
+        "ref": "B"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-79.6148, 43.6777],
+          [-79.6148, 43.6677],
+          [-79.6148, 43.6577]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "aeroway": "taxiway",
+        "name": "Taxiway C",
+        "ref": "C"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-79.6048, 43.6777],
+          [-79.6048, 43.6677],
+          [-79.6048, 43.6577]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "aeroway": "taxiway",
+        "name": "Taxiway D",
+        "ref": "D"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-79.5948, 43.6777],
+          [-79.5948, 43.6677],
+          [-79.5948, 43.6577]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "aeroway": "apron",
+        "name": "Terminal 1 Apron"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-79.6248, 43.6777],
+          [-79.6148, 43.6777],
+          [-79.6148, 43.6677],
+          [-79.6248, 43.6677],
+          [-79.6248, 43.6777]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "aeroway": "apron",
+        "name": "Terminal 3 Apron"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-79.6148, 43.6677],
+          [-79.6048, 43.6677],
+          [-79.6048, 43.6577],
+          [-79.6148, 43.6577],
+          [-79.6148, 43.6677]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "aeroway": "gate",
+        "name": "Gate A12",
+        "ref": "A12"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-79.6248, 43.6777]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "aeroway": "gate",
+        "name": "Gate A15",
+        "ref": "A15"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-79.6248, 43.6677]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "aeroway": "gate",
+        "name": "Gate B12",
+        "ref": "B12"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-79.6148, 43.6777]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "aeroway": "gate",
+        "name": "Gate B15",
+        "ref": "B15"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-79.6148, 43.6677]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "aeroway": "gate",
+        "name": "Gate C12",
+        "ref": "C12"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-79.6048, 43.6777]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "aeroway": "gate",
+        "name": "Gate C15",
+        "ref": "C15"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-79.6048, 43.6677]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "aeroway": "gate",
+        "name": "Gate D12",
+        "ref": "D12"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-79.5948, 43.6777]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "aeroway": "gate",
+        "name": "Gate D15",
+        "ref": "D15"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-79.5948, 43.6677]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "building": "terminal",
+        "name": "Terminal 1"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-79.6248, 43.6777],
+          [-79.6148, 43.6777],
+          [-79.6148, 43.6677],
+          [-79.6248, 43.6677],
+          [-79.6248, 43.6777]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "building": "terminal",
+        "name": "Terminal 3"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-79.6148, 43.6677],
+          [-79.6048, 43.6677],
+          [-79.6048, 43.6577],
+          [-79.6148, 43.6577],
+          [-79.6148, 43.6677]
+        ]]
+      }
+    }
+  ]
+}
