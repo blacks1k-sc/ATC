@@ -8,14 +8,15 @@ interface ControlButtonsProps {
   onStartSystem: () => void;
   onAddAircraft: () => void;
   onSimulateEmergency: () => void;
+  onAircraftGenerated: (aircraft: any) => void;
 }
 
-export default function ControlButtons({ onStartSystem, onAddAircraft, onSimulateEmergency }: ControlButtonsProps) {
+export default function ControlButtons({ onStartSystem, onAddAircraft, onSimulateEmergency, onAircraftGenerated }: ControlButtonsProps) {
   const [showAircraftSelector, setShowAircraftSelector] = useState(false);
 
   const handleAircraftGenerated = (aircraft: any) => {
     console.log('New aircraft generated:', aircraft);
-    // Here you can add the aircraft to the system or handle it as needed
+    onAircraftGenerated(aircraft);
     setShowAircraftSelector(false);
   };
 

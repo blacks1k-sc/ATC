@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: atc_system
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: atc_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./atc-nextjs/database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Event Bus
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Python ATC Brain Service
+  atc-brain:
+    build: ./atc-brain-python
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=atc_system
+      - DB_USER=postgres
+      - DB_PASSWORD=atc_password
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - ATC_BRAIN_HOST=0.0.0.0
+      - ATC_BRAIN_PORT=8000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./atc-brain-python:/app
+    working_dir: /app
+    command: python src/main.py
+
+  # Next.js Frontend (optional - can run locally)
+  # atc-frontend:
+  #   build: ./atc-nextjs
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     - DB_HOST=postgres
+  #     - DB_PORT=5432
+  #     - DB_NAME=atc_system
+  #     - DB_USER=postgres
+  #     - DB_PASSWORD=atc_password
+  #     - REDIS_HOST=redis
+  #     - REDIS_PORT=6379
+  #     - PYTHON_SERVICE_URL=http://atc-brain:8000
+  #   depends_on:
+  #     - postgres
+  #     - redis
+  #     - atc-brain
+
+volumes:
+  postgres_data:
+  redis_data:

@@ -20,6 +20,7 @@ export default function AircraftGenerator({ isOpen, onClose, onAircraftGenerated
   const [selectedAirline, setSelectedAirline] = useState<string>('');
   const [aircraftSearch, setAircraftSearch] = useState<string>('');
   const [airlineSearch, setAirlineSearch] = useState<string>('');
+  const [operationType, setOperationType] = useState<'ARRIVAL' | 'DEPARTURE'>('ARRIVAL');
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
 
@@ -62,6 +63,7 @@ export default function AircraftGenerator({ isOpen, onClose, onAircraftGenerated
         body: JSON.stringify({
           aircraftType: selectedAircraft,
           airline: selectedAirline,
+          operationType: operationType,
         }),
       });
 
@@ -79,6 +81,7 @@ export default function AircraftGenerator({ isOpen, onClose, onAircraftGenerated
       setSelectedAirline('');
       setAircraftSearch('');
       setAirlineSearch('');
+      setOperationType('ARRIVAL');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to generate aircraft');
     } finally {
@@ -118,6 +121,35 @@ export default function AircraftGenerator({ isOpen, onClose, onAircraftGenerated
             {error}
           </div>
         )}
+
+        {/* Operation Type Selection */}
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-3">Operation Type</h3>
+          <div className="flex space-x-4">
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="operationType"
+                value="ARRIVAL"
+                checked={operationType === 'ARRIVAL'}
+                onChange={(e) => setOperationType(e.target.value as 'ARRIVAL' | 'DEPARTURE')}
+                className="mr-2"
+              />
+              <span className="text-gray-700">Arrival (Landing at CYYZ)</span>
+            </label>
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="operationType"
+                value="DEPARTURE"
+                checked={operationType === 'DEPARTURE'}
+                onChange={(e) => setOperationType(e.target.value as 'ARRIVAL' | 'DEPARTURE')}
+                className="mr-2"
+              />
+              <span className="text-gray-700">Departure (Taking off from CYYZ)</span>
+            </label>
+          </div>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Aircraft Selection */}

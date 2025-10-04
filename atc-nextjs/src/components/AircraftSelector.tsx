@@ -32,6 +32,7 @@ export default function AircraftSelector({ isOpen, onClose, onAircraftGenerated 
   const [selectedAirline, setSelectedAirline] = useState<string>('');
   const [aircraftSearch, setAircraftSearch] = useState<string>('');
   const [airlineSearch, setAirlineSearch] = useState<string>('');
+  const [operationType, setOperationType] = useState<'ARRIVAL' | 'DEPARTURE'>('ARRIVAL');
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   const [showAircraftList, setShowAircraftList] = useState<boolean>(false);
@@ -94,6 +95,7 @@ export default function AircraftSelector({ isOpen, onClose, onAircraftGenerated 
         body: JSON.stringify({
           aircraftType: selectedAircraft,
           airline: selectedAirline,
+          operationType: operationType,
         }),
       });
 
@@ -111,6 +113,7 @@ export default function AircraftSelector({ isOpen, onClose, onAircraftGenerated 
       setSelectedAirline('');
       setAircraftSearch('');
       setAirlineSearch('');
+      setOperationType('ARRIVAL');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to generate aircraft');
     } finally {
@@ -177,6 +180,37 @@ export default function AircraftSelector({ isOpen, onClose, onAircraftGenerated 
         )}
 
         <div className="space-y-3">
+          {/* Operation Type Selection */}
+          <div>
+            <label className="block text-sm font-medium text-green-400 mb-2">
+              Operation Type
+            </label>
+            <div className="flex space-x-4">
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  name="operationType"
+                  value="ARRIVAL"
+                  checked={operationType === 'ARRIVAL'}
+                  onChange={(e) => setOperationType(e.target.value as 'ARRIVAL' | 'DEPARTURE')}
+                  className="mr-2 text-green-400"
+                />
+                <span className="text-sm text-gray-300">Arrival</span>
+              </label>
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  name="operationType"
+                  value="DEPARTURE"
+                  checked={operationType === 'DEPARTURE'}
+                  onChange={(e) => setOperationType(e.target.value as 'ARRIVAL' | 'DEPARTURE')}
+                  className="mr-2 text-green-400"
+                />
+                <span className="text-sm text-gray-300">Departure</span>
+              </label>
+            </div>
+          </div>
+
           {/* Aircraft Selection */}
           <div className="relative" ref={aircraftRef}>
             <label className="block text-sm font-medium text-green-400 mb-1">

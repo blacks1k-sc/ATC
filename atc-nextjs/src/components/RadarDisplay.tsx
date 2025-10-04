@@ -9,20 +9,21 @@ interface RadarDisplayProps {
 }
 
 export default function RadarDisplay({ aircraft, emergencyAircraft, emergencyAlert }: RadarDisplayProps) {
-  const radarCircles = [80, 160, 240, 320, 400, 480, 560, 640];
+  // Responsive circle sizes based on percentage of container
+  const radarCircles = [12.5, 25, 37.5, 50, 62.5, 75, 87.5, 100]; // percentages
   const degreeMarks = [
-    { degree: '0', style: { top: '0', left: '50%', transform: 'translateX(-50%) translateY(-15px)' } },
-    { degree: '30', style: { top: '13.4%', right: '13.4%', transform: 'translate(15px,-50%)' } },
-    { degree: '60', style: { top: '50%', right: '0', transform: 'translateY(-50%) translateX(15px)' } },
-    { degree: '90', style: { top: '50%', right: '0', transform: 'translateY(-50%) translateX(15px)' } },
-    { degree: '120', style: { bottom: '13.4%', right: '13.4%', transform: 'translate(15px,50%)' } },
-    { degree: '150', style: { bottom: '0', left: '50%', transform: 'translateX(-50%) translateY(15px)' } },
-    { degree: '180', style: { bottom: '0', left: '50%', transform: 'translateX(-50%) translateY(15px)' } },
-    { degree: '210', style: { bottom: '13.4%', left: '13.4%', transform: 'translate(-15px,50%)' } },
-    { degree: '240', style: { top: '50%', left: '0', transform: 'translateY(-50%) translateX(-15px)' } },
-    { degree: '270', style: { top: '50%', left: '0', transform: 'translateY(-50%) translateX(-15px)' } },
-    { degree: '300', style: { top: '13.4%', left: '13.4%', transform: 'translate(-15px,-50%)' } },
-    { degree: '330', style: { top: '0', left: '50%', transform: 'translateX(-50%) translateY(-15px)' } },
+    { degree: '0', style: { top: '0', left: '50%', transform: 'translateX(-50%) translateY(-2.5%)' } },
+    { degree: '30', style: { top: '13.4%', right: '13.4%', transform: 'translate(2.5%,-50%)' } },
+    { degree: '60', style: { top: '50%', right: '0', transform: 'translateY(-50%) translateX(2.5%)' } },
+    { degree: '90', style: { top: '50%', right: '0', transform: 'translateY(-50%) translateX(2.5%)' } },
+    { degree: '120', style: { bottom: '13.4%', right: '13.4%', transform: 'translate(2.5%,50%)' } },
+    { degree: '150', style: { bottom: '0', left: '50%', transform: 'translateX(-50%) translateY(2.5%)' } },
+    { degree: '180', style: { bottom: '0', left: '50%', transform: 'translateX(-50%) translateY(2.5%)' } },
+    { degree: '210', style: { bottom: '13.4%', left: '13.4%', transform: 'translate(-2.5%,50%)' } },
+    { degree: '240', style: { top: '50%', left: '0', transform: 'translateY(-50%) translateX(-2.5%)' } },
+    { degree: '270', style: { top: '50%', left: '0', transform: 'translateY(-50%) translateX(-2.5%)' } },
+    { degree: '300', style: { top: '13.4%', left: '13.4%', transform: 'translate(-2.5%,-50%)' } },
+    { degree: '330', style: { top: '0', left: '50%', transform: 'translateX(-50%) translateY(-2.5%)' } },
   ];
 
   return (
@@ -32,7 +33,7 @@ export default function RadarDisplay({ aircraft, emergencyAircraft, emergencyAle
           <div
             key={index}
             className="radar-circle"
-            style={{ width: `${size}px`, height: `${size}px` }}
+            style={{ '--circle-size': size } as React.CSSProperties}
           />
         ))}
       </div>

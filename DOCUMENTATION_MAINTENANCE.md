@@ -155,6 +155,10 @@ The project has a four-level documentation system:
 - ✅ **Updated data-pipeline/README.md** with API Ninjas integration
 - ✅ **Added new source modules** (apininjas.py, derive.py) to documentation
 - ✅ **Updated build process** documentation for new API-based workflow
+- ✅ **Added Python ATC Brain microservice** integration
+- ✅ **Updated database schema** with waypoints, procedures, gates, taxiways
+- ✅ **Added SID/STAR controllers** for waypoint-based navigation
+- ✅ **Created comprehensive setup guide** for microservice architecture
 
 ### **Future Maintenance**
 - 🔄 **Monitor for changes** and update docs accordingly

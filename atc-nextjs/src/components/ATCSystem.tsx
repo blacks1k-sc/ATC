@@ -221,18 +221,68 @@ export default function ATCSystem() {
     }));
   }, []);
 
-  const startSystem = useCallback(() => {
+  const startSystem = useCallback(async () => {
     setSystemActive(true);
-    // Seed sample stage logs for visual verification with staggered timestamps
-    setTimeout(() => addStageLog('entryExit', 'departure', { flight: 'AAL78', type: 'B737', text: 'requesting SID clearance' }), 0);
-    setTimeout(() => addStageLog('entryExit', 'arrival', { flight: 'QFA12', type: 'A388', text: 'entering sector, FL370' }), 10);
-    setTimeout(() => addStageLog('enroute', 'departure', { flight: 'DAL213', type: 'A321', text: 'climbing to FL350 via J65' }), 20);
-    setTimeout(() => addStageLog('enroute', 'arrival', { flight: 'UAL267', type: 'A320', text: 'descend via ANJLL6' }), 30);
-    setTimeout(() => addStageLog('seq', 'departure', { flight: 'ASA797', type: 'B737', text: 'line-up sequence RWY 25L' }), 40);
-    setTimeout(() => addStageLog('seq', 'arrival', { flight: 'UAL788', type: 'B737', text: 'on vectors for ILS 25L' }), 50);
-    setTimeout(() => addStageLog('runway', 'arrival', { flight: 'UAL891', type: 'B738', text: 'on final for 24L' }), 60);
-    setTimeout(() => addStageLog('groundMove', 'departure', { flight: 'JBU890', type: 'A321', text: 'taxi A, B to 25L, hold short' }), 70);
-    setTimeout(() => addStageLog('gate', 'arrival', { flight: 'ACA551', type: 'A220', text: 'arrived at GATE B15' }), 80);
+    
+    // Load real aircraft events from database instead of hardcoded data
+    try {
+      const response = await fetch('/api/events?limit=9');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.events) {
+          console.log('Loaded 9 initial events');
+          
+          // Process real aircraft events and add them to stage logs
+          data.events.forEach((event: any, index: number) => {
+            const callsign = event.aircraft?.callsign || event.callsign;
+            const aircraftType = event.aircraft?.aircraft_type?.icao_type || 'UNKNOWN';
+            const operationType = event.details?.operation_type || 'ARRIVAL';
+            const flightPhase = event.details?.flight_phase || 'ENROUTE';
+            
+            // Map flight phases to stage categories
+            let stage = 'enroute';
+            let kind: 'departure' | 'arrival' = operationType === 'ARRIVAL' ? 'arrival' : 'departure';
+            let text = event.message;
+            
+            // Determine stage based on flight phase and operation type
+            if (flightPhase === 'SPAWNING' || flightPhase === 'DEPARTURE') {
+              stage = 'entryExit';
+            } else if (flightPhase === 'ENROUTE') {
+              stage = 'enroute';
+            } else if (flightPhase === 'APPROACH') {
+              stage = 'seq';
+            } else if (flightPhase === 'FINAL' || flightPhase === 'LANDING') {
+              stage = 'runway';
+            } else if (flightPhase === 'TAXI') {
+              stage = 'groundMove';
+            } else if (flightPhase === 'GATE') {
+              stage = 'gate';
+            }
+            
+            // Add stage log with staggered timing
+            setTimeout(() => {
+              addStageLog(stage, kind, { 
+                flight: callsign, 
+                type: aircraftType, 
+                text: text 
+              });
+            }, index * 10);
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error loading real aircraft events:', error);
+      // Fallback to hardcoded data if database fails
+      setTimeout(() => addStageLog('entryExit', 'departure', { flight: 'AAL78', type: 'B737', text: 'requesting SID clearance' }), 0);
+      setTimeout(() => addStageLog('entryExit', 'arrival', { flight: 'QFA12', type: 'A388', text: 'entering sector, FL370' }), 10);
+      setTimeout(() => addStageLog('enroute', 'departure', { flight: 'DAL213', type: 'A321', text: 'climbing to FL350 via J65' }), 20);
+      setTimeout(() => addStageLog('enroute', 'arrival', { flight: 'UAL267', type: 'A320', text: 'descend via ANJLL6' }), 30);
+      setTimeout(() => addStageLog('seq', 'departure', { flight: 'ASA797', type: 'B737', text: 'line-up sequence RWY 25L' }), 40);
+      setTimeout(() => addStageLog('seq', 'arrival', { flight: 'UAL788', type: 'B737', text: 'on vectors for ILS 25L' }), 50);
+      setTimeout(() => addStageLog('runway', 'arrival', { flight: 'UAL891', type: 'B738', text: 'on final for 24L' }), 60);
+      setTimeout(() => addStageLog('groundMove', 'departure', { flight: 'JBU890', type: 'A321', text: 'taxi A, B to 25L, hold short' }), 70);
+      setTimeout(() => addStageLog('gate', 'arrival', { flight: 'ACA551', type: 'A220', text: 'arrived at GATE B15' }), 80);
+    }
   }, [addStageLog]);
 
   const addAircraft = useCallback(() => {
@@ -270,6 +320,43 @@ export default function ATCSystem() {
     setFlightStrips(prev => prev.filter(strip => strip.id !== 'swa1234'));
   }, []);
 
+  const handleAircraftGenerated = useCallback((aircraft: any) => {
+    console.log('New aircraft generated:', aircraft);
+    
+    // Extract aircraft information
+    const callsign = aircraft.callsign;
+    const aircraftType = aircraft.aircraft_type?.icao_type || 'UNKNOWN';
+    const operationType = aircraft.flight_plan?.operation_type || 'ARRIVAL';
+    const flightPhase = aircraft.flight_plan?.flight_phase || 'SPAWNING';
+    
+    // Map flight phases to stage categories
+    let stage = 'enroute';
+    let kind: 'departure' | 'arrival' = operationType === 'ARRIVAL' ? 'arrival' : 'departure';
+    let text = `Aircraft ${callsign} (${aircraftType}) created for ${aircraft.airline?.name || 'Unknown Airline'}`;
+    
+    // Determine stage based on flight phase and operation type
+    if (flightPhase === 'SPAWNING' || flightPhase === 'DEPARTURE') {
+      stage = 'entryExit';
+    } else if (flightPhase === 'ENROUTE') {
+      stage = 'enroute';
+    } else if (flightPhase === 'APPROACH') {
+      stage = 'seq';
+    } else if (flightPhase === 'FINAL' || flightPhase === 'LANDING') {
+      stage = 'runway';
+    } else if (flightPhase === 'TAXI') {
+      stage = 'groundMove';
+    } else if (flightPhase === 'GATE') {
+      stage = 'gate';
+    }
+    
+    // Add stage log
+    addStageLog(stage, kind, { 
+      flight: callsign, 
+      type: aircraftType, 
+      text: text 
+    });
+  }, [addStageLog]);
+
   const handleTabChange = useCallback((tabId: string) => {
     setActiveTab(tabId);
   }, []);
@@ -280,6 +367,7 @@ export default function ATCSystem() {
         onStartSystem={startSystem}
         onAddAircraft={addAircraft}
         onSimulateEmergency={simulateEmergency}
+        onAircraftGenerated={handleAircraftGenerated}
       />
 
       <Header

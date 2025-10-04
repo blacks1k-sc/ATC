@@ -2,17 +2,20 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { MapContainer, TileLayer, GeoJSON } from 'react-leaflet';
-import L, { GeoJSON as LGeoJSON, Layer, PathOptions, LatLng } from 'leaflet';
+import L from 'leaflet';
 import type { Feature, FeatureCollection, Geometry, GeoJsonObject } from 'geojson';
 import 'leaflet/dist/leaflet.css';
 
 // Fix for default markers in react-leaflet
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-});
+if (typeof window !== 'undefined') {
+  const LIcon = L as any;
+  delete LIcon.Icon.Default.prototype._getIconUrl;
+  LIcon.Icon.Default.mergeOptions({
+    iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+  });
+}
 
 import { calculateBoundsFromRunways } from '../utils/coordinateUtils';
 
@@ -34,7 +37,7 @@ const tooltipHTML = (p: Record<string, any>) => {
 
 const styleFor =
   (selectedId: string | null) =>
-  (f: AnyFeat): PathOptions => {
+  (f: AnyFeat): any => {
     const t = f.properties?.aeroway;
     const id = featureId(f);
     const sel = selectedId && id === selectedId;
@@ -77,7 +80,7 @@ export default function GroundMapYYZ({ airport = 'CYYZ' }: GroundMapYYZProps) {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [mapCenter, setMapCenter] = useState<[number, number]>([43.675, -79.63]); // Default fallback
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const geoRef = useRef<LGeoJSON | null>(null);
+  const geoRef = useRef<any>(null);
 
   // Fetch GeoJSON from our API
   useEffect(() => {
@@ -219,7 +222,7 @@ export default function GroundMapYYZ({ airport = 'CYYZ' }: GroundMapYYZProps) {
               data={{
                 type: 'FeatureCollection',
                 features: (data as any).features.filter((f: AnyFeat) => f.properties?.aeroway === 'apron')
-              }}
+              } as any}
               style={() => ({ 
                 color: '#0b2b2b', 
                 weight: 2, 
@@ -227,7 +230,7 @@ export default function GroundMapYYZ({ airport = 'CYYZ' }: GroundMapYYZProps) {
                 fillOpacity: 0.5, 
                 opacity: 0.7 
               })}
-              interactive={false}
+              {...({ interactive: false } as any)}
             />
             
             {/* Interactive features (everything except aprons) */}
@@ -235,10 +238,10 @@ export default function GroundMapYYZ({ airport = 'CYYZ' }: GroundMapYYZProps) {
               {...({ ref: geoRef, data: {
                 type: 'FeatureCollection',
                 features: (data as any).features.filter((f: AnyFeat) => f.properties?.aeroway !== 'apron')
-              }, style: styleFor(selectedId) } as any)}
-              pointToLayer={(feature: AnyFeat, latlng: LatLng) => {
+              } as any, style: styleFor(selectedId) } as any)}
+              pointToLayer={(feature: AnyFeat, latlng: any) => {
                 if (feature.properties?.aeroway === 'gate') {
-                  return L.circleMarker(latlng, {
+                  return (L as any).circleMarker(latlng, {
                     radius: 3.5,
                     color: '#111',
                     weight: 1,
@@ -247,9 +250,9 @@ export default function GroundMapYYZ({ airport = 'CYYZ' }: GroundMapYYZProps) {
                   });
                 }
                 // hide any other points safely
-                return L.circleMarker(latlng, { radius: 0, opacity: 0, fillOpacity: 0 });
+                return (L as any).circleMarker(latlng, { radius: 0, opacity: 0, fillOpacity: 0 });
               }}
-              onEachFeature={(feature: AnyFeat, layer: Layer) => {
+              onEachFeature={(feature: AnyFeat, layer: any) => {
                 layer.on('mouseover', (e: any) => {
                   const l = e.target;
                   const html = tooltipHTML(feature.properties || {});
@@ -262,7 +265,7 @@ export default function GroundMapYYZ({ airport = 'CYYZ' }: GroundMapYYZProps) {
 
                   // bump style on hover
                   const base = styleFor(selectedId)(feature);
-                  const hover: PathOptions = { ...base, weight: (base.weight || 1) + 1, color: '#ffffff' };
+                  const hover: any = { ...base, weight: (base.weight || 1) + 1, color: '#ffffff' };
                   // setStyle is only for Path layers
                   (l as any).setStyle?.(hover);
                   (l as any).bringToFront?.();

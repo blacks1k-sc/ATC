@@ -33,7 +33,7 @@ interface SSEEvent {
 export default function Logs() {
   const [logs, setLogs] = useState<AtcLogEntry[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeFilters, setActiveFilters] = useState<Set<LogDirection>>(new Set(['TX', 'RX', 'CPDLC', 'XFER', 'SYS']));
+  const [activeFilters, setActiveFilters] = useState<Set<LogDirection>>(new Set(['TX', 'RX', 'CPDLC', 'XFER', 'SYS'] as LogDirection[]));
   const [arrivalFilter, setArrivalFilter] = useState<'all' | 'arrival' | 'departure'>('all');
   const [sectorFilter, setSectorFilter] = useState<Set<string>>(new Set(['TWR', 'GND', 'APP', 'CTR']));
   const [loading, setLoading] = useState(true);

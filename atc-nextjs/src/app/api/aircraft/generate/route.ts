@@ -12,6 +12,7 @@ import { eventBus } from '@/lib/eventBus';
 interface GenerateAircraftRequest {
   aircraftType: string;
   airline: string;
+  operationType?: 'ARRIVAL' | 'DEPARTURE';
 }
 
 // Generate random ICAO24 address (6-character hex)
@@ -36,18 +37,33 @@ function generateRegistration(airlineICAO: string): string {
   return `${airlineICAO}${numbers}`;
 }
 
-// Generate random position around Toronto
-function generatePosition(): { lat: number; lon: number; altitude_ft: number; heading: number; speed_kts: number } {
+// Generate position based on operation type
+function generatePosition(operationType: 'ARRIVAL' | 'DEPARTURE'): { lat: number; lon: number; altitude_ft: number; heading: number; speed_kts: number } {
   const baseLat = 43.6777;
   const baseLon = -79.6248;
   
-  return {
-    lat: baseLat + (Math.random() - 0.5) * 0.2, // ±0.1 degree
-    lon: baseLon + (Math.random() - 0.5) * 0.2,
-    altitude_ft: Math.floor(Math.random() * 40000) + 1000, // 1000-41000 ft
-    heading: Math.floor(Math.random() * 360),
-    speed_kts: Math.floor(Math.random() * 400) + 150 // 150-550 kts
-  };
+  if (operationType === 'ARRIVAL') {
+    // Arrivals: Start outside the airport, flying towards it
+    const distance = 0.3 + Math.random() * 0.2; // 0.3-0.5 degrees away
+    const angle = Math.random() * 2 * Math.PI; // Random direction
+    
+    return {
+      lat: baseLat + Math.cos(angle) * distance,
+      lon: baseLon + Math.sin(angle) * distance,
+      altitude_ft: Math.floor(Math.random() * 20000) + 10000, // 10,000-30,000 ft
+      heading: Math.floor(Math.random() * 360),
+      speed_kts: Math.floor(Math.random() * 200) + 300 // 300-500 kts
+    };
+  } else {
+    // Departures: Start at the airport
+    return {
+      lat: baseLat + (Math.random() - 0.5) * 0.01, // Very close to airport
+      lon: baseLon + (Math.random() - 0.5) * 0.01,
+      altitude_ft: 0, // On ground
+      heading: Math.floor(Math.random() * 360),
+      speed_kts: 0 // Stationary
+    };
+  }
 }
 
 // Generate squawk code
@@ -57,7 +73,7 @@ function generateSquawkCode(): string {
 
 export async function POST(request: NextRequest) {
   try {
-    const { aircraftType, airline }: GenerateAircraftRequest = await request.json();
+    const { aircraftType, airline, operationType = 'ARRIVAL' }: GenerateAircraftRequest = await request.json();
 
     if (!aircraftType || !airline) {
       return NextResponse.json(
@@ -122,7 +138,7 @@ export async function POST(request: NextRequest) {
         } while (true);
 
         // Generate position and flight data
-        const position = generatePosition();
+        const position = generatePosition(operationType);
         const squawkCode = generateSquawkCode();
 
         // Create aircraft instance
@@ -135,16 +151,22 @@ export async function POST(request: NextRequest) {
           position,
           status: 'active',
           squawk_code: squawkCode,
+          flight_plan: {
+            operation_type: operationType,
+            flight_phase: operationType === 'ARRIVAL' ? 'ARRIVAL' : 'SPAWNING',
+          },
         });
 
         // Create event
         const event = await eventRepo.create({
           level: 'INFO',
           type: 'aircraft.created',
-          message: `Aircraft ${callsign} (${selectedAircraftType.icao_type}) created for ${selectedAirline.name}`,
+          message: `Aircraft ${callsign} (${selectedAircraftType.icao_type}) created for ${selectedAirline.name} - ${operationType}`,
           details: {
             aircraft_type: selectedAircraftType.icao_type,
             airline: selectedAirline.name,
+            operation_type: operationType,
+            flight_phase: operationType === 'ARRIVAL' ? 'ARRIVAL' : 'SPAWNING',
             position,
             squawk_code: squawkCode,
           },

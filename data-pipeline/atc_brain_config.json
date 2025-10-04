@@ -1,0 +1,44 @@
+{
+  "database": {
+    "host": "localhost",
+    "port": 5432,
+    "name": "atc_system",
+    "user": "postgres",
+    "password": "password",
+    "pool_size": 20
+  },
+  "redis": {
+    "host": "localhost",
+    "port": 6379,
+    "password": null,
+    "db": 0
+  },
+  "airspace": {
+    "center_lat": 43.6532,
+    "center_lon": -79.3832,
+    "radius_nm": 50.0,
+    "entry_altitude_ft": 3000.0,
+    "exit_altitude_ft": 35000.0
+  },
+  "airport": {
+    "icao": "CYYZ",
+    "name": "Toronto Pearson International Airport",
+    "lat": 43.6532,
+    "lon": -79.3832,
+    "elevation_ft": 569.0
+  },
+  "simulation": {
+    "simulation_speed": 1.0,
+    "max_aircraft": 100,
+    "spawn_interval": 30.0,
+    "cleanup_interval": 30.0,
+    "archive_interval": 60.0,
+    "tick_interval": 1.0
+  },
+  "logging": {
+    "level": "INFO",
+    "file": "atc_brain.log",
+    "max_size": 10485760,
+    "backup_count": 5
+  }
+}

@@ -142,3 +142,107 @@ BEGIN
     RETURN airline_icao || numbers;
 END;
 $$ LANGUAGE plpgsql;
+
+-- NEW: Waypoints table for navigation
+CREATE TABLE IF NOT EXISTS waypoints (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(10) UNIQUE NOT NULL,
+    lat DECIMAL(10, 7) NOT NULL,
+    lon DECIMAL(11, 7) NOT NULL,
+    description TEXT,
+    type VARCHAR(20), -- 'ARRIVAL', 'DEPARTURE', 'ENROUTE', 'IAF', 'FAF'
+    airport_icao VARCHAR(4),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- NEW: Procedures table (SIDs/STARs)
+CREATE TABLE IF NOT EXISTS procedures (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    type VARCHAR(10) NOT NULL, -- 'SID' or 'STAR'
+    runway_id VARCHAR(10),
+    airport_icao VARCHAR(4) NOT NULL,
+    waypoint_sequence JSONB NOT NULL, -- Array of waypoint names in order
+    altitude_restrictions JSONB, -- Altitude constraints at each waypoint
+    speed_restrictions JSONB, -- Speed constraints at each waypoint
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(name, airport_icao)
+);
+
+-- NEW: Gates table for departures
+CREATE TABLE IF NOT EXISTS gates (
+    id SERIAL PRIMARY KEY,
+    gate_number VARCHAR(10) UNIQUE NOT NULL,
+    terminal VARCHAR(5),
+    lat DECIMAL(10, 7) NOT NULL,
+    lon DECIMAL(11, 7) NOT NULL,
+    airport_icao VARCHAR(4) NOT NULL,
+    status VARCHAR(20) DEFAULT 'available', -- 'available', 'occupied'
+    occupied_by_aircraft_id INTEGER REFERENCES aircraft_instances(id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- NEW: Taxiways table for ground movement
+CREATE TABLE IF NOT EXISTS taxiways (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(10) NOT NULL,
+    from_point VARCHAR(50), -- Gate, runway, or intersection
+    to_point VARCHAR(50),
+    path JSONB, -- Array of lat/lon coordinates
+    length_meters DECIMAL(10, 2),
+    airport_icao VARCHAR(4) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- NEW: Aircraft history for archived flights
+CREATE TABLE IF NOT EXISTS aircraft_history (
+    id SERIAL PRIMARY KEY,
+    original_aircraft_id INTEGER, -- Reference to original aircraft_instances.id
+    icao24 VARCHAR(6) NOT NULL,
+    registration VARCHAR(10) NOT NULL,
+    callsign VARCHAR(10) NOT NULL,
+    aircraft_type_id INTEGER,
+    airline_id INTEGER,
+    operation_type VARCHAR(10), -- 'ARRIVAL' or 'DEPARTURE'
+    spawn_time TIMESTAMP,
+    completion_time TIMESTAMP,
+    spawn_location JSONB, -- Initial position
+    exit_location JSONB, -- Final position
+    assigned_procedure VARCHAR(50),
+    assigned_runway VARCHAR(10),
+    assigned_gate VARCHAR(10),
+    total_flight_time_seconds INTEGER,
+    total_events_logged INTEGER,
+    archived_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- NEW: Runway occupancy tracking
+CREATE TABLE IF NOT EXISTS runway_occupancy (
+    id SERIAL PRIMARY KEY,
+    runway_id VARCHAR(10) NOT NULL,
+    aircraft_id INTEGER REFERENCES aircraft_instances(id),
+    occupancy_type VARCHAR(20), -- 'landing', 'takeoff', 'crossing'
+    occupied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    cleared_at TIMESTAMP,
+    is_occupied BOOLEAN DEFAULT TRUE
+);
+
+-- NEW: Add comprehensive fields to aircraft_instances
+ALTER TABLE aircraft_instances ADD COLUMN IF NOT EXISTS
+    assigned_procedure_id INTEGER REFERENCES procedures(id),
+    current_waypoint_index INTEGER DEFAULT 0,
+    next_waypoint_name VARCHAR(10),
+    operation_type VARCHAR(10) DEFAULT 'ARRIVAL', -- 'ARRIVAL' or 'DEPARTURE'
+    spawn_gate VARCHAR(10), -- For departures: which gate they start at
+    assigned_taxiway_route JSONB, -- Planned taxi route
+    go_around_count INTEGER DEFAULT 0, -- Track go-arounds
+    cleared_altitude INTEGER, -- ATC cleared altitude
+    cleared_speed INTEGER, -- ATC cleared speed
+    cleared_heading INTEGER; -- ATC cleared heading
+
+-- Index for performance
+CREATE INDEX IF NOT EXISTS idx_aircraft_operation_type ON aircraft_instances(operation_type);
+CREATE INDEX IF NOT EXISTS idx_gates_status ON gates(status);
+CREATE INDEX IF NOT EXISTS idx_runway_occupancy ON runway_occupancy(runway_id, is_occupied);
+CREATE INDEX IF NOT EXISTS idx_aircraft_history_operation ON aircraft_history(operation_type);
