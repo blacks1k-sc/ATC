@@ -44,6 +44,14 @@ CREATE TABLE IF NOT EXISTS aircraft_instances (
     status VARCHAR(20) DEFAULT 'active',
     squawk_code VARCHAR(4),
     flight_plan JSONB,
+    controller VARCHAR(20) DEFAULT 'ENGINE',
+    phase VARCHAR(20) DEFAULT 'CRUISE',
+    last_event_fired VARCHAR(100),
+    target_speed_kts INTEGER,
+    target_heading_deg INTEGER,
+    target_altitude_ft INTEGER,
+    vertical_speed_fpm INTEGER,
+    distance_to_airport_nm DECIMAL(8,2),
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );

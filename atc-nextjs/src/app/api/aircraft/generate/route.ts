@@ -36,18 +36,64 @@ function generateRegistration(airlineICAO: string): string {
   return `${airlineICAO}${numbers}`;
 }
 
-// Generate random position around Toronto
-function generatePosition(): { lat: number; lon: number; altitude_ft: number; heading: number; speed_kts: number } {
+// Generate random position around Toronto (arrivals start further out)
+function generatePosition(flightType: string = 'ARRIVAL'): { lat: number; lon: number; altitude_ft: number; heading: number; speed_kts: number } {
   const baseLat = 43.6777;
   const baseLon = -79.6248;
   
-  return {
-    lat: baseLat + (Math.random() - 0.5) * 0.2, // ±0.1 degree
-    lon: baseLon + (Math.random() - 0.5) * 0.2,
-    altitude_ft: Math.floor(Math.random() * 40000) + 1000, // 1000-41000 ft
-    heading: Math.floor(Math.random() * 360),
-    speed_kts: Math.floor(Math.random() * 400) + 150 // 150-550 kts
-  };
+  if (flightType === 'ARRIVAL') {
+    // Start arrivals 30-50 NM away at cruise altitude
+    const distance_nm = Math.random() * 20 + 30; // 30-50 NM
+    const bearing = Math.random() * 360; // Random direction
+    const bearing_rad = (bearing * Math.PI) / 180;
+    
+    // Convert NM to degrees (approximately)
+    const lat = baseLat + (distance_nm / 60) * Math.cos(bearing_rad);
+    const lon = baseLon + (distance_nm / (60 * Math.cos((baseLat * Math.PI) / 180))) * Math.sin(bearing_rad);
+    
+    return {
+      lat: lat,
+      lon: lon,
+      altitude_ft: Math.floor(Math.random() * 10000) + 15000, // 15000-25000 ft
+      heading: Math.floor(Math.random() * 360),
+      speed_kts: Math.floor(Math.random() * 100) + 250 // 250-350 kts
+    };
+  } else {
+    // Departures start at airport
+    return {
+      lat: baseLat + (Math.random() - 0.5) * 0.01,
+      lon: baseLon + (Math.random() - 0.5) * 0.01,
+      altitude_ft: Math.floor(Math.random() * 1000) + 500, // 500-1500 ft
+      heading: Math.floor(Math.random() * 360),
+      speed_kts: Math.floor(Math.random() * 50) + 150 // 150-200 kts
+    };
+  }
+}
+
+// Generate flight plan
+function generateFlightPlan(flightType: string, airline: string): any {
+  const origins = ['KJFK', 'KORD', 'KLAX', 'LFPG', 'EGLL', 'OMDB', 'RJTT', 'YSSY'];
+  const destinations = ['CYYZ']; // Always Toronto for now
+  const runways = ['05L', '05R', '23L', '23R'];
+  const entryWaypoints = ['LINNG', 'BOXUM', 'PEDGA', 'DUVNO', 'IMEBA', 'NUBER'];
+  
+  if (flightType === 'ARRIVAL') {
+    return {
+      type: 'ARRIVAL',
+      origin: origins[Math.floor(Math.random() * origins.length)],
+      destination: 'CYYZ',
+      entry_waypoint: entryWaypoints[Math.floor(Math.random() * entryWaypoints.length)],
+      runway: runways[Math.floor(Math.random() * runways.length)]
+    };
+  } else {
+    return {
+      type: 'DEPARTURE',
+      origin: 'CYYZ',
+      destination: origins[Math.floor(Math.random() * origins.length)],
+      runway: runways[Math.floor(Math.random() * runways.length)],
+      sid: 'VECTOR' // Simplified
+    };
+  }
 }
 
 // Generate squawk code
@@ -121,9 +167,13 @@ export async function POST(request: NextRequest) {
           }
         } while (true);
 
+        // Force ARRIVAL for current development phase
+        const flightType = 'ARRIVAL';
+        
         // Generate position and flight data
-        const position = generatePosition();
+        const position = generatePosition(flightType);
         const squawkCode = generateSquawkCode();
+        const flightPlan = generateFlightPlan(flightType, airlineName);
 
         // Create aircraft instance
         const aircraft = await aircraftRepo.create({
@@ -135,21 +185,26 @@ export async function POST(request: NextRequest) {
           position,
           status: 'active',
           squawk_code: squawkCode,
+          flight_plan: flightPlan,
+          flight_type: flightType,
+          controller: 'ENGINE'
         });
 
         // Create event
         const event = await eventRepo.create({
           level: 'INFO',
           type: 'aircraft.created',
-          message: `Aircraft ${callsign} (${selectedAircraftType.icao_type}) created for ${selectedAirline.name}`,
+          message: `Aircraft ${callsign} (${selectedAircraftType.icao_type}) ${flightType} created for ${selectedAirline.name}`,
           details: {
             aircraft_type: selectedAircraftType.icao_type,
             airline: selectedAirline.name,
+            flight_type: flightType,
             position,
             squawk_code: squawkCode,
+            flight_plan: flightPlan,
           },
           aircraft_id: aircraft.id,
-          sector: 'TWR',
+          sector: flightType === 'ARRIVAL' ? 'APP' : 'TWR',
           direction: 'SYS',
         });
 

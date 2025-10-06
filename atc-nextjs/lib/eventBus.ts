@@ -10,8 +10,9 @@ const REDIS_CONFIG = {
   maxRetriesPerRequest: 3,
 };
 
-// Redis connection (optional - will be null if Redis not available)
+// Redis connections (separate for publishing and subscribing)
 export const redis = process.env.SKIP_REDIS === 'true' ? null : new Redis(REDIS_CONFIG);
+export const redisPublisher = process.env.SKIP_REDIS === 'true' ? null : new Redis(REDIS_CONFIG);
 
 // Event bus configuration
 export const EVENT_CHANNEL = process.env.EVENT_CHANNEL || 'atc:events';
@@ -36,10 +37,12 @@ export interface EventBusMessage {
 
 export class EventBus {
   private redis: Redis | null;
+  private redisPublisher: Redis | null;
   private subscribers: Map<string, Set<(message: EventBusMessage) => void>> = new Map();
 
-  constructor(redis: Redis | null) {
+  constructor(redis: Redis | null, redisPublisher: Redis | null) {
     this.redis = redis;
+    this.redisPublisher = redisPublisher;
     if (this.redis) {
       this.setupSubscriber();
     }
@@ -79,8 +82,8 @@ export class EventBus {
   }
 
   async publish(type: EventType, data: any, event?: Event): Promise<void> {
-    if (!this.redis) {
-      console.log('Redis not available, event not published:', { type, data });
+    if (!this.redisPublisher) {
+      console.log('Redis publisher not available, event not published:', { type, data });
       return;
     }
 
@@ -92,7 +95,7 @@ export class EventBus {
         event,
       };
 
-      await this.redis.publish(EVENT_CHANNEL, JSON.stringify(message));
+      await this.redisPublisher.publish(EVENT_CHANNEL, JSON.stringify(message));
       console.log(`📤 Published event: ${type}`);
     } catch (error) {
       console.error('Failed to publish event:', error);
@@ -155,7 +158,7 @@ export class EventBus {
 }
 
 // Global event bus instance
-export const eventBus = new EventBus(redis);
+export const eventBus = new EventBus(redis, redisPublisher);
 
 // Helper functions for common event publishing patterns
 export async function publishAircraftEvent(
@@ -177,13 +180,14 @@ export async function publishSystemEvent(
 
 // Health check for Redis connection
 export async function checkRedisHealth(): Promise<boolean> {
-  if (!redis) {
+  if (!redis || !redisPublisher) {
     console.log('Redis connection skipped (SKIP_REDIS=true)');
     return false;
   }
   
   try {
     await redis.ping();
+    await redisPublisher.ping();
     return true;
   } catch (error) {
     console.error('Redis health check failed:', error);

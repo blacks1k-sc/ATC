@@ -190,12 +190,14 @@ export class AircraftInstanceRepository {
     status?: string;
     squawk_code?: string;
     flight_plan?: any;
+    flight_type?: string;
+    controller?: string;
   }): Promise<AircraftInstance> {
     const result = await this.client.query(`
       INSERT INTO aircraft_instances (
         icao24, registration, callsign, aircraft_type_id, airline_id,
-        position, status, squawk_code, flight_plan
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        position, status, squawk_code, flight_plan, flight_type, controller
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
       RETURNING *
     `, [
       data.icao24,
@@ -206,7 +208,9 @@ export class AircraftInstanceRepository {
       JSON.stringify(data.position),
       data.status || 'active',
       data.squawk_code,
-      data.flight_plan ? JSON.stringify(data.flight_plan) : null
+      data.flight_plan ? JSON.stringify(data.flight_plan) : null,
+      data.flight_type || 'ARRIVAL',
+      data.controller || 'ENGINE'
     ]);
     return result.rows[0];
   }
@@ -298,6 +302,15 @@ export class AircraftInstanceRepository {
       status: row.status,
       squawk_code: row.squawk_code,
       flight_plan: row.flight_plan,
+      flight_type: row.flight_type,
+      controller: row.controller,
+      phase: row.phase,
+      last_event_fired: row.last_event_fired,
+      target_speed_kts: row.target_speed_kts,
+      target_heading_deg: row.target_heading_deg,
+      target_altitude_ft: row.target_altitude_ft,
+      vertical_speed_fpm: row.vertical_speed_fpm,
+      distance_to_airport_nm: row.distance_to_airport_nm,
       created_at: row.created_at,
       updated_at: row.updated_at,
       aircraft_type: row.icao_type ? {
