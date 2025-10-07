@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { ControllerTab, SystemStatus } from '@/types/atc';
+import Link from 'next/link';
+import { SystemStatus } from '@/types/atc';
 
 interface HeaderProps {
   systemStatus: SystemStatus;
@@ -10,22 +10,6 @@ interface HeaderProps {
 }
 
 export default function Header({ systemStatus, currentTime, onTabChange }: HeaderProps) {
-  const [tabs, setTabs] = useState<ControllerTab[]>([
-    { id: 'tower', name: 'TOWER', active: true },
-    { id: 'ground', name: 'GROUND', active: false },
-    { id: 'approach', name: 'APPROACH', active: false },
-    { id: 'center', name: 'CENTER', active: false },
-    { id: 'coordinator', name: 'COORD', active: false },
-  ]);
-
-  const handleTabClick = (tabId: string) => {
-    setTabs(tabs.map(tab => ({
-      ...tab,
-      active: tab.id === tabId
-    })));
-    onTabChange(tabId);
-  };
-
   const getStatusClass = (status: string) => {
     switch (status) {
       case 'active': return 'active';
@@ -40,15 +24,7 @@ export default function Header({ systemStatus, currentTime, onTabChange }: Heade
       <div>
         <h1>AI ATC OPERATIONS CENTER - LAX</h1>
         <div className="controller-tabs">
-          {tabs.map(tab => (
-            <div
-              key={tab.id}
-              className={`tab ${tab.active ? 'active' : ''}`}
-              onClick={() => handleTabClick(tab.id)}
-            >
-              {tab.name}
-            </div>
-          ))}
+          {/* Navigation moved to ControlButtons component */}
         </div>
       </div>
       <div className="system-status">

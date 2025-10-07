@@ -25,20 +25,20 @@ export default function ControlButtons({ onStartSystem, onAddAircraft, onSimulat
         <button className="control-btn" onClick={onStartSystem}>
           START SYSTEM
         </button>
-        <button className="control-btn" onClick={onAddAircraft}>
-          ADD AIRCRAFT
-        </button>
         <button className="control-btn" onClick={() => setShowAircraftSelector(true)}>
           GENERATE AIRCRAFT
         </button>
         <button className="control-btn emergency" onClick={onSimulateEmergency}>
           SIMULATE EMERGENCY
         </button>
-        <Link href="/logs" className="control-btn">
-          LOGS
-        </Link>
         <Link href="/ground" className="control-btn">
           GROUND OPS
+        </Link>
+        <Link href="/engine-ops" className="control-btn">
+          ENGINE OPS
+        </Link>
+        <Link href="/logs" className="control-btn">
+          LOGS
         </Link>
       </div>
 

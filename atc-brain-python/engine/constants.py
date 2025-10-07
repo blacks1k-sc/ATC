@@ -32,11 +32,36 @@ GLIDESLOPE_SLOPE = math.tan(GLIDESLOPE_ANGLE_RAD)  # ~0.0524
 # ========== Physical Constants ==========
 G = 9.80665  # m/s² - standard gravity
 
-# ========== Distance Thresholds ==========
+# ========== Distance Thresholds (Legacy - Use airspace sectors instead) ==========
 # Nautical miles from airport
 ENTRY_ZONE_THRESHOLD_NM = 30.0  # Enter ATC control zone
 HANDOFF_READY_THRESHOLD_NM = 20.0  # Ready for approach handoff
 TOUCHDOWN_ALTITUDE_FT = 50.0  # AGL - consider touchdown below this
+
+# ========== Airspace Sector Boundaries ==========
+# Multi-sector airspace around YYZ (concentric annuli)
+SECTOR_ENTRY_INNER_NM = 30.0  # ENTRY sector inner boundary
+SECTOR_ENTRY_OUTER_NM = 60.0  # ENTRY sector outer boundary
+SECTOR_ENTRY_ALT_MIN_FT = 20000  # FL200
+SECTOR_ENTRY_ALT_MAX_FT = 60000  # FL600
+
+SECTOR_ENROUTE_INNER_NM = 10.0  # ENROUTE sector inner boundary
+SECTOR_ENROUTE_OUTER_NM = 30.0  # ENROUTE sector outer boundary
+SECTOR_ENROUTE_ALT_MIN_FT = 18000  # FL180
+SECTOR_ENROUTE_ALT_MAX_FT = 35000  # FL350
+
+SECTOR_APPROACH_INNER_NM = 3.0  # APPROACH sector inner boundary
+SECTOR_APPROACH_OUTER_NM = 10.0  # APPROACH sector outer boundary
+SECTOR_APPROACH_ALT_MIN_FT = 0  # Surface
+SECTOR_APPROACH_ALT_MAX_FT = 18000  # FL180
+
+SECTOR_RUNWAY_INNER_NM = 0.0  # RUNWAY sector inner boundary (airport center)
+SECTOR_RUNWAY_OUTER_NM = 3.0  # RUNWAY sector outer boundary
+SECTOR_RUNWAY_ALT_MIN_FT = 0  # Surface
+SECTOR_RUNWAY_ALT_MAX_FT = 3000  # 3000 ft
+
+# Sector hysteresis to prevent oscillation at boundaries
+SECTOR_HYSTERESIS_NM = 0.5  # Buffer zone for sector transitions
 
 # ========== Random Drift (Uncontrolled Aircraft) ==========
 # Applied when no specific target is set
@@ -67,6 +92,11 @@ EVENT_ENTERED_ENTRY_ZONE = "ENTERED_ENTRY_ZONE"
 EVENT_HANDOFF_READY = "HANDOFF_READY"
 EVENT_TOUCHDOWN = "TOUCHDOWN"
 EVENT_STATE_SNAPSHOT = "STATE_SNAPSHOT"
+
+# Sector-based events
+EVENT_SECTOR_CAPTURED = "SECTOR_CAPTURED"  # Aircraft captured by sector
+EVENT_SECTOR_HANDOFF = "SECTOR_HANDOFF"  # Handoff between sectors
+EVENT_SECTOR_BOUNDARY_REFLECTION = "SECTOR_BOUNDARY_REFLECTION"  # Boundary bounce
 
 # ========== Logging Configuration ==========
 TELEMETRY_BUFFER_SIZE = 100  # snapshots to buffer before writing

@@ -44,7 +44,9 @@ export async function GET(request: NextRequest) {
               type: 'initial',
               event
             })}\n\n`;
-            controller.enqueue(encoder.encode(data));
+            if (controller.desiredSize !== null) {
+              controller.enqueue(encoder.encode(data));
+            }
           }
 
           // Send a marker that initial events are complete
@@ -52,7 +54,9 @@ export async function GET(request: NextRequest) {
             type: 'initial_complete',
             count: events.length
           })}\n\n`;
-          controller.enqueue(encoder.encode(marker));
+          if (controller.desiredSize !== null) {
+            controller.enqueue(encoder.encode(marker));
+          }
 
         } catch (error) {
           console.error('Error sending initial events:', error);
@@ -60,7 +64,9 @@ export async function GET(request: NextRequest) {
             type: 'error',
             message: 'Failed to load initial events'
           })}\n\n`;
-          controller.enqueue(encoder.encode(errorData));
+          if (controller.desiredSize !== null) {
+            controller.enqueue(encoder.encode(errorData));
+          }
         }
       };
 
@@ -94,7 +100,9 @@ export async function GET(request: NextRequest) {
               type: 'realtime',
               event
             })}\n\n`;
-            controller.enqueue(encoder.encode(data));
+            if (controller.desiredSize !== null) {
+              controller.enqueue(encoder.encode(data));
+            }
           }
         } catch (error) {
           console.error('Error processing real-time event:', error);

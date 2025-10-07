@@ -205,7 +205,7 @@ class KinematicsEngine:
         updated["phase"] = phase
         
         # Check threshold events
-        last_event = aircraft.get("last_event_fired", "")
+        last_event = aircraft.get("last_event_fired") or ""
         new_event = None
         
         if altitude_agl < TOUCHDOWN_ALTITUDE_FT and EVENT_TOUCHDOWN not in last_event:
@@ -298,6 +298,7 @@ class KinematicsEngine:
             "position": position,
             "vertical_speed_fpm": updated.get("vertical_speed_fpm"),
             "phase": phase,
+            "distance_to_airport_nm": distance_nm,
         }
         
         if new_event:

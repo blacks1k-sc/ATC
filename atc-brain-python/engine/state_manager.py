@@ -129,7 +129,8 @@ class StateManager:
                 set_clauses.append(f"position = ${param_idx}::jsonb")
                 values.append(json.dumps(value))
             elif key in ["target_speed_kts", "target_heading_deg", "target_altitude_ft",
-                        "vertical_speed_fpm", "phase", "last_event_fired", "controller"]:
+                        "vertical_speed_fpm", "phase", "last_event_fired", "controller",
+                        "distance_to_airport_nm"]:
                 set_clauses.append(f"{key} = ${param_idx}")
                 values.append(value)
             param_idx += 1

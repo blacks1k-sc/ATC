@@ -1,0 +1,243 @@
+{
+  "airport": {
+    "icao": "CYYZ",
+    "name": "Toronto Pearson International Airport",
+    "center": {
+      "lat": 43.67667,
+      "lon": -79.63056
+    },
+    "elevation_ft": 569,
+    "magnetic_variation": -10.0
+  },
+  "sectors": [
+    {
+      "name": "ENTRY",
+      "description": "Airspace Entry/Exit - FIR Boundary Sector",
+      "type": "ENTRY_EXIT",
+      "radius_nm_inner": 30.0,
+      "radius_nm_outer": 60.0,
+      "altitude_ft_min": 20000,
+      "altitude_ft_max": 60000,
+      "controller_hint": "ENTRY_ATC",
+      "hysteresis_nm": 0.5,
+      "behavior": "random_drift",
+      "drift_params": {
+        "heading_deg": 4.0,
+        "speed_kts": 5.0,
+        "altitude_fpm": 200.0,
+        "boundary_reflection": true
+      }
+    },
+    {
+      "name": "ENROUTE",
+      "description": "En-Route Operations - Climb/Descent Management",
+      "type": "ENROUTE",
+      "radius_nm_inner": 10.0,
+      "radius_nm_outer": 30.0,
+      "altitude_ft_min": 18000,
+      "altitude_ft_max": 35000,
+      "controller_hint": "ENROUTE_ATC",
+      "hysteresis_nm": 0.5,
+      "behavior": "controlled_descent",
+      "descent_params": {
+        "target_speed_kts": [280, 320],
+        "glideslope_start_nm": 25.0,
+        "descent_rate_fpm": 2000
+      }
+    },
+    {
+      "name": "APPROACH",
+      "description": "Approach/Departure Sequencing - Vectors to Final",
+      "type": "APPROACH_DEPARTURE",
+      "radius_nm_inner": 3.0,
+      "radius_nm_outer": 10.0,
+      "altitude_ft_min": 0,
+      "altitude_ft_max": 18000,
+      "controller_hint": "APPROACH_ATC",
+      "hysteresis_nm": 0.3,
+      "behavior": "approach_sequencing",
+      "approach_params": {
+        "target_speed_kts": [180, 220],
+        "intercept_final_nm": 8.0,
+        "stabilized_altitude_ft": 3000
+      }
+    },
+    {
+      "name": "RUNWAY",
+      "description": "Runway Operations - Final Approach and Landing",
+      "type": "RUNWAY_OPS",
+      "radius_nm_inner": 0.0,
+      "radius_nm_outer": 3.0,
+      "altitude_ft_min": 0,
+      "altitude_ft_max": 3000,
+      "controller_hint": "TOWER_ATC",
+      "hysteresis_nm": 0.2,
+      "behavior": "final_approach",
+      "final_params": {
+        "target_speed_kts": [140, 170],
+        "glideslope_angle_deg": 3.0,
+        "flare_altitude_ft": 50
+      }
+    }
+  ],
+  "entry_fixes": [
+    {
+      "name": "BOXUM",
+      "lat": 44.177670,
+      "lon": -79.630560,
+      "bearing_from_airport": 0.0,
+      "distance_nm": 30.0,
+      "description": "North Entry Fix"
+    },
+    {
+      "name": "DUVOS",
+      "lat": 44.031246,
+      "lon": -79.207394,
+      "bearing_from_airport": 45.0,
+      "distance_nm": 30.0,
+      "description": "Northeast Entry Fix"
+    },
+    {
+      "name": "NUBER",
+      "lat": 43.676670,
+      "lon": -79.207394,
+      "bearing_from_airport": 90.0,
+      "distance_nm": 30.0,
+      "description": "East Entry Fix"
+    },
+    {
+      "name": "KEDMA",
+      "lat": 43.322094,
+      "lon": -79.207394,
+      "bearing_from_airport": 135.0,
+      "distance_nm": 30.0,
+      "description": "Southeast Entry Fix"
+    },
+    {
+      "name": "PILMU",
+      "lat": 43.176670,
+      "lon": -79.630560,
+      "bearing_from_airport": 180.0,
+      "distance_nm": 30.0,
+      "description": "South Entry Fix"
+    },
+    {
+      "name": "VERKO",
+      "lat": 43.322094,
+      "lon": -80.053726,
+      "bearing_from_airport": 225.0,
+      "distance_nm": 30.0,
+      "description": "Southwest Entry Fix"
+    },
+    {
+      "name": "IMEBA",
+      "lat": 43.676670,
+      "lon": -80.053726,
+      "bearing_from_airport": 270.0,
+      "distance_nm": 30.0,
+      "description": "West Entry Fix"
+    },
+    {
+      "name": "RAGID",
+      "lat": 44.031246,
+      "lon": -80.053726,
+      "bearing_from_airport": 315.0,
+      "distance_nm": 30.0,
+      "description": "Northwest Entry Fix"
+    }
+  ],
+  "geometry": {
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "ENTRY",
+          "sector": "ENTRY_EXIT",
+          "altitude_range": "FL200-FL600"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[]]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "ENROUTE",
+          "sector": "ENROUTE",
+          "altitude_range": "FL180-FL350"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[]]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "APPROACH",
+          "sector": "APPROACH_DEPARTURE",
+          "altitude_range": "SFC-FL180"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[]]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "RUNWAY",
+          "sector": "RUNWAY_OPS",
+          "altitude_range": "SFC-3000ft"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[]]
+        }
+      }
+    ]
+  },
+  "handoff_thresholds": {
+    "ENTRY_TO_ENROUTE": {
+      "distance_nm": 30.0,
+      "hysteresis_nm": 0.5,
+      "requires_inbound": true,
+      "min_stable_ticks": 2
+    },
+    "ENROUTE_TO_APPROACH": {
+      "distance_nm": 10.0,
+      "hysteresis_nm": 0.5,
+      "requires_inbound": true,
+      "min_stable_ticks": 2
+    },
+    "APPROACH_TO_RUNWAY": {
+      "distance_nm": 3.0,
+      "hysteresis_nm": 0.3,
+      "requires_inbound": true,
+      "min_stable_ticks": 2
+    }
+  },
+  "spawn_zones": {
+    "arrivals": {
+      "sector": "ENTRY",
+      "radius_nm_min": 40.0,
+      "radius_nm_max": 60.0,
+      "altitude_ft_min": 25000,
+      "altitude_ft_max": 35000,
+      "speed_kts_min": 280,
+      "speed_kts_max": 350,
+      "random_bearing": true
+    },
+    "departures": {
+      "sector": "RUNWAY",
+      "radius_nm_max": 1.0,
+      "altitude_ft_min": 500,
+      "altitude_ft_max": 1500,
+      "speed_kts_min": 150,
+      "speed_kts_max": 200
+    }
+  }
+}
+

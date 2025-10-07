@@ -3,10 +3,10 @@ import Redis from 'ioredis';
 
 // Environment configuration with defaults
 const DB_CONFIG = {
-  user: process.env.DB_USER || 'postgres',
+  user: process.env.DB_USER || 'nrup',
   host: process.env.DB_HOST || 'localhost',
   database: process.env.DB_NAME || 'atc_system',
-  password: process.env.DB_PASSWORD || 'password',
+  password: process.env.DB_PASSWORD || '',
   port: parseInt(process.env.DB_PORT || '5432'),
   max: parseInt(process.env.DB_POOL_SIZE || '20'),
   idleTimeoutMillis: 30000,
@@ -283,7 +283,21 @@ export class AircraftInstanceRepository {
 
   async findAllActive(): Promise<AircraftInstance[]> {
     const result = await this.client.query(`
-      SELECT ai.*, at.*, al.*
+      SELECT 
+        ai.id, ai.icao24, ai.registration, ai.callsign,
+        ai.aircraft_type_id, ai.airline_id, ai.position, ai.status,
+        ai.squawk_code, ai.flight_plan, ai.flight_type, ai.controller,
+        ai.phase, ai.last_event_fired, ai.target_speed_kts,
+        ai.target_heading_deg, ai.target_altitude_ft, ai.vertical_speed_fpm,
+        ai.distance_to_airport_nm, ai.created_at, ai.updated_at,
+        at.id as at_id, at.icao_type, at.wake, at.engines, at.dimensions,
+        at.mtow_kg, at.cruise_speed_kts, at.max_speed_kts, at.range_nm,
+        at.ceiling_ft, at.climb_rate_fpm, at.takeoff_ground_run_ft,
+        at.landing_ground_roll_ft, at.engine_thrust_lbf, at.notes,
+        at.created_at as at_created_at, at.updated_at as at_updated_at,
+        al.id as al_id, al.name as al_name, al.icao as al_icao,
+        al.iata as al_iata, al.country as al_country,
+        al.created_at as al_created_at, al.updated_at as al_updated_at
       FROM aircraft_instances ai
       LEFT JOIN aircraft_types at ON ai.aircraft_type_id = at.id
       LEFT JOIN airlines al ON ai.airline_id = al.id
@@ -314,7 +328,7 @@ export class AircraftInstanceRepository {
       created_at: row.created_at,
       updated_at: row.updated_at,
       aircraft_type: row.icao_type ? {
-        id: row.aircraft_type_id,
+        id: row.at_id,
         icao_type: row.icao_type,
         wake: row.wake,
         engines: row.engines,
@@ -329,17 +343,17 @@ export class AircraftInstanceRepository {
         landing_ground_roll_ft: row.landing_ground_roll_ft,
         engine_thrust_lbf: row.engine_thrust_lbf,
         notes: row.notes,
-        created_at: row.created_at,
-        updated_at: row.updated_at
+        created_at: row.at_created_at,
+        updated_at: row.at_updated_at
       } : undefined,
-      airline: row.name ? {
-        id: row.airline_id,
-        name: row.name,
-        icao: row.icao,
-        iata: row.iata,
-        country: row.country,
-        created_at: row.created_at,
-        updated_at: row.updated_at
+      airline: row.al_name ? {
+        id: row.al_id,
+        name: row.al_name,
+        icao: row.al_icao,
+        iata: row.al_iata,
+        country: row.al_country,
+        created_at: row.al_created_at,
+        updated_at: row.al_updated_at
       } : undefined
     }));
   }
@@ -356,6 +370,16 @@ export class AircraftInstanceRepository {
       'UPDATE aircraft_instances SET status = $1, updated_at = NOW() WHERE id = $2',
       [status, id]
     );
+  }
+
+  async clearAll(): Promise<number> {
+    const result = await this.client.query('DELETE FROM aircraft_instances');
+    return result.rowCount || 0;
+  }
+
+  async count(): Promise<number> {
+    const result = await this.client.query('SELECT COUNT(*) FROM aircraft_instances');
+    return parseInt(result.rows[0].count);
   }
 }
 
@@ -433,6 +457,11 @@ export class EventRepository {
 
     const result = await this.client.query(query, params);
     return result.rows;
+  }
+
+  async clearAll(): Promise<number> {
+    const result = await this.client.query('DELETE FROM events');
+    return result.rowCount || 0;
   }
 }
 

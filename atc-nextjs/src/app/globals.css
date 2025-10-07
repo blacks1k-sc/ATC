@@ -83,6 +83,19 @@ body{font-family:'Courier New',monospace;background:var(--bg);color:var(--ink);o
 .tab.active{background:var(--neon); color:#000; border-color:var(--neon)}
 .tab:hover:not(.active){background:#3a3a6e}
 
+/* Engine Ops tab styling */
+.engine-ops-tab {
+  background: #4a2a4e !important;
+  border: 1px solid #660044 !important;
+  color: #ff6aff !important;
+  text-decoration: none;
+  display: inline-block;
+}
+.engine-ops-tab:hover {
+  background: #5a3a5e !important;
+  color: #ff8aff !important;
+}
+
 .system-status{display:flex; gap:15px; align-items:center}
 .status-indicator{display:flex; align-items:center; gap:5px; font-size:11px}
 .status-light{width:10px; height:10px; border-radius:50%; animation:pulse 2s infinite}

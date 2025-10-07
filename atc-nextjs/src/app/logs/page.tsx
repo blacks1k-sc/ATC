@@ -202,6 +202,45 @@ export default function Logs() {
     // This is now handled by the real API, but we can keep it for testing
     console.log('Mock generation is now handled by the real API');
   };
+
+  const handleClearAllAircraft = async () => {
+    if (!confirm('Are you sure you want to clear all aircraft and events? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      
+      // Clear all aircraft instances
+      const aircraftResponse = await fetch('/api/aircraft/clear', {
+        method: 'DELETE'
+      });
+      
+      if (!aircraftResponse.ok) {
+        throw new Error('Failed to clear aircraft');
+      }
+      
+      // Clear all events
+      const eventsResponse = await fetch('/api/events', {
+        method: 'DELETE'
+      });
+      
+      if (!eventsResponse.ok) {
+        throw new Error('Failed to clear events');
+      }
+      
+      // Clear local state
+      setLogs([]);
+      setError('');
+      
+      console.log('All aircraft and events cleared successfully');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to clear data');
+      console.error('Error clearing data:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
   
   const toggleFilter = (direction: LogDirection) => {
     const newFilters = new Set(activeFilters);
@@ -427,6 +466,25 @@ export default function Logs() {
             }}
           >
             Generate Mock Logs
+          </button>
+          
+          {/* Clear All Aircraft Button */}
+          <button
+            onClick={handleClearAllAircraft}
+            disabled={loading}
+            style={{
+              padding: '6px 12px',
+              background: loading ? '#1a1a2e' : '#4a1a1a',
+              border: '1px solid #ff4444',
+              color: loading ? '#666' : '#ff4444',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              fontSize: '10px',
+              transition: '0.3s',
+              fontFamily: 'Courier New, monospace',
+              opacity: loading ? 0.6 : 1
+            }}
+          >
+            {loading ? 'Clearing...' : 'Clear All Aircraft'}
           </button>
         </div>
       </div>

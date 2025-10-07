@@ -48,3 +48,33 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+
+// DELETE /api/events - Clear all events
+export async function DELETE() {
+  try {
+    if (!pool) {
+      return NextResponse.json(
+        { error: 'Database not available' },
+        { status: 503 }
+      );
+    }
+
+    const result = await withTransaction(async (client) => {
+      const eventRepo = new EventRepository(client);
+      return await eventRepo.clearAll();
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: 'All events cleared',
+      deletedCount: result
+    });
+
+  } catch (error) {
+    console.error('Error clearing events:', error);
+    return NextResponse.json(
+      { error: 'Failed to clear events' },
+      { status: 500 }
+    );
+  }
+}
