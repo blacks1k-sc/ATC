@@ -1,0 +1,1512 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_525126c534f98a722348a1c6ebe7053b {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+
+            <style>html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            </style>
+
+            <style>#map {
+                position:absolute;
+                top:0;
+                bottom:0;
+                right:0;
+                left:0;
+                }
+            </style>
+
+            <script>
+                L_NO_TOUCH = false;
+                L_DISABLE_3D = false;
+            </script>
+
+        
+</head>
+<body>
+    
+    
+            <div class="folium-map" id="map_525126c534f98a722348a1c6ebe7053b" ></div>
+        
+</body>
+<script>
+    
+    
+            var map_525126c534f98a722348a1c6ebe7053b = L.map(
+                "map_525126c534f98a722348a1c6ebe7053b",
+                {
+                    center: [43.6775, -79.6303],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  "zoom": 10,
+  "zoomControl": true,
+  "preferCanvas": false,
+}
+
+                }
+            );
+            L.control.scale().addTo(map_525126c534f98a722348a1c6ebe7053b);
+
+            
+
+        
+    
+            var tile_layer_641a41cdd574f4cb1a76be7b6a0c5b98 = L.tileLayer(
+                "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+                {
+  "minZoom": 9,
+  "maxZoom": 13,
+  "maxNativeZoom": 13,
+  "noWrap": false,
+  "attribution": "\u0026copy; \u003ca href=\"https://www.openstreetmap.org/copyright\"\u003eOpenStreetMap\u003c/a\u003e contributors \u0026copy; \u003ca href=\"https://carto.com/attributions\"\u003eCARTO\u003c/a\u003e",
+  "subdomains": "abcd",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 1,
+}
+
+            );
+        
+    
+            tile_layer_641a41cdd574f4cb1a76be7b6a0c5b98.addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            var circle_21dc346a3fd237d7fba627d83a513ab6 = L.circle(
+                [43.6775, -79.6303],
+                {"bubblingMouseEvents": true, "color": "gray", "dashArray": "5,5", "dashOffset": null, "fill": false, "fillColor": "gray", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.4, "radius": 18520.0, "stroke": true, "weight": 1}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_21dc346a3fd237d7fba627d83a513ab6.bindTooltip(
+                `<div>
+                     10 NM
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_614bbce61ffaf033eeec787932f5f155 = L.circle(
+                [43.6775, -79.6303],
+                {"bubblingMouseEvents": true, "color": "gray", "dashArray": "5,5", "dashOffset": null, "fill": false, "fillColor": "gray", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.4, "radius": 37040.0, "stroke": true, "weight": 1}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_614bbce61ffaf033eeec787932f5f155.bindTooltip(
+                `<div>
+                     20 NM
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_937e5acb1641d26e709bdc1eea66ee41 = L.circle(
+                [43.6775, -79.6303],
+                {"bubblingMouseEvents": true, "color": "gray", "dashArray": "5,5", "dashOffset": null, "fill": false, "fillColor": "gray", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.4, "radius": 55560.0, "stroke": true, "weight": 1}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_937e5acb1641d26e709bdc1eea66ee41.bindTooltip(
+                `<div>
+                     30 NM
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_4d6b330676b17fe3d831bebaf3cd7248 = L.circle(
+                [43.6775, -79.6303],
+                {"bubblingMouseEvents": true, "color": "gray", "dashArray": "5,5", "dashOffset": null, "fill": false, "fillColor": "gray", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.4, "radius": 74080.0, "stroke": true, "weight": 1}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_4d6b330676b17fe3d831bebaf3cd7248.bindTooltip(
+                `<div>
+                     40 NM
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_fccf2c328bc95ed6fc1ac09c59fdc231 = L.circle(
+                [43.6775, -79.6303],
+                {"bubblingMouseEvents": true, "color": "gray", "dashArray": "5,5", "dashOffset": null, "fill": false, "fillColor": "gray", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.4, "radius": 111120.0, "stroke": true, "weight": 1}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_fccf2c328bc95ed6fc1ac09c59fdc231.bindTooltip(
+                `<div>
+                     60 NM
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_a7ddba72e642d6c6f8969e7d08f6ed4b = L.circleMarker(
+                [43.6775, -79.6303],
+                {"bubblingMouseEvents": true, "color": "red", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "red", "fillOpacity": 1, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_a7ddba72e642d6c6f8969e7d08f6ed4b.bindTooltip(
+                `<div>
+                     CYYZ VOR / Airport Center
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var poly_line_810a78d756dffec7f97691106658eb92 = L.polyline(
+                [[43.673889, -79.663889], [43.694722, -79.633333]],
+                {"bubblingMouseEvents": true, "color": "white", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "white", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.9, "smoothFactor": 1.0, "stroke": true, "weight": 5}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            poly_line_810a78d756dffec7f97691106658eb92.bindTooltip(
+                `<div>
+                     Runway 05/23
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_e4d8927caa598eb0c3c68a750130146e = L.circleMarker(
+                [43.673889, -79.663889],
+                {"bubblingMouseEvents": true, "color": "cyan", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "cyan", "fillOpacity": 1, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            var circle_marker_3cfd6dab5dc6586af8bc140890402f14 = L.circleMarker(
+                [43.694722, -79.633333],
+                {"bubblingMouseEvents": true, "color": "magenta", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "magenta", "fillOpacity": 1, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            var poly_line_6c4be32d1af667242844bdf98d9d97d4 = L.polyline(
+                [[43.66, -79.622222], [43.679133, -79.596761]],
+                {"bubblingMouseEvents": true, "color": "white", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "white", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.9, "smoothFactor": 1.0, "stroke": true, "weight": 5}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            poly_line_6c4be32d1af667242844bdf98d9d97d4.bindTooltip(
+                `<div>
+                     Runway 06L/24R
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_1ad82327487a809762b1c9a9e8036f7b = L.circleMarker(
+                [43.66, -79.622222],
+                {"bubblingMouseEvents": true, "color": "cyan", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "cyan", "fillOpacity": 1, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            var circle_marker_800df5c1d18864abe45323e8892e299e = L.circleMarker(
+                [43.679133, -79.596761],
+                {"bubblingMouseEvents": true, "color": "magenta", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "magenta", "fillOpacity": 1, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            var poly_line_d21217854d3189a9aecbe627fc945371 = L.polyline(
+                [[43.6583, -79.621928], [43.675292, -79.597236]],
+                {"bubblingMouseEvents": true, "color": "white", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "white", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.9, "smoothFactor": 1.0, "stroke": true, "weight": 5}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            poly_line_d21217854d3189a9aecbe627fc945371.bindTooltip(
+                `<div>
+                     Runway 06R/24L
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_48d650858e9ac5bee4148d2db05dd6df = L.circleMarker(
+                [43.6583, -79.621928],
+                {"bubblingMouseEvents": true, "color": "cyan", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "cyan", "fillOpacity": 1, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            var circle_marker_51c406b674f4f0efd8b48fb9146df50f = L.circleMarker(
+                [43.675292, -79.597236],
+                {"bubblingMouseEvents": true, "color": "magenta", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "magenta", "fillOpacity": 1, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            var poly_line_e11c5de5dada2eda87e0fcf9c530699c = L.polyline(
+                [[43.691944, -79.642219], [43.669997, -79.613892]],
+                {"bubblingMouseEvents": true, "color": "white", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "white", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.9, "smoothFactor": 1.0, "stroke": true, "weight": 5}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            poly_line_e11c5de5dada2eda87e0fcf9c530699c.bindTooltip(
+                `<div>
+                     Runway 15L/33R
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_2f921dad194b7450fdc602424503ac4e = L.circleMarker(
+                [43.691944, -79.642219],
+                {"bubblingMouseEvents": true, "color": "cyan", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "cyan", "fillOpacity": 1, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            var circle_marker_740ab0f4f1db2f0de65696d80801ec5f = L.circleMarker(
+                [43.669997, -79.613892],
+                {"bubblingMouseEvents": true, "color": "magenta", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "magenta", "fillOpacity": 1, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            var poly_line_1743d0ee080de32d23588a0599ca5088 = L.polyline(
+                [[43.685833, -79.651667], [43.6675, -79.628333]],
+                {"bubblingMouseEvents": true, "color": "white", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "white", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.9, "smoothFactor": 1.0, "stroke": true, "weight": 5}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            poly_line_1743d0ee080de32d23588a0599ca5088.bindTooltip(
+                `<div>
+                     Runway 15R/33L
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_7415fc2cb86df70bdaaec38e2d8fc056 = L.circleMarker(
+                [43.685833, -79.651667],
+                {"bubblingMouseEvents": true, "color": "cyan", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "cyan", "fillOpacity": 1, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            var circle_marker_ecaf788d03e71cb4992877a5b277ca87 = L.circleMarker(
+                [43.6675, -79.628333],
+                {"bubblingMouseEvents": true, "color": "magenta", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "magenta", "fillOpacity": 1, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            var circle_marker_ca1611c2884af36b05ca20b7d667dbdb = L.circleMarker(
+                [43.96306, -79.76333],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_ca1611c2884af36b05ca20b7d667dbdb.bindTooltip(
+                `<div>
+                     <b>ADREB</b><br>Category: Common<br>Altitude: 5,058 ft<br>Distance: 18.15 NM<br>Bearing (Mag): N/A°<br>Lat: 43.96306<br>Lon: -79.76333
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_21b6bee8ffbfb455e3c04596a13f768b = L.circleMarker(
+                [43.55833, -79.46806],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_21b6bee8ffbfb455e3c04596a13f768b.bindTooltip(
+                `<div>
+                     <b>AGBEK</b><br>Category: Common<br>Altitude: 8,346 ft<br>Distance: 9.89 NM<br>Bearing (Mag): N/A°<br>Lat: 43.55833<br>Lon: -79.46806
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_0ab73dd875c3c25d30a6be98cdfd191f = L.circleMarker(
+                [43.59444, -79.36361],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_0ab73dd875c3c25d30a6be98cdfd191f.bindTooltip(
+                `<div>
+                     <b>ALKUB</b><br>Category: Common<br>Altitude: 9,757 ft<br>Distance: 12.40 NM<br>Bearing (Mag): N/A°<br>Lat: 43.59444<br>Lon: -79.36361
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_2751e2454dcc0a08d629d0f2442b52ee = L.circleMarker(
+                [43.61028, -79.55417],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_2751e2454dcc0a08d629d0f2442b52ee.bindTooltip(
+                `<div>
+                     <b>APMAM</b><br>Category: Common<br>Altitude: 5,246 ft<br>Distance: 5.08 NM<br>Bearing (Mag): N/A°<br>Lat: 43.61028<br>Lon: -79.55417
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_cb3645643f1d3c02402d4daeada23535 = L.circleMarker(
+                [43.80361, -79.78861],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_cb3645643f1d3c02402d4daeada23535.bindTooltip(
+                `<div>
+                     <b>BEFNI</b><br>Category: Common<br>Altitude: 13,582 ft<br>Distance: 10.37 NM<br>Bearing (Mag): N/A°<br>Lat: 43.80361<br>Lon: -79.78861
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_e176ae24de0ec68435d1c25343f260ee = L.circleMarker(
+                [43.56944, -79.33361],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_e176ae24de0ec68435d1c25343f260ee.bindTooltip(
+                `<div>
+                     <b>BERIG</b><br>Category: Common<br>Altitude: 6,914 ft<br>Distance: 14.23 NM<br>Bearing (Mag): N/A°<br>Lat: 43.56944<br>Lon: -79.33361
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_507c54bc18406635e12733fe775c2c8a = L.circleMarker(
+                [43.85194, -79.87083],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_507c54bc18406635e12733fe775c2c8a.bindTooltip(
+                `<div>
+                     <b>BLOOS</b><br>Category: Common<br>Altitude: 11,833 ft<br>Distance: 14.94 NM<br>Bearing (Mag): N/A°<br>Lat: 43.85194<br>Lon: -79.87083
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_11f14a2e2bdcff01fe85433864476ab1 = L.circleMarker(
+                [43.81444, -79.65861],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_11f14a2e2bdcff01fe85433864476ab1.bindTooltip(
+                `<div>
+                     <b>BOBTA</b><br>Category: Common<br>Altitude: 12,527 ft<br>Distance: 8.34 NM<br>Bearing (Mag): N/A°<br>Lat: 43.81444<br>Lon: -79.65861
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_1b771851e6b311d4cac932c086c9472b = L.circleMarker(
+                [43.59361, -79.56528],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_1b771851e6b311d4cac932c086c9472b.bindTooltip(
+                `<div>
+                     <b>BORID</b><br>Category: Common<br>Altitude: 10,110 ft<br>Distance: 5.67 NM<br>Bearing (Mag): N/A°<br>Lat: 43.59361<br>Lon: -79.56528
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_072801354d12a81b5fe8c40bc3225328 = L.circleMarker(
+                [43.35083, -79.70639],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_072801354d12a81b5fe8c40bc3225328.bindTooltip(
+                `<div>
+                     <b>BOXAN</b><br>Category: Common<br>Altitude: 11,592 ft<br>Distance: 19.95 NM<br>Bearing (Mag): N/A°<br>Lat: 43.35083<br>Lon: -79.70639
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_30b7086e7c4edad750aec86e1b5a34c9 = L.circleMarker(
+                [43.80167, -79.47833],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_30b7086e7c4edad750aec86e1b5a34c9.bindTooltip(
+                `<div>
+                     <b>CALVY</b><br>Category: Common<br>Altitude: 9,177 ft<br>Distance: 9.79 NM<br>Bearing (Mag): N/A°<br>Lat: 43.80167<br>Lon: -79.47833
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_f776e866870dfe03c6ceaf7ac82d1f35 = L.circleMarker(
+                [43.89333, -79.6025],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_f776e866870dfe03c6ceaf7ac82d1f35.bindTooltip(
+                `<div>
+                     <b>DAROG</b><br>Category: Common<br>Altitude: 9,549 ft<br>Distance: 12.98 NM<br>Bearing (Mag): N/A°<br>Lat: 43.89333<br>Lon: -79.60250
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_bfd89a1dff10ea41d9aa0e89f0a88cb9 = L.circleMarker(
+                [43.27889, -79.92361],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_bfd89a1dff10ea41d9aa0e89f0a88cb9.bindTooltip(
+                `<div>
+                     <b>DEPRU</b><br>Category: Common<br>Altitude: 6,190 ft<br>Distance: 27.26 NM<br>Bearing (Mag): N/A°<br>Lat: 43.27889<br>Lon: -79.92361
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_f9dd2e5556e74feb15fc1a0cf24c8a77 = L.circleMarker(
+                [43.92694, -79.29444],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_f9dd2e5556e74feb15fc1a0cf24c8a77.bindTooltip(
+                `<div>
+                     <b>DEPTU</b><br>Category: Common<br>Altitude: 11,944 ft<br>Distance: 20.71 NM<br>Bearing (Mag): N/A°<br>Lat: 43.92694<br>Lon: -79.29444
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_f36cb0ab8cfa8534dcaae2777a0e556f = L.circleMarker(
+                [43.56833, -79.81694],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_f36cb0ab8cfa8534dcaae2777a0e556f.bindTooltip(
+                `<div>
+                     <b>DULPA</b><br>Category: Common<br>Altitude: 9,213 ft<br>Distance: 10.62 NM<br>Bearing (Mag): N/A°<br>Lat: 43.56833<br>Lon: -79.81694
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_730782746a1ccb34f0052f72574b42ae = L.circleMarker(
+                [43.61333, -79.43194],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_730782746a1ccb34f0052f72574b42ae.bindTooltip(
+                `<div>
+                     <b>DUVUM</b><br>Category: Common<br>Altitude: 12,395 ft<br>Distance: 9.23 NM<br>Bearing (Mag): N/A°<br>Lat: 43.61333<br>Lon: -79.43194
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_ec9d8b1e7623ebf8654908ff7009bd38 = L.circleMarker(
+                [43.236389, -79.091111],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_ec9d8b1e7623ebf8654908ff7009bd38.bindTooltip(
+                `<div>
+                     <b>APNUS</b><br>Category: Common<br>Altitude: 9,492 ft<br>Distance: 35.26 NM<br>Bearing (Mag): N/A°<br>Lat: 43.23639<br>Lon: -79.09111
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_c033bd4d9edaf81d1b651101887251df = L.circleMarker(
+                [43.787778, -79.438333],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_c033bd4d9edaf81d1b651101887251df.bindTooltip(
+                `<div>
+                     <b>EBDAL</b><br>Category: Common<br>Altitude: 8,144 ft<br>Distance: 10.45 NM<br>Bearing (Mag): N/A°<br>Lat: 43.78778<br>Lon: -79.43833
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_bfbc550dcd67b63748cc792602c85b23 = L.circleMarker(
+                [43.616667, -79.353611],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_bfbc550dcd67b63748cc792602c85b23.bindTooltip(
+                `<div>
+                     <b>EBGAP</b><br>Category: Common<br>Altitude: 10,798 ft<br>Distance: 12.34 NM<br>Bearing (Mag): N/A°<br>Lat: 43.61667<br>Lon: -79.35361
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_1a3a57aced4405fe0b966e555a027f21 = L.circleMarker(
+                [43.743333, -79.709167],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_1a3a57aced4405fe0b966e555a027f21.bindTooltip(
+                `<div>
+                     <b>EDLIB</b><br>Category: Common<br>Altitude: 8,574 ft<br>Distance: 5.38 NM<br>Bearing (Mag): N/A°<br>Lat: 43.74333<br>Lon: -79.70917
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_2e85748e3f9262522c914dfc30755ef5 = L.circleMarker(
+                [43.921667, -79.433611],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_2e85748e3f9262522c914dfc30755ef5.bindTooltip(
+                `<div>
+                     <b>ELGYN</b><br>Category: Common<br>Altitude: 6,093 ft<br>Distance: 16.83 NM<br>Bearing (Mag): N/A°<br>Lat: 43.92167<br>Lon: -79.43361
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_7c63f98ea50c1dcbf1da2fb83c82599e = L.circleMarker(
+                [43.740278, -79.161111],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_7c63f98ea50c1dcbf1da2fb83c82599e.bindTooltip(
+                `<div>
+                     <b>ELTOT</b><br>Category: Common<br>Altitude: 5,357 ft<br>Distance: 20.47 NM<br>Bearing (Mag): N/A°<br>Lat: 43.74028<br>Lon: -79.16111
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_2affeab939625f9ecb52df3012393ed6 = L.circleMarker(
+                [43.586111, -79.522778],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_2affeab939625f9ecb52df3012393ed6.bindTooltip(
+                `<div>
+                     <b>EMBOP</b><br>Category: Common<br>Altitude: 12,379 ft<br>Distance: 7.07 NM<br>Bearing (Mag): N/A°<br>Lat: 43.58611<br>Lon: -79.52278
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_da29ef2e2aa3ed4a326c1dba7187027b = L.circleMarker(
+                [43.554167, -79.481111],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_da29ef2e2aa3ed4a326c1dba7187027b.bindTooltip(
+                `<div>
+                     <b>ERBAN</b><br>Category: Common<br>Altitude: 9,896 ft<br>Distance: 9.70 NM<br>Bearing (Mag): N/A°<br>Lat: 43.55417<br>Lon: -79.48111
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_cb2525b7e1b33424797c823afab7af7f = L.circleMarker(
+                [43.746111, -79.722778],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_cb2525b7e1b33424797c823afab7af7f.bindTooltip(
+                `<div>
+                     <b>ERBUS</b><br>Category: Common<br>Altitude: 10,230 ft<br>Distance: 5.91 NM<br>Bearing (Mag): N/A°<br>Lat: 43.74611<br>Lon: -79.72278
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_e1688f1cdb83b92475314e4cbcd8d42d = L.circleMarker(
+                [43.551111, -79.7825],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_e1688f1cdb83b92475314e4cbcd8d42d.bindTooltip(
+                `<div>
+                     <b>FAYOL</b><br>Category: Common<br>Altitude: 11,680 ft<br>Distance: 10.24 NM<br>Bearing (Mag): N/A°<br>Lat: 43.55111<br>Lon: -79.78250
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_efda89445bbe29ea52ea037af45acd78 = L.circleMarker(
+                [43.672222, -79.262222],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_efda89445bbe29ea52ea037af45acd78.bindTooltip(
+                `<div>
+                     <b>GUBAL</b><br>Category: Common<br>Altitude: 9,987 ft<br>Distance: 15.75 NM<br>Bearing (Mag): N/A°<br>Lat: 43.67222<br>Lon: -79.26222
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_f521e39f9c368ce25b31b14eba613724 = L.circleMarker(
+                [43.604167, -79.401389],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_f521e39f9c368ce25b31b14eba613724.bindTooltip(
+                `<div>
+                     <b>GUBOV</b><br>Category: Common<br>Altitude: 5,108 ft<br>Distance: 10.67 NM<br>Bearing (Mag): N/A°<br>Lat: 43.60417<br>Lon: -79.40139
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_ee4e59fc69c6670fca6d9d40e845a226 = L.circleMarker(
+                [43.743611, -79.728056],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_ee4e59fc69c6670fca6d9d40e845a226.bindTooltip(
+                `<div>
+                     <b>HOFFS</b><br>Category: Common<br>Altitude: 12,247 ft<br>Distance: 5.98 NM<br>Bearing (Mag): N/A°<br>Lat: 43.74361<br>Lon: -79.72806
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_9a463c080e7d99bf5c598bf2464b6893 = L.circleMarker(
+                [43.585556, -79.489167],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_9a463c080e7d99bf5c598bf2464b6893.bindTooltip(
+                `<div>
+                     <b>IKBAM</b><br>Category: Common<br>Altitude: 9,005 ft<br>Distance: 8.09 NM<br>Bearing (Mag): N/A°<br>Lat: 43.58556<br>Lon: -79.48917
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_f5688f602e485e5e77aaa222ed8b0943 = L.circleMarker(
+                [43.720278, -79.427778],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_f5688f602e485e5e77aaa222ed8b0943.bindTooltip(
+                `<div>
+                     <b>IKDOP</b><br>Category: Common<br>Altitude: 12,892 ft<br>Distance: 8.93 NM<br>Bearing (Mag): N/A°<br>Lat: 43.72028<br>Lon: -79.42778
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_f2590edbc5063a385f5fe983c41c5f2e = L.circleMarker(
+                [43.479444, -79.384444],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_f2590edbc5063a385f5fe983c41c5f2e.bindTooltip(
+                `<div>
+                     <b>IKMEX</b><br>Category: Common<br>Altitude: 11,842 ft<br>Distance: 15.84 NM<br>Bearing (Mag): N/A°<br>Lat: 43.47944<br>Lon: -79.38444
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_93465f254f78ce93eead7cbf2266f236 = L.circleMarker(
+                [43.589444, -79.245],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_93465f254f78ce93eead7cbf2266f236.bindTooltip(
+                `<div>
+                     <b>ILEGI</b><br>Category: Common<br>Altitude: 6,359 ft<br>Distance: 17.34 NM<br>Bearing (Mag): N/A°<br>Lat: 43.58944<br>Lon: -79.24500
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_a9cb1d9eb2394a404fe032db6ab6f07b = L.circleMarker(
+                [43.355, -79.205556],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_a9cb1d9eb2394a404fe032db6ab6f07b.bindTooltip(
+                `<div>
+                     <b>ILIMO</b><br>Category: Common<br>Altitude: 14,520 ft<br>Distance: 26.62 NM<br>Bearing (Mag): N/A°<br>Lat: 43.35500<br>Lon: -79.20556
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_6d0db2bdafc6dec2af81f9246f185c8d = L.circleMarker(
+                [43.660694, -79.623197],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_6d0db2bdafc6dec2af81f9246f185c8d.bindTooltip(
+                `<div>
+                     <b>JNB39</b><br>Category: Common<br>Altitude: 7,008 ft<br>Distance: 1.02 NM<br>Bearing (Mag): N/A°<br>Lat: 43.66069<br>Lon: -79.62320
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_f3e930722913e2804042d0586e12bbe8 = L.circleMarker(
+                [43.2325, -79.831944],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_f3e930722913e2804042d0586e12bbe8.bindTooltip(
+                `<div>
+                     <b>KEDIS</b><br>Category: Common<br>Altitude: 14,626 ft<br>Distance: 28.21 NM<br>Bearing (Mag): N/A°<br>Lat: 43.23250<br>Lon: -79.83194
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_6619c16a1472bb69e33429258eb4eeb3 = L.circleMarker(
+                [43.512778, -79.266111],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_6619c16a1472bb69e33429258eb4eeb3.bindTooltip(
+                `<div>
+                     <b>KENBA</b><br>Category: Common<br>Altitude: 12,445 ft<br>Distance: 18.48 NM<br>Bearing (Mag): N/A°<br>Lat: 43.51278<br>Lon: -79.26611
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_a8c3664dd01e2729080c10902d5d1ffe = L.circleMarker(
+                [43.995, -79.293889],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_a8c3664dd01e2729080c10902d5d1ffe.bindTooltip(
+                `<div>
+                     <b>KENGU</b><br>Category: Common<br>Altitude: 6,513 ft<br>Distance: 23.84 NM<br>Bearing (Mag): N/A°<br>Lat: 43.99500<br>Lon: -79.29389
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_29b6e8c241c8dad4855d1af0be6b182c = L.circleMarker(
+                [43.729167, -79.518889],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_29b6e8c241c8dad4855d1af0be6b182c.bindTooltip(
+                `<div>
+                     <b>KIREX</b><br>Category: Common<br>Altitude: 5,389 ft<br>Distance: 5.54 NM<br>Bearing (Mag): N/A°<br>Lat: 43.72917<br>Lon: -79.51889
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_953186c7693a971efa4da3c24f8c8d95 = L.circleMarker(
+                [43.499444, -79.851667],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_953186c7693a971efa4da3c24f8c8d95.bindTooltip(
+                `<div>
+                     <b>LESOD</b><br>Category: Common<br>Altitude: 6,764 ft<br>Distance: 14.56 NM<br>Bearing (Mag): N/A°<br>Lat: 43.49944<br>Lon: -79.85167
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_915ba583233b08e9e5bb8f26eb58aa5b = L.circleMarker(
+                [43.3025, -79.354722],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_915ba583233b08e9e5bb8f26eb58aa5b.bindTooltip(
+                `<div>
+                     <b>LINNG</b><br>Category: Common<br>Altitude: 12,437 ft<br>Distance: 25.42 NM<br>Bearing (Mag): N/A°<br>Lat: 43.30250<br>Lon: -79.35472
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_f67fc6efa6f2f96385c735ea4768f856 = L.circleMarker(
+                [43.784167, -79.438333],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_f67fc6efa6f2f96385c735ea4768f856.bindTooltip(
+                `<div>
+                     <b>LISDU</b><br>Category: Common<br>Altitude: 7,542 ft<br>Distance: 10.31 NM<br>Bearing (Mag): N/A°<br>Lat: 43.78417<br>Lon: -79.43833
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_8b6e6093ab123a7162db9940d6e35082 = L.circleMarker(
+                [43.548333, -79.780833],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_8b6e6093ab123a7162db9940d6e35082.bindTooltip(
+                `<div>
+                     <b>LOBKO</b><br>Category: Common<br>Altitude: 13,004 ft<br>Distance: 10.31 NM<br>Bearing (Mag): N/A°<br>Lat: 43.54833<br>Lon: -79.78083
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_bcb4a77117f71aa361455ef34110de73 = L.circleMarker(
+                [43.803333, -79.308056],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_bcb4a77117f71aa361455ef34110de73.bindTooltip(
+                `<div>
+                     <b>LOBNI</b><br>Category: Common<br>Altitude: 7,046 ft<br>Distance: 15.67 NM<br>Bearing (Mag): N/A°<br>Lat: 43.80333<br>Lon: -79.30806
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_bc01d40904ab0776602c4ad4e744c7be = L.circleMarker(
+                [43.715556, -79.406111],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_bc01d40904ab0776602c4ad4e744c7be.bindTooltip(
+                `<div>
+                     <b>LORLI</b><br>Category: Common<br>Altitude: 7,392 ft<br>Distance: 9.76 NM<br>Bearing (Mag): N/A°<br>Lat: 43.71556<br>Lon: -79.40611
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_67f5f8d186909ee687a0b76e88322659 = L.circleMarker(
+                [43.718333, -79.673333],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_67f5f8d186909ee687a0b76e88322659.bindTooltip(
+                `<div>
+                     <b>MALTN</b><br>Category: Common<br>Altitude: 10,460 ft<br>Distance: 3.22 NM<br>Bearing (Mag): N/A°<br>Lat: 43.71833<br>Lon: -79.67333
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_defdc9c323657d3e31ac768aaa1c5635 = L.circleMarker(
+                [43.423889, -79.313333],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_defdc9c323657d3e31ac768aaa1c5635.bindTooltip(
+                `<div>
+                     <b>MERKI</b><br>Category: Common<br>Altitude: 5,452 ft<br>Distance: 20.40 NM<br>Bearing (Mag): N/A°<br>Lat: 43.42389<br>Lon: -79.31333
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_a1b1b987848ac58d6707d5a06c4feb52 = L.circleMarker(
+                [43.413611, -79.631389],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_a1b1b987848ac58d6707d5a06c4feb52.bindTooltip(
+                `<div>
+                     <b>MESNO</b><br>Category: Common<br>Altitude: 9,714 ft<br>Distance: 15.86 NM<br>Bearing (Mag): N/A°<br>Lat: 43.41361<br>Lon: -79.63139
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_1cbc2b5af583e5a67928888b8b21312f = L.circleMarker(
+                [43.988333, -79.504722],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_1cbc2b5af583e5a67928888b8b21312f.bindTooltip(
+                `<div>
+                     <b>METLU</b><br>Category: Common<br>Altitude: 6,960 ft<br>Distance: 19.36 NM<br>Bearing (Mag): N/A°<br>Lat: 43.98833<br>Lon: -79.50472
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_6ee7679d412925a1dfcf9e8f8bff1875 = L.circleMarker(
+                [43.823611, -79.539444],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_6ee7679d412925a1dfcf9e8f8bff1875.bindTooltip(
+                `<div>
+                     <b>MIDPA</b><br>Category: Common<br>Altitude: 9,753 ft<br>Distance: 9.51 NM<br>Bearing (Mag): N/A°<br>Lat: 43.82361<br>Lon: -79.53944
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_853f8bebfbe6caca8c801c1d9d34cfca = L.circleMarker(
+                [43.725, -79.555],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_853f8bebfbe6caca8c801c1d9d34cfca.bindTooltip(
+                `<div>
+                     <b>MIRUG</b><br>Category: Common<br>Altitude: 8,683 ft<br>Distance: 4.15 NM<br>Bearing (Mag): N/A°<br>Lat: 43.72500<br>Lon: -79.55500
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_a3c6b9b3975db0ffdbb45afdd146c930 = L.circleMarker(
+                [43.440556, -79.528333],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_a3c6b9b3975db0ffdbb45afdd146c930.bindTooltip(
+                `<div>
+                     <b>MIZEN</b><br>Category: Common<br>Altitude: 12,671 ft<br>Distance: 14.85 NM<br>Bearing (Mag): N/A°<br>Lat: 43.44056<br>Lon: -79.52833
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_89757652095d54c53b61dc42f26306b0 = L.circleMarker(
+                [43.596111, -79.5175],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_89757652095d54c53b61dc42f26306b0.bindTooltip(
+                `<div>
+                     <b>MODUL</b><br>Category: Common<br>Altitude: 10,802 ft<br>Distance: 6.76 NM<br>Bearing (Mag): N/A°<br>Lat: 43.59611<br>Lon: -79.51750
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_a690f5a46a0148967fbca95c2589f0cf = L.circleMarker(
+                [43.366667, -79.516667],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_a690f5a46a0148967fbca95c2589f0cf.bindTooltip(
+                `<div>
+                     <b>MUSET</b><br>Category: Common<br>Altitude: 9,004 ft<br>Distance: 19.26 NM<br>Bearing (Mag): N/A°<br>Lat: 43.36667<br>Lon: -79.51667
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_182e3c90a5882fceaa3c2baf4e477620 = L.circleMarker(
+                [43.654167, -79.692778],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_182e3c90a5882fceaa3c2baf4e477620.bindTooltip(
+                `<div>
+                     <b>MUVOK</b><br>Category: Common<br>Altitude: 9,080 ft<br>Distance: 3.27 NM<br>Bearing (Mag): N/A°<br>Lat: 43.65417<br>Lon: -79.69278
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_de5435a9633b605162da463ad9052a12 = L.circleMarker(
+                [43.287222, -79.746111],
+                {"bubblingMouseEvents": true, "color": "limegreen", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "limegreen", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_de5435a9633b605162da463ad9052a12.bindTooltip(
+                `<div>
+                     <b>MUXIG</b><br>Category: Common<br>Altitude: 8,125 ft<br>Distance: 24.03 NM<br>Bearing (Mag): N/A°<br>Lat: 43.28722<br>Lon: -79.74611
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_bec656c0965fce0dfb735f84385e6af8 = L.circleMarker(
+                [43.47, -79.26],
+                {"bubblingMouseEvents": true, "color": "deepskyblue", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "deepskyblue", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_bec656c0965fce0dfb735f84385e6af8.bindTooltip(
+                `<div>
+                     <b>DULPA</b><br>Category: Landing<br>Altitude: 6,495 ft<br>Distance: 20.36 NM<br>Bearing (Mag): 137.99249606981633°<br>Lat: 43.47000<br>Lon: -79.26000
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_6adee7eb15b9106b2dd1a73126e033d8 = L.circleMarker(
+                [43.44, -79.43],
+                {"bubblingMouseEvents": true, "color": "deepskyblue", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "deepskyblue", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_6adee7eb15b9106b2dd1a73126e033d8.bindTooltip(
+                `<div>
+                     <b>FAYOL</b><br>Category: Landing<br>Altitude: 6,239 ft<br>Distance: 16.71 NM<br>Bearing (Mag): 158.89924372556445°<br>Lat: 43.44000<br>Lon: -79.43000
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_992eb98915a74ceca2935d97520be0b9 = L.circleMarker(
+                [43.32, -79.46],
+                {"bubblingMouseEvents": true, "color": "deepskyblue", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "deepskyblue", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_992eb98915a74ceca2935d97520be0b9.bindTooltip(
+                `<div>
+                     <b>CALVY</b><br>Category: Landing<br>Altitude: 4,896 ft<br>Distance: 22.71 NM<br>Bearing (Mag): 171.27880021397098°<br>Lat: 43.32000<br>Lon: -79.46000
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_2e5e53b0630eb0dba460bb6d79c733c9 = L.circleMarker(
+                [43.33, -79.28],
+                {"bubblingMouseEvents": true, "color": "deepskyblue", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "deepskyblue", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_2e5e53b0630eb0dba460bb6d79c733c9.bindTooltip(
+                `<div>
+                     <b>EBDAL</b><br>Category: Landing<br>Altitude: 4,427 ft<br>Distance: 25.85 NM<br>Bearing (Mag): 154.10600941650867°<br>Lat: 43.33000<br>Lon: -79.28000
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_f3373bfd812fcc948a3f8adf0b47c0a4 = L.circleMarker(
+                [43.33, -79.47],
+                {"bubblingMouseEvents": true, "color": "deepskyblue", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "deepskyblue", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_f3373bfd812fcc948a3f8adf0b47c0a4.bindTooltip(
+                `<div>
+                     <b>LOBKO</b><br>Category: Landing<br>Altitude: 3,748 ft<br>Distance: 22.00 NM<br>Bearing (Mag): 171.84502151537836°<br>Lat: 43.33000<br>Lon: -79.47000
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_7b83aa21dc39676d99405d4371727258 = L.circleMarker(
+                [43.47, -79.26],
+                {"bubblingMouseEvents": true, "color": "deepskyblue", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "deepskyblue", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_7b83aa21dc39676d99405d4371727258.bindTooltip(
+                `<div>
+                     <b>LISDU</b><br>Category: Landing<br>Altitude: 3,636 ft<br>Distance: 20.36 NM<br>Bearing (Mag): 137.99249606981633°<br>Lat: 43.47000<br>Lon: -79.26000
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_b396ed3d40b3084b2a292afdf4641b8f = L.circleMarker(
+                [43.51, -79.33],
+                {"bubblingMouseEvents": true, "color": "deepskyblue", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "deepskyblue", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_b396ed3d40b3084b2a292afdf4641b8f.bindTooltip(
+                `<div>
+                     <b>VERKO</b><br>Category: Landing<br>Altitude: 9,481 ft<br>Distance: 16.48 NM<br>Bearing (Mag): 137.8978926439993°<br>Lat: 43.51000<br>Lon: -79.33000
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_f32e331ad2493c9bd4be4fe1a8ca4099 = L.circleMarker(
+                [43.48, -79.48],
+                {"bubblingMouseEvents": true, "color": "deepskyblue", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "deepskyblue", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_f32e331ad2493c9bd4be4fe1a8ca4099.bindTooltip(
+                `<div>
+                     <b>ROKTO</b><br>Category: Landing<br>Altitude: 4,555 ft<br>Distance: 13.54 NM<br>Bearing (Mag): 161.48028451212463°<br>Lat: 43.48000<br>Lon: -79.48000
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_6a6d18bbc150f1e61ba96cb5787fcb3a = L.circleMarker(
+                [43.44, -79.43],
+                {"bubblingMouseEvents": true, "color": "deepskyblue", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "deepskyblue", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_6a6d18bbc150f1e61ba96cb5787fcb3a.bindTooltip(
+                `<div>
+                     <b>MIRUG</b><br>Category: Landing<br>Altitude: 3,708 ft<br>Distance: 16.71 NM<br>Bearing (Mag): 158.89924372556445°<br>Lat: 43.44000<br>Lon: -79.43000
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_fbea1f9d9ea6ae1a822adeb69fbd1de8 = L.circleMarker(
+                [43.4, -79.39],
+                {"bubblingMouseEvents": true, "color": "deepskyblue", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "deepskyblue", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_fbea1f9d9ea6ae1a822adeb69fbd1de8.bindTooltip(
+                `<div>
+                     <b>PILKI</b><br>Category: Landing<br>Altitude: 9,867 ft<br>Distance: 19.67 NM<br>Bearing (Mag): 158.19937620348892°<br>Lat: 43.40000<br>Lon: -79.39000
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_b7686bc5a8bce9f5aa7ad7c24594bab3 = L.circleMarker(
+                [43.43, -79.33],
+                {"bubblingMouseEvents": true, "color": "deepskyblue", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "deepskyblue", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_b7686bc5a8bce9f5aa7ad7c24594bab3.bindTooltip(
+                `<div>
+                     <b>BEFNI</b><br>Category: Landing<br>Altitude: 3,170 ft<br>Distance: 19.79 NM<br>Bearing (Mag): 148.97009218100126°<br>Lat: 43.43000<br>Lon: -79.33000
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_6d9cd0bbf8826a52e875fce4319b435d = L.circleMarker(
+                [44.0, -79.59],
+                {"bubblingMouseEvents": true, "color": "deepskyblue", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "deepskyblue", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_6d9cd0bbf8826a52e875fce4319b435d.bindTooltip(
+                `<div>
+                     <b>AGBEK</b><br>Category: Landing<br>Altitude: 9,548 ft<br>Distance: 19.44 NM<br>Bearing (Mag): 15.536404524944569°<br>Lat: 44.00000<br>Lon: -79.59000
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_d123d06eacc5e4093a7f084db44178d4 = L.circleMarker(
+                [43.4, -79.39],
+                {"bubblingMouseEvents": true, "color": "orange", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "orange", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_d123d06eacc5e4093a7f084db44178d4.bindTooltip(
+                `<div>
+                     <b>YTP</b><br>Category: Takeoff<br>Altitude: 11,933 ft<br>Distance: 19.67 NM<br>Bearing (Mag): 158.19937620348892°<br>Lat: 43.40000<br>Lon: -79.39000
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_20fbce441d7f5ab1ca10d08ffb010912 = L.circleMarker(
+                [43.43, -79.4],
+                {"bubblingMouseEvents": true, "color": "orange", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "orange", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_20fbce441d7f5ab1ca10d08ffb010912.bindTooltip(
+                `<div>
+                     <b>MALTN</b><br>Category: Takeoff<br>Altitude: 4,746 ft<br>Distance: 17.92 NM<br>Bearing (Mag): 156.3263183787357°<br>Lat: 43.43000<br>Lon: -79.40000
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_07daf4662150313f6c4aceb256c1cea9 = L.circleMarker(
+                [43.4, -79.37],
+                {"bubblingMouseEvents": true, "color": "orange", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "orange", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 3}
+            ).addTo(map_525126c534f98a722348a1c6ebe7053b);
+        
+    
+            circle_marker_07daf4662150313f6c4aceb256c1cea9.bindTooltip(
+                `<div>
+                     <b>PEARSON</b><br>Category: Takeoff<br>Altitude: 11,635 ft<br>Distance: 20.15 NM<br>Bearing (Mag): 156.09545853215698°<br>Lat: 43.40000<br>Lon: -79.37000
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            map_525126c534f98a722348a1c6ebe7053b.fitBounds(
+                [[42.67641891891892, -80.63138108108109], [44.678581081081084, -78.62921891891892]],
+                {}
+            );
+        
+            // CYYZ VOR coordinates
+            const CYYZ_LAT = 43.6775;
+            const CYYZ_LON = -79.6303;
+            
+            // Function to send CYYZ VOR position to parent frame
+            function sendVORPosition() {
+                const point = map_525126c534f98a722348a1c6ebe7053b.latLngToContainerPoint([CYYZ_LAT, CYYZ_LON]);
+                const mapSize = map_525126c534f98a722348a1c6ebe7053b.getSize();
+                console.log('Sending VOR position:', point.x, point.y, 'Map size:', mapSize); // Debug log
+                
+                // Calculate percentage position within the map
+                const percentX = (point.x / mapSize.x) * 100;
+                const percentY = (point.y / mapSize.y) * 100;
+                
+                console.log('VOR percentage position:', percentX.toFixed(2) + '%', percentY.toFixed(2) + '%');
+                
+                window.parent.postMessage({
+                    type: 'RADAR_CENTER',
+                    x: percentX,
+                    y: percentY,
+                    zoom: map_525126c534f98a722348a1c6ebe7053b.getZoom()
+                }, '*');
+            }
+            
+            // Send initial position
+            setTimeout(sendVORPosition, 100);
+            
+            // Listen for map move and zoom events
+            map_525126c534f98a722348a1c6ebe7053b.on('move', sendVORPosition);
+            map_525126c534f98a722348a1c6ebe7053b.on('zoom', sendVORPosition);
+            map_525126c534f98a722348a1c6ebe7053b.on('viewreset', sendVORPosition);
+        
+</script>
+</html>
