@@ -32,22 +32,22 @@ GLIDESLOPE_SLOPE = math.tan(GLIDESLOPE_ANGLE_RAD)  # ~0.0524
 # ========== Physical Constants ==========
 G = 9.80665  # m/s² - standard gravity
 
-# ========== Distance Thresholds (Legacy - Use airspace sectors instead) ==========
+# ========== Distance Thresholds (Updated for Logical Approach) ==========
 # Nautical miles from airport
-ENTRY_ZONE_THRESHOLD_NM = 30.0  # Enter ATC control zone
+ENTRY_ZONE_THRESHOLD_NM = 60.0  # Entry ATC control zone (updated from 30 NM)
 HANDOFF_READY_THRESHOLD_NM = 20.0  # Ready for approach handoff
 TOUCHDOWN_ALTITUDE_FT = 50.0  # AGL - consider touchdown below this
 
 # ========== Airspace Sector Boundaries ==========
 # Multi-sector airspace around YYZ (concentric annuli)
-SECTOR_ENTRY_INNER_NM = 30.0  # ENTRY sector inner boundary
-SECTOR_ENTRY_OUTER_NM = 60.0  # ENTRY sector outer boundary
+SECTOR_ENTRY_INNER_NM = 60.0  # ENTRY sector inner boundary (updated from 30 NM)
+SECTOR_ENTRY_OUTER_NM = 80.0  # ENTRY sector outer boundary (updated from 60 NM)
 SECTOR_ENTRY_ALT_MIN_FT = 20000  # FL200
 SECTOR_ENTRY_ALT_MAX_FT = 60000  # FL600
 
 SECTOR_ENROUTE_INNER_NM = 10.0  # ENROUTE sector inner boundary
-SECTOR_ENROUTE_OUTER_NM = 30.0  # ENROUTE sector outer boundary
-SECTOR_ENROUTE_ALT_MIN_FT = 18000  # FL180
+SECTOR_ENROUTE_OUTER_NM = 60.0  # ENROUTE sector outer boundary (updated from 30 NM)
+SECTOR_ENROUTE_ALT_MIN_FT = 16000  # FL160 (updated from FL180)
 SECTOR_ENROUTE_ALT_MAX_FT = 35000  # FL350
 
 SECTOR_APPROACH_INNER_NM = 3.0  # APPROACH sector inner boundary
@@ -114,4 +114,12 @@ TICK_WARNING_THRESHOLD_SEC = 0.1  # log warning if tick takes longer
 
 # ========== Database Query Limits ==========
 MAX_ACTIVE_AIRCRAFT = 100  # maximum aircraft to process per tick
+
+# ========== Holding Pattern Logic ==========
+HOLDING_BOUNDARY_NM = 60.0  # Distance boundary for holding pattern
+HOLDING_APPROACH_RANGE_NM = 70.0  # Extended range for approaching boundary detection
+HOLDING_MIN_ALTITUDE_FT = 15000  # Minimum altitude threshold for forced climb
+HOLDING_TARGET_ALTITUDE_FT = 16000  # Target altitude for aircraft in holding pattern
+HOLDING_DESCENT_TARGET_ALTITUDE_FT = 17000  # Target altitude at 60 NM for descent profile
+HOLDING_TARGET_SPEED_KTS = 290  # Target speed at 60 NM boundary
 

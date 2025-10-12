@@ -234,6 +234,106 @@ def calculate_glideslope_altitude(distance_nm: float,
     return target_altitude
 
 
+def calculate_holding_heading(lat: float, lon: float, current_distance_nm: float) -> float:
+    """
+    Calculate heading to maintain or extend distance from airport.
+    Used for holding pattern when aircraft haven't been assigned waypoints.
+    
+    Args:
+        lat, lon: Current aircraft position
+        current_distance_nm: Current distance from airport
+    
+    Returns:
+        Heading in degrees to maintain distance > 60 NM
+    """
+    yyz_lat = 43.6777
+    yyz_lon = -79.6248
+    
+    # Calculate bearing from aircraft to airport
+    bearing_to_airport = calculate_heading_to_yyz(lat, lon)
+    
+    # More aggressive holding pattern based on distance using configurable constants
+    from .constants import HOLDING_BOUNDARY_NM
+    
+    if current_distance_nm < HOLDING_BOUNDARY_NM:
+        # Aircraft is INSIDE boundary - turn AWAY from airport to increase distance
+        # Turn 180 degrees opposite to airport bearing to move away
+        holding_heading = (bearing_to_airport + 180) % 360
+        print(f"🚨 INSIDE BOUNDARY: Turning 180° away from airport")
+    elif current_distance_nm <= HOLDING_BOUNDARY_NM + 5.0:
+        # Aircraft is close to boundary - turn perpendicular for circular pattern
+        holding_heading = (bearing_to_airport + 90) % 360
+        print(f"🔄 CLOSE TO BOUNDARY: Turning 90° perpendicular")
+    elif current_distance_nm <= HOLDING_BOUNDARY_NM + 10.0:
+        # Aircraft is approaching boundary - turn more away from airport
+        holding_heading = (bearing_to_airport + 120) % 360
+        print(f"⚠️ APPROACHING BOUNDARY: Turning 120° away")
+    else:
+        # Aircraft is further out - turn more away from airport to extend distance
+        holding_heading = (bearing_to_airport + 120) % 360
+    
+    return holding_heading
+
+
+def should_enter_holding_pattern(aircraft: Dict[str, Any]) -> bool:
+    """
+    Determine if aircraft should enter holding pattern.
+    
+    More aggressive conditions to prevent aircraft from penetrating 60 NM boundary:
+    1. Aircraft is INSIDE 60 NM boundary (any altitude), OR
+    2. Aircraft is approaching 60 NM boundary (60-70 NM) and below 16,000 ft, OR
+    3. Aircraft is at any distance but significantly below proper altitude for approach
+    
+    Args:
+        aircraft: Aircraft data dictionary
+    
+    Returns:
+        True if aircraft should enter holding pattern
+    """
+    position = aircraft["position"]
+    altitude_ft = position["altitude_ft"]
+    distance_nm = aircraft.get("distance_to_airport_nm", 999.0)
+    controller = aircraft.get("controller", "ENGINE")
+    
+    # Check if aircraft has specific assignments (waypoints, targets)
+    has_specific_assignments = (
+        aircraft.get("target_heading_deg") is not None or
+        aircraft.get("target_altitude_ft") is not None or
+        aircraft.get("target_speed_kts") is not None or
+        aircraft.get("waypoints") is not None
+    )
+    
+    # More aggressive holding pattern conditions using configurable constants
+    from .constants import (
+        HOLDING_BOUNDARY_NM, HOLDING_APPROACH_RANGE_NM, 
+        HOLDING_MIN_ALTITUDE_FT, HOLDING_TARGET_ALTITUDE_FT
+    )
+    
+    # Trigger holding pattern if:
+    # 1. Inside boundary (any altitude)
+    inside_boundary = distance_nm < HOLDING_BOUNDARY_NM
+    
+    # 2. Approaching boundary and below target altitude
+    approaching_boundary_low = (HOLDING_BOUNDARY_NM <= distance_nm <= HOLDING_APPROACH_RANGE_NM 
+                               and altitude_ft < HOLDING_TARGET_ALTITUDE_FT)
+    
+    # 3. Any distance but significantly below proper altitude for approach
+    altitude_too_low = altitude_ft < HOLDING_MIN_ALTITUDE_FT
+    
+    engine_controlled = controller == "ENGINE"
+    not_assigned = not has_specific_assignments
+    
+    should_hold = (inside_boundary or approaching_boundary_low or altitude_too_low) and engine_controlled and not_assigned
+    
+    # Debug logging
+    if should_hold:
+        callsign = aircraft.get("callsign", "UNKNOWN")
+        print(f"🚨 HOLDING TRIGGERED: {callsign} - Distance: {distance_nm:.1f} NM, Alt: {altitude_ft:.0f} ft")
+        print(f"   Inside: {inside_boundary}, Approaching: {approaching_boundary_low}, Low Alt: {altitude_too_low}")
+    
+    return should_hold
+
+
 def apply_random_drift(current_value: float, drift_amount: float, 
                       is_circular: bool = False) -> float:
     """
@@ -260,10 +360,185 @@ def apply_random_drift(current_value: float, drift_amount: float,
     return new_value
 
 
+def calculate_descent_profile(current_distance_nm: float, current_altitude_ft: float, 
+                            target_altitude_ft: float = None) -> float:
+    """
+    Calculate descent rate to reach target altitude at boundary.
+    
+    Args:
+        current_distance_nm: Current distance from YYZ
+        current_altitude_ft: Current altitude MSL
+        target_altitude_ft: Target altitude at boundary (uses constant if None)
+    
+    Returns:
+        Required descent rate (fpm)
+    """
+    from .constants import HOLDING_BOUNDARY_NM, HOLDING_DESCENT_TARGET_ALTITUDE_FT
+    
+    if target_altitude_ft is None:
+        target_altitude_ft = HOLDING_DESCENT_TARGET_ALTITUDE_FT
+    
+    distance_to_boundary = current_distance_nm - HOLDING_BOUNDARY_NM
+    altitude_to_lose = current_altitude_ft - target_altitude_ft
+    
+    if distance_to_boundary > 0 and altitude_to_lose > 0:
+        # Calculate required descent rate (ft/NM)
+        required_descent_rate = altitude_to_lose / distance_to_boundary
+        # Convert to fpm (feet per minute) at typical speed
+        descent_rate_fpm = required_descent_rate * 300  # Assuming 300 kts
+        return min(descent_rate_fpm, 2000)  # Cap at 2000 fpm
+    return 0
+
+
+def calculate_speed_profile(current_distance_nm: float, current_speed_kts: float) -> float:
+    """
+    Calculate speed reduction to reach target speed at boundary.
+    
+    Args:
+        current_distance_nm: Current distance from YYZ
+        current_speed_kts: Current speed
+    
+    Returns:
+        Target speed (kts)
+    """
+    from .constants import HOLDING_BOUNDARY_NM, HOLDING_TARGET_SPEED_KTS
+    
+    if current_distance_nm > HOLDING_BOUNDARY_NM:
+        # Gradual speed reduction from 300+ to target speed at boundary
+        # At 80 NM: 300+ kts, At boundary: target speed
+        distance_factor = (current_distance_nm - HOLDING_BOUNDARY_NM) / 20  # 0 to 1 as distance decreases
+        target_speed = HOLDING_TARGET_SPEED_KTS + distance_factor * 20  # target to target+20 kts
+        return min(target_speed, current_speed_kts)
+    return current_speed_kts
+
+
+def calculate_heading_to_yyz(lat: float, lon: float) -> float:
+    """
+    Calculate heading from current position to YYZ.
+    
+    Args:
+        lat: Current latitude
+        lon: Current longitude
+    
+    Returns:
+        Heading to YYZ (degrees, 0-360)
+    """
+    yyz_lat = 43.6777
+    yyz_lon = -79.6248
+    
+    d_lon = (yyz_lon - lon) * math.pi / 180
+    lat1 = lat * math.pi / 180
+    lat2 = yyz_lat * math.pi / 180
+    
+    y = math.sin(d_lon) * math.cos(lat2)
+    x = math.cos(lat1) * math.sin(lat2) - math.sin(lat1) * math.cos(lat2) * math.cos(d_lon)
+    
+    heading = math.atan2(y, x) * 180 / math.pi
+    return (heading + 360) % 360
+
+
+def apply_logical_approach_physics(aircraft: Dict[str, Any], dt: float = DT) -> Dict[str, Any]:
+    """
+    Apply logical approach physics instead of random drift.
+    
+    Args:
+        aircraft: Aircraft state dictionary
+        dt: Time step (seconds)
+    
+    Returns:
+        Updated aircraft state with logical physics applied
+    """
+    # Extract current state
+    position = aircraft.get("position", {})
+    lat = position.get("lat", 0.0)
+    lon = position.get("lon", 0.0)
+    altitude_ft = position.get("altitude_ft", 0.0)
+    speed_kts = position.get("speed_kts", 0.0)
+    heading = position.get("heading", 0.0)
+    
+    # Calculate distance to YYZ
+    from .geo_utils import distance_to_airport
+    distance_nm = distance_to_airport(lat, lon)
+    
+    # Apply altitude profile based on situation - using configurable constants
+    from .constants import (
+        HOLDING_BOUNDARY_NM, HOLDING_MIN_ALTITUDE_FT, HOLDING_TARGET_ALTITUDE_FT
+    )
+    
+    if altitude_ft < HOLDING_MIN_ALTITUDE_FT:
+        # Aircraft is significantly below proper altitude - FORCE CLIMB to target altitude
+        target_altitude = HOLDING_TARGET_ALTITUDE_FT
+        new_altitude, vertical_speed = update_altitude(
+            altitude_ft, target_altitude, distance_nm, False, dt
+        )
+        print(f"🚨 FORCED CLIMB: Altitude {altitude_ft:.0f} ft → {target_altitude:.0f} ft")
+    elif distance_nm < HOLDING_BOUNDARY_NM and altitude_ft < HOLDING_TARGET_ALTITUDE_FT:
+        # Aircraft is inside boundary but below target altitude - CLIMB to target altitude
+        target_altitude = HOLDING_TARGET_ALTITUDE_FT
+        new_altitude, vertical_speed = update_altitude(
+            altitude_ft, target_altitude, distance_nm, False, dt
+        )
+    elif distance_nm > HOLDING_BOUNDARY_NM:
+        # Normal descent profile for aircraft approaching boundary
+        target_altitude = calculate_descent_profile(distance_nm, altitude_ft)
+        new_altitude, vertical_speed = update_altitude(
+            altitude_ft, target_altitude, distance_nm, False, dt
+        )
+    else:
+        # Aircraft is at proper altitude and distance
+        new_altitude = altitude_ft
+        vertical_speed = 0.0
+    
+    # Apply speed profile using configurable constants
+    from .constants import HOLDING_BOUNDARY_NM
+    if distance_nm > HOLDING_BOUNDARY_NM:
+        target_speed = calculate_speed_profile(distance_nm, speed_kts)
+        new_speed = update_speed(speed_kts, target_speed, dt)
+    else:
+        new_speed = speed_kts
+    
+    # Check if aircraft should enter holding pattern
+    if should_enter_holding_pattern(aircraft):
+        # Apply holding pattern - turn perpendicular to maintain distance > 60 NM
+        holding_heading = calculate_holding_heading(lat, lon, distance_nm)
+        new_heading = update_heading(heading, holding_heading, speed_kts, dt)
+        
+        # Log holding pattern activation with more detail
+        callsign = aircraft.get("callsign", "UNKNOWN")
+        if distance_nm < 60.0:
+            print(f"🚨 HOLDING PATTERN: {callsign} INSIDE 60 NM at {distance_nm:.1f} NM, {altitude_ft:.0f} ft - TURNING AWAY")
+        else:
+            print(f"🔄 HOLDING PATTERN: {callsign} approaching 60 NM at {distance_nm:.1f} NM, {altitude_ft:.0f} ft")
+    else:
+        # Normal approach - maintain heading toward YYZ (with small random variation)
+        yyz_heading = calculate_heading_to_yyz(lat, lon)
+        heading_variation = random.uniform(-5, 5)  # ±5 degrees
+        target_heading = (yyz_heading + heading_variation) % 360
+        new_heading = update_heading(heading, target_heading, speed_kts, dt)
+    
+    # Update position
+    from .geo_utils import update_position
+    new_lat, new_lon = update_position(lat, lon, new_heading, new_speed, dt)
+    
+    # Return updated state
+    updated = aircraft.copy()
+    updated["position"] = {
+        "lat": new_lat,
+        "lon": new_lon,
+        "altitude_ft": new_altitude,
+        "speed_kts": new_speed,
+        "heading": new_heading,
+    }
+    updated["vertical_speed_fpm"] = vertical_speed
+    updated["distance_to_airport_nm"] = distance_nm
+    
+    return updated
+
+
 def update_aircraft_state(aircraft: Dict[str, Any], dt: float = DT) -> Dict[str, Any]:
     """
     Update complete aircraft state for one tick.
-    Applies all kinematic formulas and random drift.
+    Applies logical approach physics for arrivals, random drift for others.
     
     Args:
         aircraft: Aircraft state dictionary
@@ -280,14 +555,22 @@ def update_aircraft_state(aircraft: Dict[str, Any], dt: float = DT) -> Dict[str,
     speed = position.get("speed_kts", 0.0)
     heading = position.get("heading", 0.0)
     
-    # Get targets (if None, apply drift)
+    # Calculate distance to airport
+    from .geo_utils import distance_to_airport
+    distance_nm = distance_to_airport(lat, lon)
+    
+    # Check if aircraft is controlled by ENGINE and is an arrival
+    controller = aircraft.get("controller", "ENGINE")
+    flight_type = aircraft.get("flight_type", "ARRIVAL")
+    
+    # Apply logical approach physics for ENGINE-controlled arrivals
+    if controller == "ENGINE" and flight_type == "ARRIVAL":
+        return apply_logical_approach_physics(aircraft, dt)
+    
+    # For other aircraft, use original logic with targets or drift
     target_speed = aircraft.get("target_speed_kts")
     target_heading = aircraft.get("target_heading_deg")
     target_altitude = aircraft.get("target_altitude_ft")
-    
-    # Calculate distance to airport
-    from .geo_utils import distance_to_airport, update_position
-    distance_nm = distance_to_airport(lat, lon)
     
     # Determine if on approach
     is_approach = distance_nm < 20.0
@@ -325,6 +608,7 @@ def update_aircraft_state(aircraft: Dict[str, Any], dt: float = DT) -> Dict[str,
             vertical_speed = 0.0
     
     # Update position
+    from .geo_utils import update_position
     new_lat, new_lon = update_position(lat, lon, new_heading, new_speed, dt)
     
     # Return updated state

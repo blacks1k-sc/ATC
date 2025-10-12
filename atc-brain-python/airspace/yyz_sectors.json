@@ -14,18 +14,18 @@
       "name": "ENTRY",
       "description": "Airspace Entry/Exit - FIR Boundary Sector",
       "type": "ENTRY_EXIT",
-      "radius_nm_inner": 30.0,
-      "radius_nm_outer": 60.0,
+      "radius_nm_inner": 60.0,
+      "radius_nm_outer": 80.0,
       "altitude_ft_min": 20000,
       "altitude_ft_max": 60000,
       "controller_hint": "ENTRY_ATC",
       "hysteresis_nm": 0.5,
-      "behavior": "random_drift",
-      "drift_params": {
-        "heading_deg": 4.0,
-        "speed_kts": 5.0,
-        "altitude_fpm": 200.0,
-        "boundary_reflection": true
+      "behavior": "logical_approach",
+      "approach_params": {
+        "target_altitude_at_60nm": 17000,
+        "target_speed_at_60nm": 290,
+        "descent_rate_fpm": 2000,
+        "heading_variation_deg": 5.0
       }
     },
     {
@@ -33,8 +33,8 @@
       "description": "En-Route Operations - Climb/Descent Management",
       "type": "ENROUTE",
       "radius_nm_inner": 10.0,
-      "radius_nm_outer": 30.0,
-      "altitude_ft_min": 18000,
+      "radius_nm_outer": 60.0,
+      "altitude_ft_min": 16000,
       "altitude_ft_max": 35000,
       "controller_hint": "ENROUTE_ATC",
       "hysteresis_nm": 0.5,
@@ -83,66 +83,66 @@
   "entry_fixes": [
     {
       "name": "BOXUM",
-      "lat": 44.177670,
+      "lat": 44.677670,
       "lon": -79.630560,
       "bearing_from_airport": 0.0,
-      "distance_nm": 30.0,
+      "distance_nm": 60.0,
       "description": "North Entry Fix"
     },
     {
       "name": "DUVOS",
-      "lat": 44.031246,
-      "lon": -79.207394,
+      "lat": 44.385246,
+      "lon": -78.784394,
       "bearing_from_airport": 45.0,
-      "distance_nm": 30.0,
+      "distance_nm": 60.0,
       "description": "Northeast Entry Fix"
     },
     {
       "name": "NUBER",
       "lat": 43.676670,
-      "lon": -79.207394,
+      "lon": -78.784394,
       "bearing_from_airport": 90.0,
-      "distance_nm": 30.0,
+      "distance_nm": 60.0,
       "description": "East Entry Fix"
     },
     {
       "name": "KEDMA",
-      "lat": 43.322094,
-      "lon": -79.207394,
+      "lat": 42.968094,
+      "lon": -78.784394,
       "bearing_from_airport": 135.0,
-      "distance_nm": 30.0,
+      "distance_nm": 60.0,
       "description": "Southeast Entry Fix"
     },
     {
       "name": "PILMU",
-      "lat": 43.176670,
+      "lat": 42.676670,
       "lon": -79.630560,
       "bearing_from_airport": 180.0,
-      "distance_nm": 30.0,
+      "distance_nm": 60.0,
       "description": "South Entry Fix"
     },
     {
       "name": "VERKO",
-      "lat": 43.322094,
-      "lon": -80.053726,
+      "lat": 42.968094,
+      "lon": -80.476726,
       "bearing_from_airport": 225.0,
-      "distance_nm": 30.0,
+      "distance_nm": 60.0,
       "description": "Southwest Entry Fix"
     },
     {
       "name": "IMEBA",
       "lat": 43.676670,
-      "lon": -80.053726,
+      "lon": -80.476726,
       "bearing_from_airport": 270.0,
-      "distance_nm": 30.0,
+      "distance_nm": 60.0,
       "description": "West Entry Fix"
     },
     {
       "name": "RAGID",
-      "lat": 44.031246,
-      "lon": -80.053726,
+      "lat": 44.385246,
+      "lon": -80.476726,
       "bearing_from_airport": 315.0,
-      "distance_nm": 30.0,
+      "distance_nm": 60.0,
       "description": "Northwest Entry Fix"
     }
   ],
@@ -201,7 +201,7 @@
   },
   "handoff_thresholds": {
     "ENTRY_TO_ENROUTE": {
-      "distance_nm": 30.0,
+      "distance_nm": 60.0,
       "hysteresis_nm": 0.5,
       "requires_inbound": true,
       "min_stable_ticks": 2
@@ -222,11 +222,11 @@
   "spawn_zones": {
     "arrivals": {
       "sector": "ENTRY",
-      "radius_nm_min": 40.0,
-      "radius_nm_max": 60.0,
-      "altitude_ft_min": 25000,
-      "altitude_ft_max": 35000,
-      "speed_kts_min": 280,
+      "radius_nm_min": 70.0,
+      "radius_nm_max": 80.0,
+      "altitude_ft_min": 20000,
+      "altitude_ft_max": 25000,
+      "speed_kts_min": 300,
       "speed_kts_max": 350,
       "random_bearing": true
     },

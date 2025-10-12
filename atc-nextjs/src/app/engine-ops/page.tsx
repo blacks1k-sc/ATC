@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { AircraftInstance } from '@/types/atc';
+import { calculateSector } from '@/utils/geoUtils';
 
 interface EngineOpsAircraft extends AircraftInstance {
   sector?: string;
@@ -21,15 +22,12 @@ export default function EngineOpsPage() {
   const [sectorFilter, setSectorFilter] = useState<string>('ENTRY');
   const [autoRefresh, setAutoRefresh] = useState(true);
 
-  // Calculate sector based on distance
-  const calculateSector = (distance: number | string | undefined): string => {
+  // Use the logic-based sector calculation from geoUtils
+  const getSectorFromDistance = (distance: number | string | undefined): string => {
     if (!distance) return 'UNKNOWN';
     const dist = typeof distance === 'string' ? parseFloat(distance) : distance;
     if (isNaN(dist)) return 'UNKNOWN';
-    if (dist > 30) return 'ENTRY';
-    if (dist > 10) return 'ENROUTE';
-    if (dist > 3) return 'APPROACH';
-    return 'RUNWAY';
+    return calculateSector(dist);
   };
 
   // Fetch aircraft data
@@ -41,10 +39,10 @@ export default function EngineOpsPage() {
       }
       const data = await response.json();
       
-      // Add computed sector based on distance
+      // Add computed sector based on distance using logic-based calculation
       const aircraftWithSectors = data.aircraft.map((ac: EngineOpsAircraft) => ({
         ...ac,
-        sector: ac.sector || calculateSector(ac.distance_to_airport_nm)
+        sector: ac.sector || getSectorFromDistance(ac.distance_to_airport_nm)
       }));
       
       // Filter by sector if specified
