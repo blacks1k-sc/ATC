@@ -132,16 +132,6 @@ This change can help understand:
       // Upload to Supermemory
       await this.apiClient.post('/memories', {
         content: summary,
-        metadata: JSON.stringify({
-          project: PROJECT_NAME,
-          type: 'git_commit',
-          commit_hash: commit.hash,
-          author: commit.author_name,
-          date: commit.date,
-          files_changed: changedFiles.length,
-          insertions: changedFiles.reduce((sum, f) => sum + f.insertions, 0),
-          deletions: changedFiles.reduce((sum, f) => sum + f.deletions, 0),
-        }),
       });
 
       console.log('✅ Commit tracked successfully!');
