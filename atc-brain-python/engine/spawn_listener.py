@@ -7,10 +7,13 @@ import redis
 import json
 import asyncio
 import os
+import logging
 from typing import Optional, Callable
 from dotenv import load_dotenv
 
 load_dotenv()
+
+logger = logging.getLogger(__name__)
 
 
 class SpawnListener:
@@ -50,9 +53,9 @@ class SpawnListener:
                 # Consume the subscription confirmation message
                 self.pubsub.get_message()
                 
-                print(f"✅ SpawnListener: Subscribed to Redis channel '{self.channel}'")
+                logger.info(f"SpawnListener: Subscribed to Redis channel '{self.channel}'")
             except Exception as e:
-                print(f"❌ SpawnListener: Failed to connect to Redis: {e}")
+                logger.error(f"SpawnListener: Failed to connect to Redis: {e}")
                 self.redis_client = None
                 self.pubsub = None
     
@@ -69,7 +72,7 @@ class SpawnListener:
             self.redis_client.close()
             self.redis_client = None
         
-        print("🔌 SpawnListener: Redis connection closed")
+        logger.info("SpawnListener: Redis connection closed")
     
     async def process_aircraft_created_event(self, event_data: dict):
         """
@@ -80,6 +83,8 @@ class SpawnListener:
             event_data: Event payload from Redis
         """
         try:
+            from .config import config
+            
             aircraft = event_data.get("aircraft", {})
             aircraft_id = aircraft.get("id")
             flight_type = aircraft.get("flight_type")
@@ -89,7 +94,8 @@ class SpawnListener:
             if flight_type != "ARRIVAL":
                 return
             
-            print(f"🛬 SpawnListener: New arrival detected: {callsign} (ID: {aircraft_id})")
+            if config.DEBUG_PRINTS:
+                logger.debug(f"SpawnListener: New arrival detected: {callsign} (ID: {aircraft_id})")
             
             # Mark for ENGINE control
             success = await self.state_manager.update_aircraft_state(aircraft_id, {
@@ -98,16 +104,17 @@ class SpawnListener:
             })
             
             if success:
-                print(f"   ✅ Assigned ENGINE control to {callsign}")
+                if config.DEBUG_PRINTS:
+                    logger.debug(f"   Assigned ENGINE control to {callsign}")
                 
                 # Call optional callback
                 if self.callback:
                     await self.callback(aircraft)
             else:
-                print(f"   ⚠️  Failed to assign ENGINE control to {callsign}")
+                logger.warning(f"   Failed to assign ENGINE control to {callsign}")
         
         except Exception as e:
-            print(f"❌ SpawnListener: Error processing aircraft.created event: {e}")
+            logger.error(f"SpawnListener: Error processing aircraft.created event: {e}")
     
     async def listen_async(self):
         """
@@ -118,11 +125,11 @@ class SpawnListener:
             self.connect()
         
         if not self.pubsub:
-            print("❌ SpawnListener: Cannot start - Redis unavailable")
+            logger.error("SpawnListener: Cannot start - Redis unavailable")
             return
         
         self.running = True
-        print("👂 SpawnListener: Started listening for aircraft.created events")
+        logger.info("SpawnListener: Started listening for aircraft.created events")
         
         while self.running:
             try:
@@ -147,10 +154,10 @@ class SpawnListener:
                 await asyncio.sleep(0.1)
             
             except Exception as e:
-                print(f"⚠️  SpawnListener: Error in listen loop: {e}")
+                logger.error(f"SpawnListener: Error in listen loop: {e}")
                 await asyncio.sleep(1.0)  # Back off on error
         
-        print("👂 SpawnListener: Stopped listening")
+        logger.info("SpawnListener: Stopped listening")
     
     def start_background_task(self) -> asyncio.Task:
         """

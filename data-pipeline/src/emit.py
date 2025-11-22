@@ -316,11 +316,11 @@ def main():
         with open(dist_dir / "meta.json", 'w') as f:
             json.dump(meta, f, indent=2)
         
-        console.print(f"[green]✓ Successfully built {len(aircraft_types)} aircraft types and {len(airlines)} airlines[/green]")
-        console.print(f"[green]✓ Output files written to dist/[/green]")
+        console.print(f"[green]Successfully built {len(aircraft_types)} aircraft types and {len(airlines)} airlines[/green]")
+        console.print(f"[green]Output files written to dist/[/green]")
         
     except Exception as e:
-        console.print(f"[red]✗ Pipeline failed: {e}[/red]")
+        console.print(f"[red]Pipeline failed: {e}[/red]")
         logger.exception("Pipeline failed")
         raise
 

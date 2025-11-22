@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { eventBus, EVENT_TYPES } from '@/lib/eventBus';
+import { eventBus, EVENT_TYPES, type EventType } from '@/lib/eventBus';
 import { 
   pool, 
   withTransaction, 
@@ -15,13 +15,19 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const limit = parseInt(searchParams.get('limit') || '50');
   const level = searchParams.get('level');
-  const type = searchParams.get('type');
+  const typeParams = searchParams.getAll('type').filter(Boolean);
   const aircraft_id = searchParams.get('aircraft_id');
   const sector = searchParams.get('sector');
 
+  const listenTypes = (typeParams.length > 0
+    ? Array.from(new Set(typeParams))
+    : [EVENT_TYPES.EVENT_CREATED]) as EventType[];
+
   const filters: any = {};
   if (level) filters.level = level;
-  if (type) filters.type = type;
+  if (listenTypes.length === 1) {
+    filters.type = listenTypes[0];
+  }
   if (aircraft_id) filters.aircraft_id = parseInt(aircraft_id);
   if (sector) filters.sector = sector;
 
@@ -71,42 +77,52 @@ export async function GET(request: NextRequest) {
       };
 
       // Subscribe to real-time events
-      const unsubscribe = eventBus.subscribe(EVENT_TYPES.EVENT_CREATED, (message) => {
+      const unsubscribers: Array<() => void> = [];
+
+      const handleMessage = (message: any) => {
         try {
-          // Apply filters to real-time events
-          const event = message.event;
-          if (!event) return;
+          if (!message) return;
 
-          let shouldSend = true;
+          if (message.type === EVENT_TYPES.EVENT_CREATED) {
+            const event = message.event;
+            if (!event) return;
 
-          if (filters.level && event.level !== filters.level) {
-            shouldSend = false;
-          }
-
-          if (filters.type && event.type !== filters.type) {
-            shouldSend = false;
-          }
-
-          if (filters.aircraft_id && event.aircraft_id !== filters.aircraft_id) {
-            shouldSend = false;
-          }
-
-          if (filters.sector && event.sector !== filters.sector) {
-            shouldSend = false;
-          }
-
-          if (shouldSend) {
-            const data = `data: ${JSON.stringify({
-              type: 'realtime',
-              event
-            })}\n\n`;
-            if (controller.desiredSize !== null) {
-              controller.enqueue(encoder.encode(data));
+            if (filters.level && event.level !== filters.level) {
+              return;
             }
+
+            if (filters.type && event.type !== filters.type) {
+              return;
+            }
+
+            if (filters.aircraft_id && event.aircraft_id !== filters.aircraft_id) {
+              return;
+            }
+
+            if (filters.sector && event.sector !== filters.sector) {
+              return;
+            }
+          }
+
+          const payload = {
+            type: message.type,
+            data: message.data,
+            event: message.event,
+            timestamp: message.timestamp,
+          };
+
+          const data = `data: ${JSON.stringify(payload)}\n\n`;
+          if (controller.desiredSize !== null) {
+            controller.enqueue(encoder.encode(data));
           }
         } catch (error) {
           console.error('Error processing real-time event:', error);
         }
+      };
+
+      listenTypes.forEach((eventType) => {
+        const unsubscribe = eventBus.subscribe(eventType, handleMessage);
+        unsubscribers.push(unsubscribe);
       });
 
       // Send initial events
@@ -114,7 +130,13 @@ export async function GET(request: NextRequest) {
 
       // Handle client disconnect
       const cleanup = () => {
-        unsubscribe();
+        unsubscribers.forEach((unsubscribe) => {
+          try {
+            unsubscribe();
+          } catch (error) {
+            console.error('Error unsubscribing from event bus:', error);
+          }
+        });
         controller.close();
       };
 

@@ -186,7 +186,7 @@ def health():
     return jsonify({"status": "healthy", "timestamp": datetime.now().isoformat()})
 
 if __name__ == '__main__':
-    print("🚁 Starting Radar Service...")
-    print("📍 Map available at: http://localhost:5001")
-    print("🛩️  Aircraft API at: http://localhost:5001/api/aircraft")
+    print("Starting radar service...")
+    print("Map available at: http://localhost:5001")
+    print("Aircraft API at: http://localhost:5001/api/aircraft")
     app.run(host='0.0.0.0', port=5001, debug=True)

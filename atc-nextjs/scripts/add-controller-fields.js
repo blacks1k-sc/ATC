@@ -15,7 +15,7 @@ const pool = new Pool({
 });
 
 async function runMigration() {
-  console.log('🔄 Adding controller and related fields to aircraft_instances table...');
+  console.log('Adding controller and related fields to aircraft_instances table...');
   
   try {
     await pool.query(`
@@ -30,7 +30,7 @@ async function runMigration() {
       ADD COLUMN IF NOT EXISTS distance_to_airport_nm DECIMAL(8,2);
     `);
     
-    console.log('✅ Successfully added controller and related fields');
+    console.log('Successfully added controller and related fields');
     
     // Update existing aircraft to have ENGINE controller
     const result = await pool.query(`
@@ -39,10 +39,10 @@ async function runMigration() {
       WHERE controller IS NULL;
     `);
     
-    console.log(`✅ Updated ${result.rowCount} existing aircraft to ENGINE controller`);
+    console.log(`Updated ${result.rowCount} existing aircraft to ENGINE controller`);
     
   } catch (error) {
-    console.error('❌ Migration failed:', error);
+    console.error('Migration failed:', error);
     process.exit(1);
   } finally {
     await pool.end();

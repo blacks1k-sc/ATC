@@ -44,6 +44,49 @@
                 }
             </style>
 
+            <style>
+                .aircraft-marker-wrapper {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    pointer-events: none;
+                    color: #e0fff6;
+                    text-shadow: 0 0 3px rgba(0, 255, 204, 0.7);
+                }
+
+                .aircraft-marker-body {
+                    width: 0;
+                    height: 0;
+                    border-left: 6px solid transparent;
+                    border-right: 6px solid transparent;
+                    border-bottom: 14px solid rgba(0, 255, 170, 0.95);
+                    filter: drop-shadow(0 0 5px rgba(0, 255, 170, 0.75));
+                    transform-origin: center center;
+                }
+
+                .aircraft-marker-label {
+                    margin-top: 2px;
+                    padding: 1px 4px;
+                    background: rgba(0, 0, 0, 0.7);
+                    border-radius: 4px;
+                    border: 1px solid rgba(0, 255, 170, 0.45);
+                    font-size: 10px;
+                    letter-spacing: 0.5px;
+                    line-height: 1.2;
+                    pointer-events: none;
+                }
+
+                .aircraft-marker-emergency .aircraft-marker-body {
+                    border-bottom-color: rgba(255, 77, 77, 0.95);
+                    filter: drop-shadow(0 0 6px rgba(255, 77, 77, 0.9));
+                }
+
+                .aircraft-marker-emergency .aircraft-marker-label {
+                    border-color: rgba(255, 77, 77, 0.6);
+                    color: #ffe4e4;
+                }
+            </style>
+
             <script>
                 L_NO_TOUCH = false;
                 L_DISABLE_3D = false;
@@ -1548,6 +1591,130 @@
                 [[42.67641891891892, -80.63138108108109], [44.678581081081084, -78.62921891891892]],
                 {}
             );
+
+            const radarMap = map_525126c534f98a722348a1c6ebe7053b;
+            const aircraftLayerGroup = L.layerGroup().addTo(radarMap);
+            const aircraftMarkers = new Map();
+
+            function normalizeHeading(value) {
+                const heading = typeof value === 'number' && Number.isFinite(value) ? value : 0;
+                const normalized = heading % 360;
+                return normalized < 0 ? normalized + 360 : normalized;
+            }
+
+            function escapeHtml(value) {
+                return String(value ?? '')
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#39;');
+            }
+
+            function buildMarkerLabel(aircraft) {
+                const callsign = escapeHtml((aircraft.callsign || 'UNK').toUpperCase()).slice(0, 8);
+                const altitudeFt = typeof aircraft.altitude_ft === 'number' && Number.isFinite(aircraft.altitude_ft)
+                    ? Math.max(0, Math.round(aircraft.altitude_ft / 100)).toString().padStart(3, '0')
+                    : null;
+                const speedKts = typeof aircraft.speed_kts === 'number' && Number.isFinite(aircraft.speed_kts)
+                    ? Math.round(aircraft.speed_kts)
+                    : null;
+
+                let label = callsign;
+                if (altitudeFt) {
+                    label += ` FL${altitudeFt}`;
+                }
+                if (speedKts) {
+                    label += ` ${speedKts}KT`;
+                }
+                return label;
+            }
+
+            function createAircraftIcon(aircraft) {
+                const heading = normalizeHeading(aircraft.heading);
+                const status = (aircraft.status || '').toLowerCase();
+                const emergency = status.includes('emerg') || status.includes('distress');
+                const label = buildMarkerLabel(aircraft);
+
+                return L.divIcon({
+                    className: emergency
+                        ? 'aircraft-marker-wrapper aircraft-marker-emergency'
+                        : 'aircraft-marker-wrapper',
+                    html: `
+                        <div class="aircraft-marker-body" style="transform: rotate(${heading}deg);"></div>
+                        <div class="aircraft-marker-label">${label}</div>
+                    `,
+                    iconSize: [36, 32],
+                    iconAnchor: [18, 16],
+                });
+            }
+
+            function updateAircraftMarkers(aircraftList) {
+                if (!Array.isArray(aircraftList)) {
+                    return;
+                }
+
+                const seen = new Set();
+
+                aircraftList.forEach((aircraft) => {
+                    if (!aircraft) return;
+
+                    const lat = typeof aircraft.lat === 'number' && Number.isFinite(aircraft.lat) ? aircraft.lat : null;
+                    const lon = typeof aircraft.lon === 'number' && Number.isFinite(aircraft.lon) ? aircraft.lon : null;
+                    if (lat === null || lon === null) {
+                        return;
+                    }
+
+                    const idSource = aircraft.id ?? aircraft.callsign ?? aircraft.icao24;
+                    if (!idSource) {
+                        return;
+                    }
+
+                    const markerId = String(idSource);
+                    seen.add(markerId);
+                    const latLng = [lat, lon];
+                    const emergency = (aircraft.status || '').toLowerCase().includes('emerg');
+                    const newHeading = normalizeHeading(aircraft.heading);
+                    const newLabel = buildMarkerLabel(aircraft);
+                    const existing = aircraftMarkers.get(markerId);
+
+                    if (existing) {
+                        existing.marker.setLatLng(latLng);
+
+                        const headingDelta = Math.abs(newHeading - existing.heading);
+                        const needsIconUpdate =
+                            headingDelta > 3 ||
+                            newLabel !== existing.label ||
+                            emergency !== existing.emergency;
+
+                        if (needsIconUpdate) {
+                            existing.marker.setIcon(createAircraftIcon(aircraft));
+                            existing.heading = newHeading;
+                            existing.label = newLabel;
+                            existing.emergency = emergency;
+                        }
+                    } else {
+                        const marker = L.marker(latLng, {
+                            icon: createAircraftIcon(aircraft),
+                            interactive: false,
+                        });
+                        marker.addTo(aircraftLayerGroup);
+                        aircraftMarkers.set(markerId, {
+                            marker,
+                            heading: newHeading,
+                            label: newLabel,
+                            emergency,
+                        });
+                    }
+                });
+
+                aircraftMarkers.forEach((entry, id) => {
+                    if (!seen.has(id)) {
+                        aircraftLayerGroup.removeLayer(entry.marker);
+                        aircraftMarkers.delete(id);
+                    }
+                });
+            }
         
             // CYYZ VOR coordinates
             const CYYZ_LAT = 43.6775;
@@ -1656,10 +1823,23 @@
             
             // Listen for search messages from parent window
             window.addEventListener('message', function(event) {
+                if (!event || !event.data || !event.data.type) {
+                    return;
+                }
+
                 if (event.data.type === 'SEARCH_WAYPOINT') {
                     findAndHighlightWaypoint(event.data.waypoint);
+                    return;
+                }
+
+                if (event.data.type === 'AIRCRAFT_SNAPSHOT') {
+                    updateAircraftMarkers(event.data.aircraft);
                 }
             });
+
+            window.parent.postMessage({
+                type: 'RADAR_READY'
+            }, '*');
             
             // Grid functionality
             let gridLayer = null;

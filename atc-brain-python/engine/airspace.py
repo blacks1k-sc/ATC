@@ -154,11 +154,11 @@ class AirspaceManager:
             if "airport" in config and "center" in config["airport"]:
                 self.airport_center = config["airport"]["center"]
             
-            print(f"✅ Loaded airspace config: {len(self.sectors)} sectors, {len(self.entry_fixes)} entry fixes")
+            print(f"Loaded airspace config: {len(self.sectors)} sectors, {len(self.entry_fixes)} entry fixes")
             return True
             
         except Exception as e:
-            print(f"⚠️  Failed to load airspace config: {e}")
+            print(f"Failed to load airspace config: {e}")
             print(f"   Using default sector configuration")
             self._load_default_config()
             return False

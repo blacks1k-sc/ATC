@@ -1,11 +1,20 @@
 """
 Aircraft kinematics formulas for deterministic motion simulation.
 All formulas operate on 1-second time steps (Δt = 1 s).
+
+This module is Ray-distributed for parallel execution on remote cluster nodes.
 """
 
 import math
 import random
 from typing import Dict, Any, Optional
+
+try:
+    import ray
+    RAY_AVAILABLE = True
+except ImportError:
+    RAY_AVAILABLE = False
+
 from .constants import (
     DT,
     A_ACC_MAX,
@@ -259,15 +268,15 @@ def calculate_holding_heading(lat: float, lon: float, current_distance_nm: float
         # Aircraft is INSIDE boundary - turn AWAY from airport to increase distance
         # Turn 180 degrees opposite to airport bearing to move away
         holding_heading = (bearing_to_airport + 180) % 360
-        print(f"🚨 INSIDE BOUNDARY: Turning 180° away from airport")
+        print("INSIDE BOUNDARY: Turning 180 deg away from airport")
     elif current_distance_nm <= HOLDING_BOUNDARY_NM + 5.0:
         # Aircraft is close to boundary - turn perpendicular for circular pattern
         holding_heading = (bearing_to_airport + 90) % 360
-        print(f"🔄 CLOSE TO BOUNDARY: Turning 90° perpendicular")
+        print("CLOSE TO BOUNDARY: Turning 90 deg perpendicular")
     elif current_distance_nm <= HOLDING_BOUNDARY_NM + 10.0:
         # Aircraft is approaching boundary - turn more away from airport
         holding_heading = (bearing_to_airport + 120) % 360
-        print(f"⚠️ APPROACHING BOUNDARY: Turning 120° away")
+        print("APPROACHING BOUNDARY: Turning 120 deg away")
     else:
         # Aircraft is further out - turn more away from airport to extend distance
         holding_heading = (bearing_to_airport + 120) % 360
@@ -328,7 +337,7 @@ def should_enter_holding_pattern(aircraft: Dict[str, Any]) -> bool:
     # Debug logging
     if should_hold:
         callsign = aircraft.get("callsign", "UNKNOWN")
-        print(f"🚨 HOLDING TRIGGERED: {callsign} - Distance: {distance_nm:.1f} NM, Alt: {altitude_ft:.0f} ft")
+        print(f"HOLDING TRIGGERED: {callsign} - Distance: {distance_nm:.1f} NM, Alt: {altitude_ft:.0f} ft")
         print(f"   Inside: {inside_boundary}, Approaching: {approaching_boundary_low}, Low Alt: {altitude_too_low}")
     
     return should_hold
@@ -471,7 +480,7 @@ def apply_logical_approach_physics(aircraft: Dict[str, Any], dt: float = DT) -> 
         new_altitude, vertical_speed = update_altitude(
             altitude_ft, target_altitude, distance_nm, False, dt
         )
-        print(f"🚨 FORCED CLIMB: Altitude {altitude_ft:.0f} ft → {target_altitude:.0f} ft")
+        print(f"FORCED CLIMB: Altitude {altitude_ft:.0f} ft -> {target_altitude:.0f} ft")
     elif distance_nm < HOLDING_BOUNDARY_NM and altitude_ft < HOLDING_TARGET_ALTITUDE_FT:
         # Aircraft is inside boundary but below target altitude - CLIMB to target altitude
         target_altitude = HOLDING_TARGET_ALTITUDE_FT
@@ -506,9 +515,9 @@ def apply_logical_approach_physics(aircraft: Dict[str, Any], dt: float = DT) -> 
         # Log holding pattern activation with more detail
         callsign = aircraft.get("callsign", "UNKNOWN")
         if distance_nm < 60.0:
-            print(f"🚨 HOLDING PATTERN: {callsign} INSIDE 60 NM at {distance_nm:.1f} NM, {altitude_ft:.0f} ft - TURNING AWAY")
+            print(f"HOLDING PATTERN: {callsign} INSIDE 60 NM at {distance_nm:.1f} NM, {altitude_ft:.0f} ft - TURNING AWAY")
         else:
-            print(f"🔄 HOLDING PATTERN: {callsign} approaching 60 NM at {distance_nm:.1f} NM, {altitude_ft:.0f} ft")
+            print(f"HOLDING PATTERN: {callsign} approaching 60 NM at {distance_nm:.1f} NM, {altitude_ft:.0f} ft")
     else:
         # Normal approach - maintain heading toward YYZ (with small random variation)
         yyz_heading = calculate_heading_to_yyz(lat, lon)
@@ -539,6 +548,8 @@ def update_aircraft_state(aircraft: Dict[str, Any], dt: float = DT) -> Dict[str,
     """
     Update complete aircraft state for one tick.
     Applies logical approach physics for arrivals, random drift for others.
+    
+    This function is CPU-intensive and executes on Ray cluster nodes.
     
     Args:
         aircraft: Aircraft state dictionary

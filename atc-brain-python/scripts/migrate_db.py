@@ -22,11 +22,11 @@ DB_CONFIG = {
 
 async def migrate():
     """Apply database migration to add engine control fields."""
-    print("🔧 Connecting to database...")
+    print("Connecting to database...")
     conn = await asyncpg.connect(**DB_CONFIG)
     
     try:
-        print("📝 Applying migration: Adding engine control fields...")
+        print("Applying migration: Adding engine control fields...")
         
         # Add new columns for engine control
         await conn.execute("""
@@ -41,7 +41,7 @@ async def migrate():
             ADD COLUMN IF NOT EXISTS last_event_fired VARCHAR(50);
         """)
         
-        print("✅ Migration completed successfully!")
+        print("Migration completed successfully!")
         
         # Verify the migration
         columns = await conn.fetch("""
@@ -56,16 +56,16 @@ async def migrate():
             ORDER BY column_name;
         """)
         
-        print("\n📊 Verified columns:")
+        print("\nVerified columns:")
         for col in columns:
             print(f"  - {col['column_name']}: {col['data_type']}")
         
     except Exception as e:
-        print(f"❌ Migration failed: {e}")
+        print(f"Migration failed: {e}")
         raise
     finally:
         await conn.close()
-        print("\n🔌 Database connection closed")
+        print("\nDatabase connection closed")
 
 
 if __name__ == "__main__":

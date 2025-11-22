@@ -1,0 +1,2 @@
+2025-11-09 00:32:58,946	INFO log_monitor.py:169 -- Starting log monitor with [max open files=200], [is_autoscaler_v2=False]
+2025-11-09 00:32:59,051	INFO log_monitor.py:291 -- Beginning to track file raylet.err

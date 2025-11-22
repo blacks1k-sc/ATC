@@ -137,11 +137,11 @@ def create_radar_map():
     return m
 
 if __name__ == "__main__":
-    print("🚁 Generating Radar Map...")
+    print("Generating radar map...")
     m = create_radar_map()
     
     # Save to public directory so Next.js can serve it
     output_path = "/Users/nrup/ATC-1/atc-nextjs/public/radar-map.html"
     m.save(output_path)
-    print(f"✅ Radar map saved to: {output_path}")
-    print("📍 Map available at: http://localhost:3000/radar-map.html")
+    print(f"Radar map saved to: {output_path}")
+    print("Map available at: http://localhost:3000/radar-map.html")

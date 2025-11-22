@@ -68,14 +68,14 @@ class AirportData:
             return True
             
         except FileNotFoundError:
-            print(f"⚠️  Airport data file not found: {full_path}")
+            print(f"Airport data file not found: {full_path}")
             print(f"   Using default CYYZ coordinates")
             return False
         except json.JSONDecodeError as e:
-            print(f"⚠️  Error parsing airport JSON: {e}")
+            print(f"Error parsing airport JSON: {e}")
             return False
         except Exception as e:
-            print(f"⚠️  Error loading airport data: {e}")
+            print(f"Error loading airport data: {e}")
             return False
     
     def generate_entry_waypoints(self, radius_nm: float = 30.0, count: int = 8) -> List[Dict[str, Any]]:

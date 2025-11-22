@@ -62,7 +62,7 @@ const ADDITIONAL_IGNORE = [
 class CodebaseSync {
   constructor() {
     if (!API_KEY || API_KEY === 'your_api_key_here') {
-      console.error('❌ Error: SUPERMEMORY_API_KEY not set in .env file');
+      console.error('Error: SUPERMEMORY_API_KEY not set in .env file');
       console.error('Please copy .env.example to .env and add your API key');
       process.exit(1);
     }
@@ -95,9 +95,9 @@ class CodebaseSync {
     // Add additional ignore patterns
     this.ig.add(ADDITIONAL_IGNORE);
 
-    console.log('🚀 Starting codebase sync to Supermemory...');
-    console.log(`📁 Project: ${PROJECT_NAME}`);
-    console.log(`📂 Root: ${PROJECT_ROOT}`);
+    console.log('Starting codebase sync to Supermemory...');
+    console.log(`Project: ${PROJECT_NAME}`);
+    console.log(`Root: ${PROJECT_ROOT}`);
     console.log('');
   }
 
@@ -112,7 +112,7 @@ class CodebaseSync {
     // Check file size
     const stats = fs.statSync(filePath);
     if (stats.size > MAX_FILE_SIZE_KB * 1024) {
-      console.log(`⏭️  Skipping large file: ${relativePath} (${Math.round(stats.size / 1024)}KB)`);
+      console.log(`Skipping large file: ${relativePath} (${Math.round(stats.size / 1024)}KB)`);
       return false;
     }
 
@@ -196,13 +196,13 @@ class CodebaseSync {
       this.stats.bytesProcessed += stats.size;
       
       const chunkInfo = chunks.length > 1 ? ` (${chunks.length} chunks)` : '';
-      console.log(`✅ ${relativePath}${chunkInfo}`);
+      console.log(`${relativePath}${chunkInfo}`);
 
     } catch (error) {
       this.stats.errors++;
       const errorMsg = error.response?.data?.error || error.response?.data?.message || error.message;
       const errorDetails = error.response?.data ? JSON.stringify(error.response.data) : '';
-      console.error(`❌ Error processing ${filePath}:`, errorMsg);
+      console.error(`Error processing ${filePath}:`, errorMsg);
       if (errorDetails && this.stats.errors === 1) {
         console.error(`   Details: ${errorDetails}`);
       }
@@ -219,11 +219,11 @@ class CodebaseSync {
       nodir: true,
     });
 
-    console.log(`📊 Found ${files.length} files matching patterns\n`);
+    console.log(`Found ${files.length} files matching patterns\n`);
 
     // Filter and process files
     const filesToProcess = files.filter(f => this.shouldProcessFile(f));
-    console.log(`🔄 Processing ${filesToProcess.length} files...\n`);
+    console.log(`Processing ${filesToProcess.length} files...\n`);
 
     for (const file of filesToProcess) {
       await this.syncFile(file);
@@ -231,14 +231,14 @@ class CodebaseSync {
 
     // Print summary
     console.log('\n' + '='.repeat(60));
-    console.log('📈 Sync Complete!');
+    console.log('Sync complete!');
     console.log('='.repeat(60));
-    console.log(`✅ Files processed: ${this.stats.filesProcessed}`);
-    console.log(`📝 Memories created: ${this.stats.memoriesCreated}`);
-    console.log(`💾 Data processed: ${Math.round(this.stats.bytesProcessed / 1024)}KB`);
-    console.log(`❌ Errors: ${this.stats.errors}`);
+    console.log(`Files processed: ${this.stats.filesProcessed}`);
+    console.log(`Memories created: ${this.stats.memoriesCreated}`);
+    console.log(`Data processed: ${Math.round(this.stats.bytesProcessed / 1024)}KB`);
+    console.log(`Errors: ${this.stats.errors}`);
     console.log('='.repeat(60));
-    console.log('\n💡 Your codebase is now synced to Supermemory!');
+    console.log('\nYour codebase is now synced to Supermemory!');
     console.log('   You can now query it from ChatGPT or Claude.\n');
   }
 }
@@ -246,6 +246,6 @@ class CodebaseSync {
 // Run sync
 const sync = new CodebaseSync();
 sync.syncAll().catch(error => {
-  console.error('❌ Fatal error:', error.message);
+  console.error('Fatal error:', error.message);
   process.exit(1);
 });

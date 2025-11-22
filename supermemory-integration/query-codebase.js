@@ -12,7 +12,7 @@ const PROJECT_NAME = process.env.PROJECT_NAME || 'ATC-1';
 class CodebaseQuery {
   constructor() {
     if (!API_KEY || API_KEY === 'your_api_key_here') {
-      console.error('❌ Error: SUPERMEMORY_API_KEY not set');
+      console.error('Error: SUPERMEMORY_API_KEY not set');
       process.exit(1);
     }
 
@@ -26,7 +26,7 @@ class CodebaseQuery {
   }
 
   async testQuery(query) {
-    console.log(`🔍 Searching: "${query}"\n`);
+    console.log(`Searching: "${query}"\n`);
 
     try {
       const response = await this.apiClient.post('/search', {
@@ -37,11 +37,11 @@ class CodebaseQuery {
       const results = response.data.results || [];
 
       if (!results || results.length === 0) {
-        console.log('⚠️  No results found');
+        console.log('No results found');
         return;
       }
 
-      console.log(`📊 Found ${results.length} results:\n`);
+      console.log(`Found ${results.length} results:\n`);
       
       results.forEach((result, index) => {
         console.log(`${index + 1}. ${result.title || 'Untitled'} (score: ${result.score?.toFixed(2) || 'N/A'})`);
@@ -59,9 +59,9 @@ class CodebaseQuery {
       });
 
     } catch (error) {
-      console.error('❌ Search error:', error.response?.data?.message || error.message);
+      console.error('Search error:', error.response?.data?.message || error.message);
       if (error.response?.status === 404) {
-        console.error('\n💡 Tip: Make sure you have run the initial sync first:');
+        console.error('\nTip: Make sure you have run the initial sync first:');
         console.error('   npm run sync\n');
       }
       process.exit(1);
@@ -69,7 +69,7 @@ class CodebaseQuery {
   }
 
   async runTests() {
-    console.log('🧪 Testing Supermemory Integration\n');
+    console.log('Testing Supermemory Integration\n');
     console.log('='.repeat(60) + '\n');
 
     const testQueries = [
@@ -85,8 +85,8 @@ class CodebaseQuery {
       console.log('─'.repeat(60) + '\n');
     }
 
-    console.log('✅ Test queries complete!\n');
-    console.log('💡 Your AI assistants can now search your codebase using these queries.\n');
+    console.log('Test queries complete!\n');
+    console.log('Your AI assistants can now search your codebase using these queries.\n');
   }
 }
 
@@ -96,12 +96,12 @@ const customQuery = process.argv[2];
 
 if (customQuery) {
   query.testQuery(customQuery).catch(error => {
-    console.error('❌ Fatal error:', error.message);
+    console.error('Fatal error:', error.message);
     process.exit(1);
   });
 } else {
   query.runTests().catch(error => {
-    console.error('❌ Fatal error:', error.message);
+    console.error('Fatal error:', error.message);
     process.exit(1);
   });
 }

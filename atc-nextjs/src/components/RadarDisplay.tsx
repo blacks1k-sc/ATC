@@ -1,7 +1,35 @@
 'use client';
 
 import { Aircraft } from '@/types/atc';
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, useCallback } from 'react';
+
+type LiveAircraft = {
+  id: string;
+  callsign: string;
+  icao24?: string;
+  lat: number;
+  lon: number;
+  altitude_ft?: number;
+  heading?: number;
+  speed_kts?: number;
+  status?: string;
+  controller?: string;
+  phase?: string;
+  squawk_code?: string;
+  updatedAt: number;
+};
+
+const AIRCRAFT_EVENTS = {
+  POSITION_UPDATED: 'aircraft.position_updated',
+  CREATED: 'aircraft.created',
+  STATUS_CHANGED: 'aircraft.status_changed',
+} as const;
+
+const SSE_ENDPOINT =
+  '/api/events/stream?type=aircraft.position_updated&type=aircraft.created&type=aircraft.status_changed';
+
+const BROADCAST_INTERVAL_MS = 200;
+const STALE_TIMEOUT_MS = 30000;
 
 interface RadarDisplayProps {
   aircraft: Aircraft[];
@@ -15,6 +43,122 @@ export default function RadarDisplay({ aircraft, emergencyAircraft, emergencyAle
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [showGrid, setShowGrid] = useState(true);
+  const [trackedCount, setTrackedCount] = useState(0);
+  const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'open' | 'closed'>('connecting');
+
+  const aircraftStateRef = useRef<Map<string, LiveAircraft>>(new Map());
+  const needsBroadcastRef = useRef(false);
+  const iframeReadyRef = useRef(false);
+  const eventSourceRef = useRef<EventSource | null>(null);
+
+  const sanitizeCallsign = useCallback((value?: string | null) => {
+    if (!value) return 'UNK';
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? trimmed.toUpperCase() : 'UNK';
+  }, []);
+
+  const sanitizeIdentifier = useCallback((value: any): string | undefined => {
+    if (value === undefined || value === null) return undefined;
+    const text = String(value).trim();
+    return text.length > 0 ? text : undefined;
+  }, []);
+
+  const toNumber = useCallback((value: any): number | undefined => {
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      return value;
+    }
+    if (typeof value === 'string') {
+      const parsed = parseFloat(value);
+      return Number.isFinite(parsed) ? parsed : undefined;
+    }
+    return undefined;
+  }, []);
+
+  const broadcastSnapshot = useCallback(() => {
+    if (!iframeRef.current?.contentWindow) return;
+    const snapshot = Array.from(aircraftStateRef.current.values()).map((item) => ({
+      id: item.id,
+      callsign: item.callsign,
+      lat: item.lat,
+      lon: item.lon,
+      altitude_ft: item.altitude_ft,
+      heading: item.heading,
+      speed_kts: item.speed_kts,
+      status: item.status,
+      controller: item.controller,
+      phase: item.phase,
+      squawk_code: item.squawk_code,
+      updatedAt: item.updatedAt,
+      icao24: item.icao24,
+    }));
+
+    iframeRef.current.contentWindow.postMessage(
+      {
+        type: 'AIRCRAFT_SNAPSHOT',
+        aircraft: snapshot,
+      },
+      '*',
+    );
+
+    setTrackedCount(snapshot.length);
+  }, []);
+
+  const upsertLiveAircraft = useCallback(
+    (payload: LiveAircraft) => {
+      const current = aircraftStateRef.current.get(payload.id);
+      if (current) {
+        aircraftStateRef.current.set(payload.id, { ...current, ...payload, updatedAt: Date.now() });
+      } else {
+        aircraftStateRef.current.set(payload.id, { ...payload, updatedAt: Date.now() });
+      }
+      needsBroadcastRef.current = true;
+    },
+    [],
+  );
+
+  const removeLiveAircraft = useCallback((id: string) => {
+    if (aircraftStateRef.current.delete(id)) {
+      needsBroadcastRef.current = true;
+    }
+  }, []);
+
+  const buildLiveAircraft = useCallback(
+    (source: any, positionOverride?: any): LiveAircraft | null => {
+      if (!source) return null;
+
+      const base = source.aircraft ?? source;
+      const position = positionOverride || source.position || base.position || {};
+
+      const lat = toNumber(position.lat);
+      const lon = toNumber(position.lon);
+      if (lat === undefined || lon === undefined) {
+        return null;
+      }
+
+      const primaryId =
+        sanitizeIdentifier(base.icao24) ??
+        sanitizeIdentifier(base.callsign) ??
+        sanitizeIdentifier(base.id ?? source.id ?? base.aircraft_id);
+      if (!primaryId) return null;
+
+      return {
+        id: primaryId,
+        callsign: sanitizeCallsign(base.callsign ?? source.callsign),
+        icao24: sanitizeIdentifier(base.icao24),
+        lat,
+        lon,
+        altitude_ft: toNumber(position.altitude_ft),
+        heading: toNumber(position.heading),
+        speed_kts: toNumber(position.speed_kts),
+        status: base.status ?? source.status,
+        controller: base.controller ?? source.controller,
+        phase: base.phase ?? source.phase,
+        squawk_code: base.squawk_code ?? source.squawk_code,
+        updatedAt: Date.now(),
+      };
+    },
+    [sanitizeCallsign, toNumber],
+  );
 
   // Waypoint data - in a real app, this would come from an API
   const waypoints = [
@@ -134,7 +278,173 @@ export default function RadarDisplay({ aircraft, emergencyAircraft, emergencyAle
   };
 
   useEffect(() => {
+    const iframe = iframeRef.current;
+    if (!iframe) {
+      return;
+    }
+
+    const handleLoad = () => {
+      iframeReadyRef.current = true;
+      needsBroadcastRef.current = true;
+      broadcastSnapshot();
+    };
+
+    iframe.addEventListener('load', handleLoad);
+    return () => {
+      iframe.removeEventListener('load', handleLoad);
+    };
+  }, [broadcastSnapshot]);
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      if (!iframeReadyRef.current) return;
+      if (!needsBroadcastRef.current) return;
+      needsBroadcastRef.current = false;
+      broadcastSnapshot();
+    }, BROADCAST_INTERVAL_MS);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [broadcastSnapshot]);
+
+  useEffect(() => {
+    const sweepInterval = window.setInterval(() => {
+      const now = Date.now();
+      let changed = false;
+
+      aircraftStateRef.current.forEach((value, key) => {
+        if (now - value.updatedAt > STALE_TIMEOUT_MS) {
+          aircraftStateRef.current.delete(key);
+          changed = true;
+        }
+      });
+
+      if (changed) {
+        needsBroadcastRef.current = true;
+      }
+    }, Math.max(5000, STALE_TIMEOUT_MS / 4));
+
+    return () => {
+      window.clearInterval(sweepInterval);
+    };
+  }, []);
+
+  useEffect(() => {
+    const abortController = new AbortController();
+    let cancelled = false;
+
+    const loadInitialAircraft = async () => {
+      try {
+        const response = await fetch('/api/aircraft', { signal: abortController.signal });
+        if (!response.ok) {
+          throw new Error('Failed to fetch aircraft');
+        }
+
+        const payload = await response.json();
+        if (cancelled) return;
+
+        const activeAircraft = Array.isArray(payload?.aircraft) ? payload.aircraft : [];
+        activeAircraft.forEach((item: any) => {
+          const live = buildLiveAircraft(item);
+          if (live) {
+            upsertLiveAircraft(live);
+          }
+        });
+      } catch (error: any) {
+        if (error?.name === 'AbortError') {
+          return;
+        }
+        console.error('RadarDisplay: failed to load initial aircraft', error);
+      }
+    };
+
+    loadInitialAircraft();
+
+    return () => {
+      cancelled = true;
+      abortController.abort();
+    };
+  }, [buildLiveAircraft, upsertLiveAircraft]);
+
+  useEffect(() => {
+    setConnectionStatus('connecting');
+    const source = new EventSource(SSE_ENDPOINT);
+    eventSourceRef.current = source;
+
+    source.onopen = () => {
+      setConnectionStatus('open');
+    };
+
+    source.onerror = (error) => {
+      console.error('RadarDisplay SSE error', error);
+      setConnectionStatus('connecting');
+    };
+
+    source.onmessage = (event) => {
+      try {
+        const payload = JSON.parse(event.data);
+        const eventType: string | undefined = payload?.type;
+        const data = payload?.data;
+        if (!eventType) return;
+
+        if (eventType === AIRCRAFT_EVENTS.POSITION_UPDATED) {
+          const live = buildLiveAircraft(data?.aircraft, data?.position);
+          if (live) {
+            upsertLiveAircraft(live);
+          }
+        } else if (eventType === AIRCRAFT_EVENTS.CREATED) {
+          const live = buildLiveAircraft(data?.aircraft);
+          if (live) {
+            upsertLiveAircraft(live);
+          }
+        } else if (eventType === AIRCRAFT_EVENTS.STATUS_CHANGED) {
+          const newStatus: string | undefined = data?.newStatus;
+          const aircraftPayload = data?.aircraft;
+          const candidateIds = [
+            sanitizeIdentifier(aircraftPayload?.icao24),
+            sanitizeIdentifier(aircraftPayload?.callsign),
+            sanitizeIdentifier(aircraftPayload?.id ?? data?.aircraft_id),
+          ];
+          const resolvedId = candidateIds.find(Boolean);
+
+          if (typeof newStatus === 'string' && newStatus !== 'active') {
+            if (resolvedId) {
+              removeLiveAircraft(resolvedId);
+            }
+            return;
+          }
+
+          const live = buildLiveAircraft(aircraftPayload);
+          if (live) {
+            if (typeof newStatus === 'string') {
+              live.status = newStatus;
+            }
+            upsertLiveAircraft(live);
+          }
+        }
+      } catch (error) {
+        console.error('RadarDisplay: failed to parse SSE payload', error);
+      }
+    };
+
+    return () => {
+      source.close();
+      if (eventSourceRef.current === source) {
+        eventSourceRef.current = null;
+      }
+    };
+  }, [buildLiveAircraft, removeLiveAircraft, sanitizeIdentifier, upsertLiveAircraft]);
+
+  useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'RADAR_READY') {
+        iframeReadyRef.current = true;
+        needsBroadcastRef.current = true;
+        broadcastSnapshot();
+        return;
+      }
+
       if (event.data.type === 'WAYPOINT_FOUND') {
         // Handle successful waypoint location
         console.log('Waypoint found:', event.data.waypoint);
@@ -143,7 +453,7 @@ export default function RadarDisplay({ aircraft, emergencyAircraft, emergencyAle
 
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
-  }, []);
+  }, [broadcastSnapshot]);
 
   return (
     <div className="display-area" id="airspaceDisplay" style={{ position: 'relative' }}>
@@ -199,6 +509,35 @@ export default function RadarDisplay({ aircraft, emergencyAircraft, emergencyAle
               padding: '4px 0'
             }}
           />
+        </div>
+
+        <div
+          style={{
+            marginTop: '6px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            fontSize: '11px',
+            color: '#8fffa0',
+          }}
+        >
+          <span>{trackedCount} aircraft</span>
+          <span
+            style={{
+              color:
+                connectionStatus === 'open'
+                  ? '#00ff88'
+                  : connectionStatus === 'connecting'
+                  ? '#ffd166'
+                  : '#ff6b6b',
+            }}
+          >
+            {connectionStatus === 'open'
+              ? 'Live'
+              : connectionStatus === 'connecting'
+              ? 'Connecting\u2026'
+              : 'Offline'}
+          </span>
         </div>
         
         {/* Search Results */}

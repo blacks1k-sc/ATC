@@ -205,8 +205,8 @@ def generate(
         for record in records:
             f.write(json.dumps(record) + '\n')
     
-    console.print(f"[green]✓ Generated {len(records)} aircraft records[/green]")
-    console.print(f"[green]✓ Output written to {output_path}[/green]")
+    console.print(f"[green]Generated {len(records)} aircraft records[/green]")
+    console.print(f"[green]Output written to {output_path}[/green]")
     
     # Show summary
     aircraft_type_counts = {}

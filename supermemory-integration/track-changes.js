@@ -20,7 +20,7 @@ const PROJECT_NAME = process.env.PROJECT_NAME || 'ATC-1';
 class ChangeTracker {
   constructor() {
     if (!API_KEY || API_KEY === 'your_api_key_here') {
-      console.error('❌ Error: SUPERMEMORY_API_KEY not set');
+      console.error('Error: SUPERMEMORY_API_KEY not set');
       process.exit(1);
     }
 
@@ -40,7 +40,7 @@ class ChangeTracker {
       const log = await this.git.log({ maxCount: 1 });
       return log.latest;
     } catch (error) {
-      console.error('❌ Error getting git log:', error.message);
+      console.error('Error getting git log:', error.message);
       return null;
     }
   }
@@ -51,7 +51,7 @@ class ChangeTracker {
       const diff = await this.git.diff(['HEAD~1', 'HEAD']);
       return diff;
     } catch (error) {
-      console.error('❌ Error getting diff:', error.message);
+      console.error('Error getting diff:', error.message);
       return '';
     }
   }
@@ -66,7 +66,7 @@ class ChangeTracker {
         changes: f.changes,
       }));
     } catch (error) {
-      console.error('❌ Error getting changed files:', error.message);
+      console.error('Error getting changed files:', error.message);
       return [];
     }
   }
@@ -111,17 +111,17 @@ This change can help understand:
   }
 
   async trackLastCommit() {
-    console.log('🔍 Tracking latest commit...\n');
+    console.log('Tracking latest commit...\n');
 
     const commit = await this.getLastCommit();
     if (!commit) {
-      console.log('⚠️  No commits found');
+      console.log('No commits found');
       return;
     }
 
     const changedFiles = await this.getChangedFiles();
     if (changedFiles.length === 0) {
-      console.log('⚠️  No file changes detected');
+      console.log('No file changes detected');
       return;
     }
 
@@ -134,13 +134,13 @@ This change can help understand:
         content: summary,
       });
 
-      console.log('✅ Commit tracked successfully!');
-      console.log(`📝 Commit: ${commit.hash.substring(0, 7)} - ${commit.message}`);
-      console.log(`📂 Files changed: ${changedFiles.length}`);
-      console.log('\n💡 This change is now available for AI assistants to query.\n');
+      console.log('Commit tracked successfully!');
+      console.log(`Commit: ${commit.hash.substring(0, 7)} - ${commit.message}`);
+      console.log(`Files changed: ${changedFiles.length}`);
+      console.log('\nThis change is now available for AI assistants to query.\n');
 
     } catch (error) {
-      console.error('❌ Error uploading to Supermemory:', error.response?.data?.message || error.message);
+      console.error('Error uploading to Supermemory:', error.response?.data?.message || error.message);
       process.exit(1);
     }
   }
@@ -149,6 +149,6 @@ This change can help understand:
 // Run tracker
 const tracker = new ChangeTracker();
 tracker.trackLastCommit().catch(error => {
-  console.error('❌ Fatal error:', error.message);
+  console.error('Fatal error:', error.message);
   process.exit(1);
 });

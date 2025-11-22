@@ -19,7 +19,7 @@ async function addSectorField() {
   const client = await pool.connect();
   
   try {
-    console.log('🔧 Adding sector field to aircraft_instances table...');
+    console.log('Adding sector field to aircraft_instances table...');
     
     // Add sector column
     await client.query(`
@@ -27,7 +27,7 @@ async function addSectorField() {
       ADD COLUMN IF NOT EXISTS sector VARCHAR(20);
     `);
     
-    console.log('✅ Sector field added successfully');
+    console.log('Sector field added successfully');
     
     // Verify the column exists
     const result = await client.query(`
@@ -38,14 +38,14 @@ async function addSectorField() {
     `);
     
     if (result.rows.length > 0) {
-      console.log('✅ Verified: sector column exists');
+      console.log('Verified: sector column exists');
       console.log('   Type:', result.rows[0].data_type);
     } else {
-      console.log('⚠️  Warning: Could not verify sector column');
+      console.log('Warning: Could not verify sector column');
     }
     
   } catch (error) {
-    console.error('❌ Error adding sector field:', error);
+    console.error('Error adding sector field:', error);
     throw error;
   } finally {
     client.release();
@@ -55,11 +55,11 @@ async function addSectorField() {
 
 addSectorField()
   .then(() => {
-    console.log('\n✅ Migration complete');
+    console.log('\nMigration complete');
     process.exit(0);
   })
   .catch((error) => {
-    console.error('\n❌ Migration failed:', error);
+    console.error('\nMigration failed:', error);
     process.exit(1);
   });
 
