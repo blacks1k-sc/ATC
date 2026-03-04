@@ -298,7 +298,6 @@ export default function ATCSystem() {
 
       <ControlPanels
         flightStrips={flightStrips}
-        weatherData={weatherData}
         emergencyCoord={emergencyCoord}
       />
 

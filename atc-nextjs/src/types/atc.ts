@@ -59,6 +59,31 @@ export interface WeatherData {
   alerts: string[];
 }
 
+export interface LLMClearance {
+  id: number;
+  aircraft_id: number;
+  callsign: string;
+  clearance_type: string;
+  issued_by: 'AIR_LLM' | 'GROUND_LLM';
+  issued_at: string;
+  status: string;
+  instructions: {
+    action_type?: string;
+    target_altitude_ft?: number;
+    target_speed_kts?: number;
+    target_heading_deg?: number;
+    waypoints?: string[];
+    assigned_gate?: string;
+    taxi_route?: string[];
+    runway?: string;
+  };
+  reason?: string;
+  confidence?: number;
+  validated?: boolean;
+  current_zone?: string;
+  phase?: string;
+}
+
 export type Sector = 'TOWER' | 'GROUND' | 'APPROACH' | 'CENTER' | 'COORD';
 export type Direction = 'TX' | 'RX';
 

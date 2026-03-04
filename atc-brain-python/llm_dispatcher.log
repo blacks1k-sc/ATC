@@ -1,0 +1,613 @@
+2025-11-24 22:42:05,478 - __main__ - INFO - Starting ATC LLM Dispatcher...
+2025-11-24 22:42:05,479 - llm.llm_dispatcher - INFO - Initializing LLM Dispatcher...
+2025-11-24 22:42:05,483 - llm.llm_dispatcher - INFO - Connected to Redis on channel 'atc:events'
+2025-11-24 22:42:05,503 - llm.llm_dispatcher - INFO - Connected to PostgreSQL database
+2025-11-24 22:42:05,503 - llm.llm_dispatcher - INFO - LLM Dispatcher initialized with Mistral-7B via Ollama
+2025-11-24 22:42:05,503 - llm.llm_dispatcher - INFO - LLM Dispatcher running...
+2025-11-24 22:42:05,503 - llm.llm_dispatcher - INFO - Listening for events: zone.boundary_crossed, clearance.completed, runway.landed, runway.vacated
+2025-11-24 22:42:05,503 - llm.llm_dispatcher - INFO - Subscribed to Redis channel: atc:events
+2025-11-24 22:42:05,503 - llm.llm_dispatcher - INFO - Event processor started
+2025-11-24 22:51:20,646 - __main__ - INFO - Starting ATC LLM Dispatcher...
+2025-11-24 22:51:20,647 - llm.llm_dispatcher - INFO - Initializing LLM Dispatcher...
+2025-11-24 22:51:20,650 - llm.llm_dispatcher - INFO - Connected to Redis on channel 'atc:events'
+2025-11-24 22:51:20,680 - llm.llm_dispatcher - INFO - Connected to PostgreSQL database
+2025-11-24 22:51:20,684 - llm.llm_dispatcher - INFO - LLM Dispatcher initialized with Mistral-7B via Ollama
+2025-11-24 22:51:20,684 - llm.llm_dispatcher - INFO - LLM Dispatcher running...
+2025-11-24 22:51:20,684 - llm.llm_dispatcher - INFO - Listening for events: aircraft.created, zone.boundary_crossed, clearance.completed, runway.landed, runway.vacated
+2025-11-24 22:51:20,684 - llm.llm_dispatcher - INFO - Subscribed to Redis channel: atc:events
+2025-11-24 22:51:20,684 - llm.llm_dispatcher - INFO - Event processor started
+2025-11-24 22:51:50,364 - __main__ - INFO - Starting ATC LLM Dispatcher...
+2025-11-24 22:51:50,364 - llm.llm_dispatcher - INFO - Initializing LLM Dispatcher...
+2025-11-24 22:51:50,368 - llm.llm_dispatcher - INFO - Connected to Redis on channel 'atc:events'
+2025-11-24 22:51:50,382 - llm.llm_dispatcher - INFO - Connected to PostgreSQL database
+2025-11-24 22:51:50,382 - llm.llm_dispatcher - INFO - LLM Dispatcher initialized with Mistral-7B via Ollama
+2025-11-24 22:51:50,382 - llm.llm_dispatcher - INFO - LLM Dispatcher running...
+2025-11-24 22:51:50,383 - llm.llm_dispatcher - INFO - Listening for events: aircraft.created, zone.boundary_crossed, clearance.completed, runway.landed, runway.vacated
+2025-11-24 22:51:50,383 - llm.llm_dispatcher - INFO - Subscribed to Redis channel: atc:events
+2025-11-24 22:51:50,383 - llm.llm_dispatcher - INFO - Event processor started
+2025-11-24 22:59:39,092 - __main__ - INFO - Starting ATC LLM Dispatcher...
+2025-11-24 22:59:39,092 - llm.llm_dispatcher - INFO - Initializing LLM Dispatcher...
+2025-11-24 22:59:39,096 - llm.llm_dispatcher - INFO - Connected to Redis on channel 'atc:events'
+2025-11-24 22:59:39,116 - llm.llm_dispatcher - INFO - Connected to PostgreSQL database
+2025-11-24 22:59:39,116 - llm.llm_dispatcher - INFO - LLM Dispatcher initialized with Mistral-7B via Ollama
+2025-11-24 22:59:39,116 - llm.llm_dispatcher - INFO - Checking for existing aircraft without clearances...
+2025-11-24 22:59:39,120 - llm.llm_dispatcher - ERROR - Error processing existing aircraft: relation "clearances" does not exist
+2025-11-24 22:59:39,120 - llm.llm_dispatcher - INFO - LLM Dispatcher running...
+2025-11-24 22:59:39,120 - llm.llm_dispatcher - INFO - Listening for events: aircraft.created, zone.boundary_crossed, clearance.completed, runway.landed, runway.vacated
+2025-11-24 22:59:39,120 - llm.llm_dispatcher - INFO - Subscribed to Redis channel: atc:events
+2025-11-24 22:59:39,120 - llm.llm_dispatcher - INFO - Event processor started
+2025-11-24 23:00:09,123 - llm.llm_dispatcher - ERROR - Error processing existing aircraft: relation "clearances" does not exist
+2025-11-24 23:00:18,028 - __main__ - INFO - Starting ATC LLM Dispatcher...
+2025-11-24 23:00:18,028 - llm.llm_dispatcher - INFO - Initializing LLM Dispatcher...
+2025-11-24 23:00:18,031 - llm.llm_dispatcher - INFO - Connected to Redis on channel 'atc:events'
+2025-11-24 23:00:18,053 - llm.llm_dispatcher - INFO - Connected to PostgreSQL database
+2025-11-24 23:00:18,053 - llm.llm_dispatcher - INFO - LLM Dispatcher initialized with Mistral-7B via Ollama
+2025-11-24 23:00:18,053 - llm.llm_dispatcher - INFO - Checking for existing aircraft without clearances...
+2025-11-24 23:00:18,064 - llm.llm_dispatcher - ERROR - Error processing existing aircraft: for SELECT DISTINCT, ORDER BY expressions must appear in select list
+2025-11-24 23:00:18,064 - llm.llm_dispatcher - INFO - LLM Dispatcher running...
+2025-11-24 23:00:18,064 - llm.llm_dispatcher - INFO - Listening for events: aircraft.created, zone.boundary_crossed, clearance.completed, runway.landed, runway.vacated
+2025-11-24 23:00:18,064 - llm.llm_dispatcher - INFO - Subscribed to Redis channel: atc:events
+2025-11-24 23:00:18,064 - llm.llm_dispatcher - INFO - Event processor started
+2025-11-24 23:00:39,415 - __main__ - INFO - Starting ATC LLM Dispatcher...
+2025-11-24 23:00:39,416 - llm.llm_dispatcher - INFO - Initializing LLM Dispatcher...
+2025-11-24 23:00:39,419 - llm.llm_dispatcher - INFO - Connected to Redis on channel 'atc:events'
+2025-11-24 23:00:39,431 - llm.llm_dispatcher - INFO - Connected to PostgreSQL database
+2025-11-24 23:00:39,431 - llm.llm_dispatcher - INFO - LLM Dispatcher initialized with Mistral-7B via Ollama
+2025-11-24 23:00:39,431 - llm.llm_dispatcher - INFO - Checking for existing aircraft without clearances...
+2025-11-24 23:00:39,439 - llm.llm_dispatcher - INFO - Found 5 active aircraft without clearances - processing immediately...
+2025-11-24 23:00:39,439 - llm.llm_dispatcher - INFO - Processing existing aircraft NVC3267 (ID: 87)
+2025-11-24 23:00:39,449 - llm.llm_dispatcher - ERROR - Error processing event aircraft.created for aircraft 87: column "current_zone" does not exist
+2025-11-24 23:00:39,951 - llm.llm_dispatcher - INFO - Processing existing aircraft ANA1738 (ID: 86)
+2025-11-24 23:00:39,955 - llm.llm_dispatcher - ERROR - Error processing event aircraft.created for aircraft 86: column "current_zone" does not exist
+2025-11-24 23:00:40,457 - llm.llm_dispatcher - INFO - Processing existing aircraft CNE6567 (ID: 85)
+2025-11-24 23:00:40,461 - llm.llm_dispatcher - ERROR - Error processing event aircraft.created for aircraft 85: column "current_zone" does not exist
+2025-11-24 23:00:40,962 - llm.llm_dispatcher - INFO - Processing existing aircraft POE4676 (ID: 84)
+2025-11-24 23:00:40,967 - llm.llm_dispatcher - ERROR - Error processing event aircraft.created for aircraft 84: column "current_zone" does not exist
+2025-11-24 23:00:41,469 - llm.llm_dispatcher - INFO - Processing existing aircraft AFR7167 (ID: 83)
+2025-11-24 23:00:41,472 - llm.llm_dispatcher - ERROR - Error processing event aircraft.created for aircraft 83: column "current_zone" does not exist
+2025-11-24 23:00:41,975 - llm.llm_dispatcher - INFO - LLM Dispatcher running...
+2025-11-24 23:00:41,975 - llm.llm_dispatcher - INFO - Listening for events: aircraft.created, zone.boundary_crossed, clearance.completed, runway.landed, runway.vacated
+2025-11-24 23:00:41,976 - llm.llm_dispatcher - INFO - Subscribed to Redis channel: atc:events
+2025-11-24 23:00:41,976 - llm.llm_dispatcher - INFO - Event processor started
+2025-11-24 23:01:09,162 - __main__ - INFO - Starting ATC LLM Dispatcher...
+2025-11-24 23:01:09,162 - llm.llm_dispatcher - INFO - Initializing LLM Dispatcher...
+2025-11-24 23:01:09,165 - llm.llm_dispatcher - INFO - Connected to Redis on channel 'atc:events'
+2025-11-24 23:01:09,184 - llm.llm_dispatcher - INFO - Connected to PostgreSQL database
+2025-11-24 23:01:09,184 - llm.llm_dispatcher - INFO - LLM Dispatcher initialized with Mistral-7B via Ollama
+2025-11-24 23:01:09,184 - llm.llm_dispatcher - INFO - Checking for existing aircraft without clearances...
+2025-11-24 23:01:09,192 - llm.llm_dispatcher - INFO - Found 5 active aircraft without clearances - processing immediately...
+2025-11-24 23:01:09,192 - llm.llm_dispatcher - INFO - Processing existing aircraft NVC3267 (ID: 87)
+2025-11-24 23:01:09,199 - llm.llm_dispatcher - ERROR - Error processing event aircraft.created for aircraft 87: No module named 'llm.zone_detector'
+2025-11-24 23:01:09,700 - llm.llm_dispatcher - INFO - Processing existing aircraft ANA1738 (ID: 86)
+2025-11-24 23:01:09,704 - llm.llm_dispatcher - ERROR - Error processing event aircraft.created for aircraft 86: No module named 'llm.zone_detector'
+2025-11-24 23:01:10,205 - llm.llm_dispatcher - INFO - Processing existing aircraft CNE6567 (ID: 85)
+2025-11-24 23:01:10,208 - llm.llm_dispatcher - ERROR - Error processing event aircraft.created for aircraft 85: No module named 'llm.zone_detector'
+2025-11-24 23:01:10,710 - llm.llm_dispatcher - INFO - Processing existing aircraft POE4676 (ID: 84)
+2025-11-24 23:01:10,713 - llm.llm_dispatcher - ERROR - Error processing event aircraft.created for aircraft 84: No module named 'llm.zone_detector'
+2025-11-24 23:01:11,215 - llm.llm_dispatcher - INFO - Processing existing aircraft AFR7167 (ID: 83)
+2025-11-24 23:01:11,219 - llm.llm_dispatcher - ERROR - Error processing event aircraft.created for aircraft 83: No module named 'llm.zone_detector'
+2025-11-24 23:01:11,722 - llm.llm_dispatcher - INFO - LLM Dispatcher running...
+2025-11-24 23:01:11,722 - llm.llm_dispatcher - INFO - Listening for events: aircraft.created, zone.boundary_crossed, clearance.completed, runway.landed, runway.vacated
+2025-11-24 23:01:11,723 - llm.llm_dispatcher - INFO - Subscribed to Redis channel: atc:events
+2025-11-24 23:01:11,723 - llm.llm_dispatcher - INFO - Event processor started
+2025-11-24 23:01:30,452 - __main__ - INFO - Starting ATC LLM Dispatcher...
+2025-11-24 23:01:30,452 - llm.llm_dispatcher - INFO - Initializing LLM Dispatcher...
+2025-11-24 23:01:30,455 - llm.llm_dispatcher - INFO - Connected to Redis on channel 'atc:events'
+2025-11-24 23:01:30,470 - llm.llm_dispatcher - INFO - Connected to PostgreSQL database
+2025-11-24 23:01:30,471 - llm.llm_dispatcher - INFO - LLM Dispatcher initialized with Mistral-7B via Ollama
+2025-11-24 23:01:30,471 - llm.llm_dispatcher - INFO - Checking for existing aircraft without clearances...
+2025-11-24 23:01:30,480 - llm.llm_dispatcher - INFO - Found 5 active aircraft without clearances - processing immediately...
+2025-11-24 23:01:30,480 - llm.llm_dispatcher - INFO - Processing existing aircraft NVC3267 (ID: 87)
+2025-11-24 23:01:30,508 - llm.llm_dispatcher - ERROR - Error processing event aircraft.created for aircraft 87: column "current_zone" does not exist
+2025-11-24 23:01:31,010 - llm.llm_dispatcher - INFO - Processing existing aircraft ANA1738 (ID: 86)
+2025-11-24 23:01:31,016 - llm.llm_dispatcher - ERROR - Error processing event aircraft.created for aircraft 86: column "current_zone" does not exist
+2025-11-24 23:01:31,517 - llm.llm_dispatcher - INFO - Processing existing aircraft CNE6567 (ID: 85)
+2025-11-24 23:01:31,522 - llm.llm_dispatcher - ERROR - Error processing event aircraft.created for aircraft 85: column "current_zone" does not exist
+2025-11-24 23:01:32,024 - llm.llm_dispatcher - INFO - Processing existing aircraft POE4676 (ID: 84)
+2025-11-24 23:01:32,029 - llm.llm_dispatcher - ERROR - Error processing event aircraft.created for aircraft 84: column "current_zone" does not exist
+2025-11-24 23:01:32,531 - llm.llm_dispatcher - INFO - Processing existing aircraft AFR7167 (ID: 83)
+2025-11-24 23:01:32,537 - llm.llm_dispatcher - ERROR - Error processing event aircraft.created for aircraft 83: column "current_zone" does not exist
+2025-11-24 23:01:33,040 - llm.llm_dispatcher - INFO - LLM Dispatcher running...
+2025-11-24 23:01:33,040 - llm.llm_dispatcher - INFO - Listening for events: aircraft.created, zone.boundary_crossed, clearance.completed, runway.landed, runway.vacated
+2025-11-24 23:01:33,041 - llm.llm_dispatcher - INFO - Subscribed to Redis channel: atc:events
+2025-11-24 23:01:33,041 - llm.llm_dispatcher - INFO - Event processor started
+2025-11-24 23:02:02,537 - __main__ - INFO - Starting ATC LLM Dispatcher...
+2025-11-24 23:02:02,537 - llm.llm_dispatcher - INFO - Initializing LLM Dispatcher...
+2025-11-24 23:02:02,540 - llm.llm_dispatcher - INFO - Connected to Redis on channel 'atc:events'
+2025-11-24 23:02:02,563 - llm.llm_dispatcher - INFO - Connected to PostgreSQL database
+2025-11-24 23:02:02,563 - llm.llm_dispatcher - INFO - LLM Dispatcher initialized with Mistral-7B via Ollama
+2025-11-24 23:02:02,563 - llm.llm_dispatcher - INFO - Checking for existing aircraft without clearances...
+2025-11-24 23:02:02,571 - llm.llm_dispatcher - INFO - Found 5 active aircraft without clearances - processing immediately...
+2025-11-24 23:02:02,571 - llm.llm_dispatcher - INFO - Processing existing aircraft NVC3267 (ID: 87)
+2025-11-24 23:02:02,587 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 87 (event: aircraft.created)
+2025-11-24 23:02:02,588 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 87)
+2025-11-24 23:02:24,253 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 87 (VECTORING)
+2025-11-24 23:02:24,257 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 87: VECTORING
+2025-11-24 23:02:24,270 - llm.llm_dispatcher - INFO - Applied VECTORING for aircraft 87
+2025-11-24 23:02:24,771 - llm.llm_dispatcher - INFO - Processing existing aircraft ANA1738 (ID: 86)
+2025-11-24 23:02:24,791 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 86 (event: aircraft.created)
+2025-11-24 23:02:24,791 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 86)
+2025-11-24 23:02:31,017 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 86 (VECTORING)
+2025-11-24 23:02:31,018 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 86: VECTORING
+2025-11-24 23:02:31,019 - llm.llm_dispatcher - INFO - Applied VECTORING for aircraft 86
+2025-11-24 23:02:31,520 - llm.llm_dispatcher - INFO - Processing existing aircraft CNE6567 (ID: 85)
+2025-11-24 23:02:31,526 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 85 (event: aircraft.created)
+2025-11-24 23:02:31,526 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 85)
+2025-11-24 23:02:37,728 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 85 (VECTORING)
+2025-11-24 23:02:37,729 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 85: VECTORING
+2025-11-24 23:02:37,730 - llm.llm_dispatcher - INFO - Applied VECTORING for aircraft 85
+2025-11-24 23:02:38,231 - llm.llm_dispatcher - INFO - Processing existing aircraft POE4676 (ID: 84)
+2025-11-24 23:02:38,238 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 84 (event: aircraft.created)
+2025-11-24 23:02:38,239 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 84)
+2025-11-24 23:02:49,107 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 84 (VECTORING)
+2025-11-24 23:02:49,107 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 84: VECTORING
+2025-11-24 23:02:49,108 - llm.llm_dispatcher - INFO - Applied VECTORING for aircraft 84
+2025-11-24 23:02:49,609 - llm.llm_dispatcher - INFO - Processing existing aircraft AFR7167 (ID: 83)
+2025-11-24 23:02:49,618 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 83 (event: aircraft.created)
+2025-11-24 23:02:49,618 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 83)
+2025-11-24 23:02:58,152 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 83 (VECTORING)
+2025-11-24 23:02:58,152 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 83: VECTORING
+2025-11-24 23:02:58,153 - llm.llm_dispatcher - INFO - Applied VECTORING for aircraft 83
+2025-11-24 23:02:58,657 - llm.llm_dispatcher - INFO - LLM Dispatcher running...
+2025-11-24 23:02:58,657 - llm.llm_dispatcher - INFO - Listening for events: aircraft.created, zone.boundary_crossed, clearance.completed, runway.landed, runway.vacated
+2025-11-24 23:02:58,659 - llm.llm_dispatcher - INFO - Subscribed to Redis channel: atc:events
+2025-11-24 23:02:58,659 - llm.llm_dispatcher - INFO - Event processor started
+2025-11-24 23:03:28,662 - llm.llm_dispatcher - INFO - Found 5 active aircraft without clearances - processing immediately...
+2025-11-24 23:03:28,663 - llm.llm_dispatcher - INFO - Processing existing aircraft NVC3267 (ID: 87)
+2025-11-24 23:03:28,667 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 87 (event: aircraft.created)
+2025-11-24 23:03:28,667 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 87)
+2025-11-24 23:03:35,904 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 87 (VECTORING)
+2025-11-24 23:03:35,904 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 87: VECTORING
+2025-11-24 23:03:35,904 - llm.llm_dispatcher - INFO - Applied VECTORING for aircraft 87
+2025-11-24 23:03:36,405 - llm.llm_dispatcher - INFO - Processing existing aircraft ANA1738 (ID: 86)
+2025-11-24 23:03:36,407 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 86 (event: aircraft.created)
+2025-11-24 23:03:36,407 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 86)
+2025-11-24 23:03:44,636 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 86 (VECTORING)
+2025-11-24 23:03:44,637 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 86: VECTORING
+2025-11-24 23:03:44,637 - llm.llm_dispatcher - INFO - Applied VECTORING for aircraft 86
+2025-11-24 23:03:45,139 - llm.llm_dispatcher - INFO - Processing existing aircraft CNE6567 (ID: 85)
+2025-11-24 23:03:45,144 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 85 (event: aircraft.created)
+2025-11-24 23:03:45,145 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 85)
+2025-11-24 23:03:51,280 - llm.llm_dispatcher - WARNING - Invalid JSON from LLM for aircraft 85, retrying with fix prompt
+2025-11-24 23:03:55,843 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 85 (Climb)
+2025-11-24 23:03:55,843 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 85: Climb
+2025-11-24 23:03:55,865 - llm.llm_dispatcher - INFO - Applied validated clearance to aircraft 85: Climb (updates: ['target_altitude_ft', 'target_speed_kts'])
+2025-11-24 23:03:55,868 - llm.llm_dispatcher - INFO - Applied Climb for aircraft 85
+2025-11-24 23:03:56,370 - llm.llm_dispatcher - INFO - Processing existing aircraft POE4676 (ID: 84)
+2025-11-24 23:03:56,375 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 84 (event: aircraft.created)
+2025-11-24 23:03:56,376 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 84)
+2025-11-24 23:04:08,480 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 84 (VECTORING)
+2025-11-24 23:04:08,481 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 84: VECTORING
+2025-11-24 23:04:08,481 - llm.llm_dispatcher - INFO - Applied VECTORING for aircraft 84
+2025-11-24 23:04:08,983 - llm.llm_dispatcher - INFO - Processing existing aircraft AFR7167 (ID: 83)
+2025-11-24 23:04:08,989 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 83 (event: aircraft.created)
+2025-11-24 23:04:08,990 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 83)
+2025-11-24 23:04:14,518 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 83 (VECTORING)
+2025-11-24 23:04:14,518 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 83: VECTORING
+2025-11-24 23:04:14,519 - llm.llm_dispatcher - INFO - Applied VECTORING for aircraft 83
+2025-11-24 23:04:45,026 - llm.llm_dispatcher - INFO - Found 4 active aircraft without clearances - processing immediately...
+2025-11-24 23:04:45,027 - llm.llm_dispatcher - INFO - Processing existing aircraft NVC3267 (ID: 87)
+2025-11-24 23:04:45,032 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 87 (event: aircraft.created)
+2025-11-24 23:04:45,033 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 87)
+2025-11-24 23:04:50,857 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 87 (VECTORING)
+2025-11-24 23:04:50,858 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 87: VECTORING
+2025-11-24 23:04:50,858 - llm.llm_dispatcher - INFO - Applied VECTORING for aircraft 87
+2025-11-24 23:04:51,360 - llm.llm_dispatcher - INFO - Processing existing aircraft ANA1738 (ID: 86)
+2025-11-24 23:04:51,362 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 86 (event: aircraft.created)
+2025-11-24 23:04:51,363 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 86)
+2025-11-24 23:05:01,585 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 86 (VECTORING)
+2025-11-24 23:05:01,586 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 86: VECTORING
+2025-11-24 23:05:01,587 - llm.llm_dispatcher - INFO - Applied VECTORING for aircraft 86
+2025-11-24 23:05:02,088 - llm.llm_dispatcher - INFO - Processing existing aircraft POE4676 (ID: 84)
+2025-11-24 23:05:02,092 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 84 (event: aircraft.created)
+2025-11-24 23:05:02,092 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 84)
+2025-11-24 23:05:07,777 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 84 (VECTORING)
+2025-11-24 23:05:07,777 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 84: VECTORING
+2025-11-24 23:05:07,778 - llm.llm_dispatcher - INFO - Applied VECTORING for aircraft 84
+2025-11-24 23:05:08,279 - llm.llm_dispatcher - INFO - Processing existing aircraft AFR7167 (ID: 83)
+2025-11-24 23:05:08,283 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 83 (event: aircraft.created)
+2025-11-24 23:05:08,283 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 83)
+2025-11-24 23:05:13,905 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 83 (VECTORING)
+2025-11-24 23:05:13,906 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 83: VECTORING
+2025-11-24 23:05:13,907 - llm.llm_dispatcher - INFO - Applied VECTORING for aircraft 83
+2025-11-24 23:05:44,412 - llm.llm_dispatcher - INFO - Found 4 active aircraft without clearances - processing immediately...
+2025-11-24 23:05:44,412 - llm.llm_dispatcher - INFO - Processing existing aircraft NVC3267 (ID: 87)
+2025-11-24 23:05:44,416 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 87 (event: aircraft.created)
+2025-11-24 23:05:44,416 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 87)
+2025-11-24 23:05:55,454 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 87 (VECTORING)
+2025-11-24 23:05:55,455 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 87: VECTORING
+2025-11-24 23:05:55,457 - llm.llm_dispatcher - INFO - Applied VECTORING for aircraft 87
+2025-11-24 23:05:55,958 - llm.llm_dispatcher - INFO - Processing existing aircraft ANA1738 (ID: 86)
+2025-11-24 23:05:55,980 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 86 (event: aircraft.created)
+2025-11-24 23:05:55,980 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 86)
+2025-11-24 23:06:02,575 - llm.llm_dispatcher - WARNING - Invalid JSON from LLM for aircraft 86, retrying with fix prompt
+2025-11-24 23:06:06,746 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 86 (Climb)
+2025-11-24 23:06:06,746 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 86: Climb
+2025-11-24 23:06:06,748 - llm.llm_dispatcher - INFO - Applied validated clearance to aircraft 86: Climb (updates: ['target_altitude_ft'])
+2025-11-24 23:06:06,748 - llm.llm_dispatcher - INFO - Applied Climb for aircraft 86
+2025-11-24 23:06:07,250 - llm.llm_dispatcher - INFO - Processing existing aircraft POE4676 (ID: 84)
+2025-11-24 23:06:07,255 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 84 (event: aircraft.created)
+2025-11-24 23:06:07,255 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 84)
+2025-11-24 23:06:15,019 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 84 (VECTORING)
+2025-11-24 23:06:15,020 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 84: VECTORING
+2025-11-24 23:06:15,021 - llm.llm_dispatcher - INFO - Applied VECTORING for aircraft 84
+2025-11-24 23:06:15,522 - llm.llm_dispatcher - INFO - Processing existing aircraft AFR7167 (ID: 83)
+2025-11-24 23:06:15,526 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 83 (event: aircraft.created)
+2025-11-24 23:06:15,526 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 83)
+2025-11-24 23:06:26,729 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 83 (VECTORING)
+2025-11-24 23:06:26,730 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 83: VECTORING
+2025-11-24 23:06:26,731 - llm.llm_dispatcher - INFO - Applied VECTORING for aircraft 83
+2025-11-24 23:06:57,242 - llm.llm_dispatcher - INFO - Found 3 active aircraft without clearances - processing immediately...
+2025-11-24 23:06:57,243 - llm.llm_dispatcher - INFO - Processing existing aircraft NVC3267 (ID: 87)
+2025-11-24 23:06:57,252 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 87 (event: aircraft.created)
+2025-11-24 23:06:57,253 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 87)
+2025-11-24 23:07:04,583 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 87 (VECTORING)
+2025-11-24 23:07:04,584 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 87: VECTORING
+2025-11-24 23:07:04,585 - llm.llm_dispatcher - INFO - Applied VECTORING for aircraft 87
+2025-11-24 23:07:05,086 - llm.llm_dispatcher - INFO - Processing existing aircraft POE4676 (ID: 84)
+2025-11-24 23:07:05,099 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 84 (event: aircraft.created)
+2025-11-24 23:07:05,100 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 84)
+2025-11-24 23:07:14,926 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 84 (VECTORING)
+2025-11-24 23:07:14,927 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 84: VECTORING
+2025-11-24 23:07:14,927 - llm.llm_dispatcher - INFO - Applied VECTORING for aircraft 84
+2025-11-24 23:07:15,429 - llm.llm_dispatcher - INFO - Processing existing aircraft AFR7167 (ID: 83)
+2025-11-24 23:07:15,435 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 83 (event: aircraft.created)
+2025-11-24 23:07:15,435 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 83)
+2025-11-24 23:07:20,919 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 83 (VECTORING)
+2025-11-24 23:07:20,919 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 83: VECTORING
+2025-11-24 23:07:20,920 - llm.llm_dispatcher - INFO - Applied VECTORING for aircraft 83
+2025-11-24 23:07:51,428 - llm.llm_dispatcher - INFO - Found 3 active aircraft without clearances - processing immediately...
+2025-11-24 23:07:51,428 - llm.llm_dispatcher - INFO - Processing existing aircraft NVC3267 (ID: 87)
+2025-11-24 23:07:51,465 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 87 (event: aircraft.created)
+2025-11-24 23:07:51,465 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 87)
+2025-11-24 23:07:57,467 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 87 (VECTORING)
+2025-11-24 23:07:57,468 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 87: VECTORING
+2025-11-24 23:07:57,469 - llm.llm_dispatcher - INFO - Applied VECTORING for aircraft 87
+2025-11-24 23:07:57,971 - llm.llm_dispatcher - INFO - Processing existing aircraft POE4676 (ID: 84)
+2025-11-24 23:07:57,977 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 84 (event: aircraft.created)
+2025-11-24 23:07:57,977 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 84)
+2025-11-24 23:08:04,728 - llm.llm_dispatcher - WARNING - Invalid JSON from LLM for aircraft 84, retrying with fix prompt
+2025-11-24 23:08:12,979 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 84 (Climb)
+2025-11-24 23:08:12,980 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 84: Climb
+2025-11-24 23:08:12,981 - llm.llm_dispatcher - INFO - Applied validated clearance to aircraft 84: Climb (updates: ['target_altitude_ft', 'target_speed_kts'])
+2025-11-24 23:08:12,982 - llm.llm_dispatcher - INFO - Applied Climb for aircraft 84
+2025-11-24 23:08:13,483 - llm.llm_dispatcher - INFO - Processing existing aircraft AFR7167 (ID: 83)
+2025-11-24 23:08:13,489 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 83 (event: aircraft.created)
+2025-11-24 23:08:13,489 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 83)
+2025-11-24 23:08:19,355 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 83 (VECTORING)
+2025-11-24 23:08:19,355 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 83: VECTORING
+2025-11-24 23:08:19,356 - llm.llm_dispatcher - INFO - Applied VECTORING for aircraft 83
+2025-11-24 23:08:49,861 - llm.llm_dispatcher - INFO - Found 2 active aircraft without clearances - processing immediately...
+2025-11-24 23:08:49,862 - llm.llm_dispatcher - INFO - Processing existing aircraft NVC3267 (ID: 87)
+2025-11-24 23:08:49,865 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 87 (event: aircraft.created)
+2025-11-24 23:08:49,866 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 87)
+2025-11-24 23:09:00,712 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 87 (VECTORING)
+2025-11-24 23:09:00,713 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 87: VECTORING
+2025-11-24 23:09:00,714 - llm.llm_dispatcher - INFO - Applied VECTORING for aircraft 87
+2025-11-24 23:09:01,216 - llm.llm_dispatcher - INFO - Processing existing aircraft AFR7167 (ID: 83)
+2025-11-24 23:09:01,222 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 83 (event: aircraft.created)
+2025-11-24 23:09:01,222 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 83)
+2025-11-24 23:09:06,735 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 83 (VECTORING)
+2025-11-24 23:09:06,735 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 83: VECTORING
+2025-11-24 23:09:06,736 - llm.llm_dispatcher - INFO - Applied VECTORING for aircraft 83
+2025-11-24 23:09:37,241 - llm.llm_dispatcher - INFO - Found 2 active aircraft without clearances - processing immediately...
+2025-11-24 23:09:37,242 - llm.llm_dispatcher - INFO - Processing existing aircraft NVC3267 (ID: 87)
+2025-11-24 23:09:37,245 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 87 (event: aircraft.created)
+2025-11-24 23:09:37,245 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 87)
+2025-11-24 23:09:46,372 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 87 (VECTORING)
+2025-11-24 23:09:46,373 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 87: VECTORING
+2025-11-24 23:09:46,374 - llm.llm_dispatcher - INFO - Applied VECTORING for aircraft 87
+2025-11-24 23:09:46,874 - llm.llm_dispatcher - INFO - Processing existing aircraft AFR7167 (ID: 83)
+2025-11-24 23:09:46,880 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 83 (event: aircraft.created)
+2025-11-24 23:09:46,880 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 83)
+2025-11-24 23:09:52,428 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 83 (VECTORING)
+2025-11-24 23:09:52,429 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 83: VECTORING
+2025-11-24 23:09:52,429 - llm.llm_dispatcher - INFO - Applied VECTORING for aircraft 83
+2025-11-24 23:10:22,935 - llm.llm_dispatcher - INFO - Found 2 active aircraft without clearances - processing immediately...
+2025-11-24 23:10:22,936 - llm.llm_dispatcher - INFO - Processing existing aircraft NVC3267 (ID: 87)
+2025-11-24 23:10:22,939 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 87 (event: aircraft.created)
+2025-11-24 23:10:22,939 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 87)
+2025-11-24 23:10:37,185 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 87 (VECTORING)
+2025-11-24 23:10:37,186 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 87: VECTORING
+2025-11-24 23:10:37,187 - llm.llm_dispatcher - INFO - Applied VECTORING for aircraft 87
+2025-11-24 23:10:37,688 - llm.llm_dispatcher - INFO - Processing existing aircraft AFR7167 (ID: 83)
+2025-11-24 23:10:37,695 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 83 (event: aircraft.created)
+2025-11-24 23:10:37,696 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 83)
+2025-11-24 23:10:43,203 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 83 (VECTORING)
+2025-11-24 23:10:43,203 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 83: VECTORING
+2025-11-24 23:10:43,204 - llm.llm_dispatcher - INFO - Applied VECTORING for aircraft 83
+2025-11-24 23:11:13,713 - llm.llm_dispatcher - INFO - Found 2 active aircraft without clearances - processing immediately...
+2025-11-24 23:11:13,714 - llm.llm_dispatcher - INFO - Processing existing aircraft NVC3267 (ID: 87)
+2025-11-24 23:11:13,719 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 87 (event: aircraft.created)
+2025-11-24 23:11:13,719 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 87)
+2025-11-24 23:11:21,758 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 87 (VECTORING)
+2025-11-24 23:11:21,758 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 87: VECTORING
+2025-11-24 23:11:21,759 - llm.llm_dispatcher - INFO - Applied VECTORING for aircraft 87
+2025-11-24 23:11:22,261 - llm.llm_dispatcher - INFO - Processing existing aircraft AFR7167 (ID: 83)
+2025-11-24 23:11:22,265 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 83 (event: aircraft.created)
+2025-11-24 23:11:22,265 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 83)
+2025-11-24 23:11:27,874 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 83 (VECTORING)
+2025-11-24 23:11:27,875 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 83: VECTORING
+2025-11-24 23:11:27,876 - llm.llm_dispatcher - INFO - Applied VECTORING for aircraft 83
+2025-11-24 23:11:58,387 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-24 23:12:28,392 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-24 23:12:58,400 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-24 23:13:28,405 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-24 23:13:58,410 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-24 23:14:28,413 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-24 23:14:58,418 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-24 23:15:28,423 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-24 23:15:58,427 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-24 23:16:28,430 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-24 23:16:58,434 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-24 23:17:28,439 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-24 23:17:41,686 - llm.llm_dispatcher - INFO - Received aircraft.created event - processing immediately
+2025-11-24 23:17:53,470 - llm.llm_dispatcher - INFO - Received aircraft.created event - processing immediately
+2025-11-24 23:17:58,445 - llm.llm_dispatcher - INFO - Found 2 active aircraft without clearances - processing immediately...
+2025-11-24 23:17:58,445 - llm.llm_dispatcher - INFO - Processing existing aircraft AAL4893 (ID: 89)
+2025-11-24 23:17:58,496 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 89 (event: aircraft.created)
+2025-11-24 23:17:58,496 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 89)
+2025-11-24 23:18:03,417 - llm.llm_dispatcher - INFO - Received aircraft.created event - processing immediately
+2025-11-24 23:18:16,729 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 89 (VECTORING)
+2025-11-24 23:18:16,730 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 89: VECTORING
+2025-11-24 23:18:16,732 - llm.llm_dispatcher - INFO - Applied VECTORING for aircraft 89
+2025-11-24 23:18:17,234 - llm.llm_dispatcher - INFO - Processing existing aircraft AFR2890 (ID: 88)
+2025-11-24 23:18:17,241 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 88 (event: aircraft.created)
+2025-11-24 23:18:17,241 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 88)
+2025-11-24 23:18:18,733 - llm.llm_dispatcher - INFO - Received aircraft.created event - processing immediately
+2025-11-24 23:18:23,110 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 88 (VECTORING)
+2025-11-24 23:18:23,111 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 88: VECTORING
+2025-11-24 23:18:23,112 - llm.llm_dispatcher - INFO - Applied VECTORING for aircraft 88
+2025-11-24 23:18:30,684 - llm.llm_dispatcher - INFO - Received aircraft.created event - processing immediately
+2025-11-24 23:18:53,626 - llm.llm_dispatcher - INFO - Found 5 active aircraft without clearances - processing immediately...
+2025-11-24 23:18:53,627 - llm.llm_dispatcher - INFO - Processing existing aircraft CIC9332 (ID: 92)
+2025-11-24 23:18:53,636 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 92 (event: aircraft.created)
+2025-11-24 23:18:53,636 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 92)
+2025-11-24 23:19:01,250 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 92 (VECTORING)
+2025-11-24 23:19:01,251 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 92: VECTORING
+2025-11-24 23:19:01,251 - llm.llm_dispatcher - INFO - Applied VECTORING for aircraft 92
+2025-11-24 23:19:01,753 - llm.llm_dispatcher - INFO - Processing existing aircraft CDR3609 (ID: 91)
+2025-11-24 23:19:01,757 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 91 (event: aircraft.created)
+2025-11-24 23:19:01,757 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 91)
+2025-11-24 23:19:08,247 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 91 (VECTORING)
+2025-11-24 23:19:08,248 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 91: VECTORING
+2025-11-24 23:19:08,248 - llm.llm_dispatcher - INFO - Applied VECTORING for aircraft 91
+2025-11-24 23:19:08,750 - llm.llm_dispatcher - INFO - Processing existing aircraft XNC5779 (ID: 90)
+2025-11-24 23:19:08,755 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 90 (event: aircraft.created)
+2025-11-24 23:19:08,756 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 90)
+2025-11-24 23:19:15,939 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 90 (VECTORING)
+2025-11-24 23:19:15,939 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 90: VECTORING
+2025-11-24 23:19:16,210 - llm.llm_dispatcher - INFO - Applied validated clearance to aircraft 90: VECTORING (updates: ['target_altitude_ft', 'target_heading_deg'])
+2025-11-24 23:19:16,212 - llm.llm_dispatcher - INFO - Applied VECTORING for aircraft 90
+2025-11-24 23:19:16,714 - llm.llm_dispatcher - INFO - Processing existing aircraft AAL4893 (ID: 89)
+2025-11-24 23:19:16,718 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 89 (event: aircraft.created)
+2025-11-24 23:19:16,718 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 89)
+2025-11-24 23:19:22,672 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 89 (VECTORING)
+2025-11-24 23:19:22,672 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 89: VECTORING
+2025-11-24 23:19:22,673 - llm.llm_dispatcher - INFO - Applied VECTORING for aircraft 89
+2025-11-24 23:19:23,174 - llm.llm_dispatcher - INFO - Processing existing aircraft AFR2890 (ID: 88)
+2025-11-24 23:19:23,179 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 88 (event: aircraft.created)
+2025-11-24 23:19:23,179 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 88)
+2025-11-24 23:19:29,211 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 88 (VECTORING)
+2025-11-24 23:19:29,211 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 88: VECTORING
+2025-11-24 23:19:29,212 - llm.llm_dispatcher - INFO - Applied VECTORING for aircraft 88
+2025-11-24 23:19:59,724 - llm.llm_dispatcher - INFO - Found 4 active aircraft without clearances - processing immediately...
+2025-11-24 23:19:59,725 - llm.llm_dispatcher - INFO - Processing existing aircraft CIC9332 (ID: 92)
+2025-11-24 23:19:59,732 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 92 (event: aircraft.created)
+2025-11-24 23:19:59,732 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 92)
+2025-11-24 23:20:07,060 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 92 (VECTORING)
+2025-11-24 23:20:07,061 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 92: VECTORING
+2025-11-24 23:20:07,063 - llm.llm_dispatcher - INFO - Applied VECTORING for aircraft 92
+2025-11-24 23:20:07,564 - llm.llm_dispatcher - INFO - Processing existing aircraft CDR3609 (ID: 91)
+2025-11-24 23:20:07,573 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 91 (event: aircraft.created)
+2025-11-24 23:20:07,573 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 91)
+2025-11-24 23:20:21,233 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 91 (VECTORING)
+2025-11-24 23:20:21,234 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 91: VECTORING
+2025-11-24 23:20:21,235 - llm.llm_dispatcher - INFO - Applied VECTORING for aircraft 91
+2025-11-24 23:20:21,736 - llm.llm_dispatcher - INFO - Processing existing aircraft AAL4893 (ID: 89)
+2025-11-24 23:20:21,740 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 89 (event: aircraft.created)
+2025-11-24 23:20:21,740 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 89)
+2025-11-24 23:20:28,159 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 89 (VECTORING)
+2025-11-24 23:20:28,160 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 89: VECTORING
+2025-11-24 23:20:28,161 - llm.llm_dispatcher - INFO - Applied validated clearance to aircraft 89: VECTORING (updates: ['target_altitude_ft'])
+2025-11-24 23:20:28,162 - llm.llm_dispatcher - INFO - Applied VECTORING for aircraft 89
+2025-11-24 23:20:28,664 - llm.llm_dispatcher - INFO - Processing existing aircraft AFR2890 (ID: 88)
+2025-11-24 23:20:28,672 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 88 (event: aircraft.created)
+2025-11-24 23:20:28,672 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 88)
+2025-11-24 23:20:35,314 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 88 (DESCENT_PROFILE)
+2025-11-24 23:20:35,315 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 88: DESCENT_PROFILE
+2025-11-24 23:20:35,316 - llm.llm_dispatcher - INFO - Applied validated clearance to aircraft 88: DESCENT_PROFILE (updates: ['target_altitude_ft'])
+2025-11-24 23:20:35,317 - llm.llm_dispatcher - INFO - Applied DESCENT_PROFILE for aircraft 88
+2025-11-24 23:21:05,830 - llm.llm_dispatcher - INFO - Found 2 active aircraft without clearances - processing immediately...
+2025-11-24 23:21:05,831 - llm.llm_dispatcher - INFO - Processing existing aircraft CIC9332 (ID: 92)
+2025-11-24 23:21:05,837 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 92 (event: aircraft.created)
+2025-11-24 23:21:05,837 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 92)
+2025-11-24 23:21:21,080 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 92 (VECTORING)
+2025-11-24 23:21:21,081 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 92: VECTORING
+2025-11-24 23:21:21,082 - llm.llm_dispatcher - INFO - Applied VECTORING for aircraft 92
+2025-11-24 23:21:21,583 - llm.llm_dispatcher - INFO - Processing existing aircraft CDR3609 (ID: 91)
+2025-11-24 23:21:21,719 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 91 (event: aircraft.created)
+2025-11-24 23:21:21,719 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 91)
+2025-11-24 23:21:27,739 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 91 (VECTORING)
+2025-11-24 23:21:27,739 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 91: VECTORING
+2025-11-24 23:21:27,749 - llm.llm_dispatcher - INFO - Applied validated clearance to aircraft 91: VECTORING (updates: ['target_heading_deg'])
+2025-11-24 23:21:27,749 - llm.llm_dispatcher - INFO - Applied VECTORING for aircraft 91
+2025-11-24 23:21:58,257 - llm.llm_dispatcher - INFO - Found 1 active aircraft without clearances - processing immediately...
+2025-11-24 23:21:58,257 - llm.llm_dispatcher - INFO - Processing existing aircraft CIC9332 (ID: 92)
+2025-11-24 23:21:58,262 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 92 (event: aircraft.created)
+2025-11-24 23:21:58,262 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 92)
+2025-11-24 23:22:09,145 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 92 (VECTORING)
+2025-11-24 23:22:09,146 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 92: VECTORING
+2025-11-24 23:22:09,147 - llm.llm_dispatcher - INFO - Applied VECTORING for aircraft 92
+2025-11-24 23:22:39,653 - llm.llm_dispatcher - INFO - Found 1 active aircraft without clearances - processing immediately...
+2025-11-24 23:22:39,654 - llm.llm_dispatcher - INFO - Processing existing aircraft CIC9332 (ID: 92)
+2025-11-24 23:22:39,659 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 92 (event: aircraft.created)
+2025-11-24 23:22:39,659 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 92)
+2025-11-24 23:22:59,132 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 92 (VECTORING)
+2025-11-24 23:22:59,132 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 92: VECTORING
+2025-11-24 23:22:59,133 - llm.llm_dispatcher - INFO - Applied VECTORING for aircraft 92
+2025-11-24 23:23:29,644 - llm.llm_dispatcher - INFO - Found 1 active aircraft without clearances - processing immediately...
+2025-11-24 23:23:29,645 - llm.llm_dispatcher - INFO - Processing existing aircraft CIC9332 (ID: 92)
+2025-11-24 23:23:29,660 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 92 (event: aircraft.created)
+2025-11-24 23:23:29,661 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 92)
+2025-11-24 23:23:37,582 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 92 (VECTORING)
+2025-11-24 23:23:37,583 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 92: VECTORING
+2025-11-24 23:23:37,585 - llm.llm_dispatcher - INFO - Applied VECTORING for aircraft 92
+2025-11-24 23:24:08,093 - llm.llm_dispatcher - INFO - Found 1 active aircraft without clearances - processing immediately...
+2025-11-24 23:24:08,094 - llm.llm_dispatcher - INFO - Processing existing aircraft CIC9332 (ID: 92)
+2025-11-24 23:24:08,101 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 92 (event: aircraft.created)
+2025-11-24 23:24:08,102 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 92)
+2025-11-24 23:24:19,622 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 92 (VECTORING)
+2025-11-24 23:24:19,623 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 92: VECTORING
+2025-11-24 23:24:19,624 - llm.llm_dispatcher - INFO - Applied VECTORING for aircraft 92
+2025-11-24 23:24:50,130 - llm.llm_dispatcher - INFO - Found 1 active aircraft without clearances - processing immediately...
+2025-11-24 23:24:50,130 - llm.llm_dispatcher - INFO - Processing existing aircraft CIC9332 (ID: 92)
+2025-11-24 23:24:50,139 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 92 (event: aircraft.created)
+2025-11-24 23:24:50,139 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 92)
+2025-11-24 23:24:58,892 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 92 (VECTORING)
+2025-11-24 23:24:58,892 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 92: VECTORING
+2025-11-24 23:24:58,893 - llm.llm_dispatcher - INFO - Applied VECTORING for aircraft 92
+2025-11-24 23:25:29,426 - llm.llm_dispatcher - INFO - Found 1 active aircraft without clearances - processing immediately...
+2025-11-24 23:25:29,426 - llm.llm_dispatcher - INFO - Processing existing aircraft CIC9332 (ID: 92)
+2025-11-24 23:25:29,435 - llm.llm_dispatcher - INFO - Calling Air LLM for aircraft 92 (event: aircraft.created)
+2025-11-24 23:25:29,435 - llm.llm_dispatcher - INFO - Calling Mistral-7B for Air clearance (aircraft 92)
+2025-11-24 23:25:35,972 - llm.safety_validator - INFO - Air clearance validation PASSED for aircraft 92 (VECTORING)
+2025-11-24 23:25:35,973 - llm.llm_dispatcher - INFO - Generated valid air clearance for aircraft 92: VECTORING
+2025-11-24 23:25:36,108 - llm.llm_dispatcher - INFO - Applied validated clearance to aircraft 92: VECTORING (updates: ['target_heading_deg'])
+2025-11-24 23:25:36,117 - llm.llm_dispatcher - INFO - Applied VECTORING for aircraft 92
+2025-11-24 23:26:06,932 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-24 23:26:36,952 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-24 23:27:06,970 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-24 23:27:36,998 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-24 23:27:44,910 - __main__ - INFO - Starting ATC LLM Dispatcher...
+2025-11-24 23:27:44,910 - llm.llm_dispatcher - INFO - Initializing LLM Dispatcher...
+2025-11-24 23:27:44,997 - llm.llm_dispatcher - INFO - Connected to Redis on channel 'atc:events'
+2025-11-24 23:27:45,135 - llm.llm_dispatcher - INFO - Connected to PostgreSQL database
+2025-11-24 23:27:45,135 - llm.llm_dispatcher - INFO - LLM Dispatcher initialized with Mistral-7B via Ollama
+2025-11-24 23:27:45,135 - llm.llm_dispatcher - INFO - Checking for existing aircraft without clearances...
+2025-11-24 23:27:45,499 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-24 23:27:45,511 - llm.llm_dispatcher - INFO - LLM Dispatcher running...
+2025-11-24 23:27:45,511 - llm.llm_dispatcher - INFO - Listening for events: aircraft.created, zone.boundary_crossed, clearance.completed, runway.landed, runway.vacated
+2025-11-24 23:27:45,514 - llm.llm_dispatcher - INFO - Subscribed to Redis channel: atc:events
+2025-11-24 23:27:45,514 - llm.llm_dispatcher - INFO - Event processor started
+2025-11-24 23:28:15,520 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-24 23:28:45,571 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-24 23:29:15,355 - __main__ - INFO - Starting ATC LLM Dispatcher...
+2025-11-24 23:29:15,355 - llm.llm_dispatcher - INFO - Initializing LLM Dispatcher...
+2025-11-24 23:29:15,439 - llm.llm_dispatcher - INFO - Connected to Redis on channel 'atc:events'
+2025-11-24 23:29:15,647 - llm.llm_dispatcher - INFO - Connected to PostgreSQL database
+2025-11-24 23:29:15,647 - llm.llm_dispatcher - INFO - LLM Dispatcher initialized with Mistral-7B via Ollama
+2025-11-24 23:29:15,647 - llm.llm_dispatcher - INFO - Checking for existing aircraft without clearances...
+2025-11-24 23:29:15,923 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-24 23:29:15,961 - llm.llm_dispatcher - INFO - LLM Dispatcher running...
+2025-11-24 23:29:15,962 - llm.llm_dispatcher - INFO - Listening for events: aircraft.created, zone.boundary_crossed, clearance.completed, runway.landed, runway.vacated
+2025-11-24 23:29:15,962 - llm.llm_dispatcher - INFO - Subscribed to Redis channel: atc:events
+2025-11-24 23:29:15,963 - llm.llm_dispatcher - INFO - Event processor started
+2025-11-24 23:29:46,030 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-24 23:30:16,035 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-24 23:30:46,040 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-24 23:31:16,043 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-24 23:31:46,048 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-24 23:32:16,053 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-24 23:32:46,058 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-24 23:33:16,063 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-24 23:33:46,068 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-24 23:34:16,074 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-24 23:34:46,079 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-24 23:35:16,084 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-24 23:35:46,090 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-24 23:36:16,095 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-24 23:36:46,102 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-24 23:37:16,324 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-24 23:37:46,330 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-24 23:49:30,745 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 00:04:59,338 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 00:05:29,341 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 00:05:59,345 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 00:06:29,351 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 00:06:59,356 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 00:07:29,362 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 00:20:40,740 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 00:21:10,744 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 00:21:40,746 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 00:22:10,751 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 00:22:40,755 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 00:23:10,763 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 00:30:04,483 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 00:30:34,489 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 00:31:29,437 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 00:31:59,502 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 00:32:29,506 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 00:32:59,511 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 00:33:29,517 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 00:33:59,521 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 00:34:29,526 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 00:34:59,535 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 00:35:29,542 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 00:35:59,544 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 00:36:29,547 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 00:36:59,551 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 00:37:51,191 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 00:38:21,196 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 00:38:51,202 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 00:39:21,207 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 00:40:19,649 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 00:42:11,034 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 00:42:41,040 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 00:47:24,079 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 00:47:54,624 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 00:48:24,630 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 00:52:19,546 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 00:57:01,622 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 00:57:31,625 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 00:58:01,630 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 00:58:31,635 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 00:59:01,643 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 00:59:31,648 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 01:00:01,652 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 01:00:31,656 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 01:01:02,403 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 01:35:02,219 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 02:53:11,693 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 03:02:06,149 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 03:02:36,154 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 03:03:06,159 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 03:35:09,525 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 03:53:12,252 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 04:26:02,871 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 04:57:56,500 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 06:19:25,106 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 06:19:57,732 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 06:32:21,479 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 06:32:51,484 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 06:58:36,539 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 06:59:06,545 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 07:41:15,872 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 07:59:32,644 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 08:34:47,347 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 08:35:17,352 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 08:59:43,234 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 09:34:07,947 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 09:34:50,806 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 10:00:21,895 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 10:00:51,897 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 10:33:05,544 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 10:33:35,549 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 10:50:16,717 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 10:50:46,720 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 11:01:41,191 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 11:02:11,197 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 11:02:41,202 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 11:03:11,207 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 11:03:41,214 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 11:04:11,219 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 11:20:47,937 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 11:39:03,542 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 11:54:33,700 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 12:02:31,733 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 12:03:01,737 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 12:33:22,056 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 12:34:52,834 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 12:35:22,839 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 13:03:31,718 - llm.llm_dispatcher - INFO - No active aircraft without clearances found
+2025-11-25 13:04:01,732 - llm.llm_dispatcher - INFO - No active aircraft without clearances found

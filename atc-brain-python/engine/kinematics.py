@@ -1,19 +1,11 @@
 """
 Aircraft kinematics formulas for deterministic motion simulation.
 All formulas operate on 1-second time steps (Δt = 1 s).
-
-This module is Ray-distributed for parallel execution on remote cluster nodes.
 """
 
 import math
 import random
 from typing import Dict, Any, Optional
-
-try:
-    import ray
-    RAY_AVAILABLE = True
-except ImportError:
-    RAY_AVAILABLE = False
 
 from .constants import (
     DT,
@@ -548,9 +540,7 @@ def update_aircraft_state(aircraft: Dict[str, Any], dt: float = DT) -> Dict[str,
     """
     Update complete aircraft state for one tick.
     Applies logical approach physics for arrivals, random drift for others.
-    
-    This function is CPU-intensive and executes on Ray cluster nodes.
-    
+
     Args:
         aircraft: Aircraft state dictionary
         dt: Time step (seconds)
@@ -574,14 +564,20 @@ def update_aircraft_state(aircraft: Dict[str, Any], dt: float = DT) -> Dict[str,
     controller = aircraft.get("controller", "ENGINE")
     flight_type = aircraft.get("flight_type", "ARRIVAL")
     
-    # Apply logical approach physics for ENGINE-controlled arrivals
-    if controller == "ENGINE" and flight_type == "ARRIVAL":
-        return apply_logical_approach_physics(aircraft, dt)
-    
-    # For other aircraft, use original logic with targets or drift
+    # Get target values (from LLM clearances)
     target_speed = aircraft.get("target_speed_kts")
     target_heading = aircraft.get("target_heading_deg")
     target_altitude = aircraft.get("target_altitude_ft")
+    
+    # If LLM has provided targets, use them (even for ENGINE-controlled arrivals)
+    # This allows LLM to guide aircraft instead of default approach logic
+    has_llm_targets = target_speed is not None or target_heading is not None or target_altitude is not None
+    
+    if not has_llm_targets and controller == "ENGINE" and flight_type == "ARRIVAL":
+        # No LLM targets - use default logical approach physics
+        return apply_logical_approach_physics(aircraft, dt)
+    
+    # For aircraft with LLM targets, use target-based logic below
     
     # Determine if on approach
     is_approach = distance_nm < 20.0
