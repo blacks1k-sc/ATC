@@ -8,9 +8,6 @@ Architecture:
   * db_worker: Batches DB writes every 1s
   * redis_worker: Batches Redis publishes every 20-50ms
   * telemetry_worker: Writes telemetry every 10s
-- Ray distributed computing for CPU-intensive physics simulation
-  * Aircraft physics executed on remote cluster (ASUS @ 192.168.2.142)
-  * MacBook orchestrates, manages I/O, and coordinates visualization
 """
 
 import asyncio
@@ -19,19 +16,8 @@ import json
 import os
 import logging
 from datetime import datetime
-from pathlib import Path
 from typing import List, Dict, Any, Optional
 from dotenv import load_dotenv
-
-# Ray distributed computing
-try:
-    import ray
-    from .kinematics_ray import update_aircraft_state_remote
-    RAY_AVAILABLE = True
-except ImportError:
-    RAY_AVAILABLE = False
-    logger_temp = logging.getLogger(__name__)
-    logger_temp.warning("Ray not available - falling back to local execution")
 
 from .state_manager import StateManager
 from .event_publisher import EventPublisher
@@ -64,33 +50,20 @@ logger = logging.getLogger(__name__)
 
 
 class KinematicsEngine:
-    """Main kinematics engine controller with async worker architecture and Ray distribution."""
-    
-    def __init__(self, ray_address: Optional[str] = None, use_ray: bool = True):
-        """
-        Initialize the kinematics engine.
-        
-        Args:
-            ray_address: Ray cluster address (e.g., "ray://192.168.2.142:10001")
-                        If None, uses environment variable RAY_ADDRESS or defaults to local
-            use_ray: Whether to use Ray distributed execution (default: True if available)
-        """
+    """Main kinematics engine controller with async worker architecture."""
+
+    def __init__(self):
+        """Initialize the kinematics engine."""
         self.state_manager = StateManager()
         self.event_publisher = EventPublisher()
         self.spawn_listener = SpawnListener(self.state_manager, self.on_aircraft_spawned)
-        
+
         self.airport = get_airport_data()
-        self.project_root = Path(__file__).resolve().parent.parent
-        
+
         self.tick_count = 0
         self.running = False
         self.start_time = 0.0
-        
-        # Ray distributed computing setup
-        self.use_ray = use_ray and RAY_AVAILABLE
-        self.ray_address = ray_address or os.getenv("RAY_ADDRESS", "ray://192.168.2.142:10001")
-        self.ray_initialized = False
-        
+
         # ========== Async Queue and Workers ==========
         # Shared queue for physics loop -> async workers
         self.io_queue: asyncio.Queue = asyncio.Queue(maxsize=config.IO_QUEUE_MAX_SIZE)
@@ -118,8 +91,6 @@ class KinematicsEngine:
             "db_writes": 0,
             "redis_publishes": 0,
             "telemetry_writes": 0,
-            "ray_tasks_executed": 0,
-            "ray_fallbacks": 0,
         }
         
         # Worker statistics
@@ -134,36 +105,7 @@ class KinematicsEngine:
         """Initialize all subsystems and spawn async workers."""
         logger.info("Initializing Kinematics Engine...")
         config.print_config()
-        
-        # Initialize Ray distributed computing
-        if self.use_ray:
-            try:
-                logger.info(f"Connecting to Ray cluster at {self.ray_address}...")
-                runtime_env = {
-                    "working_dir": str(self.project_root),
-                }
-                ray.init(
-                    address=self.ray_address,
-                    ignore_reinit_error=True,
-                    runtime_env=runtime_env,
-                )
-                self.ray_initialized = True
-                
-                # Verify cluster resources
-                resources = ray.cluster_resources()
-                logger.info("Ray cluster connected!")
-                logger.info(f"   Cluster resources: {resources}")
-                logger.info(f"   Available CPUs: {resources.get('CPU', 0)}")
-                logger.info(f"   Available nodes: {len(ray.nodes())}")
-                
-            except Exception as e:
-                logger.error(f"Failed to connect to Ray cluster: {e}")
-                logger.warning("   Falling back to local execution")
-                self.use_ray = False
-                self.ray_initialized = False
-        else:
-            logger.info("Ray disabled - using local execution")
-        
+
         # Connect to database
         await self.state_manager.connect()
         
@@ -184,8 +126,7 @@ class KinematicsEngine:
         self.redis_worker_task = asyncio.create_task(self.redis_worker())
         self.telemetry_worker_task = asyncio.create_task(self.telemetry_worker())
         
-        mode = "Ray distributed" if self.use_ray else "local"
-        logger.info(f"Kinematics Engine initialized ({mode} mode)")
+        logger.info("Kinematics Engine initialized")
     
     async def shutdown(self):
         """Shutdown all subsystems and cancel async workers."""
@@ -221,15 +162,6 @@ class KinematicsEngine:
         # Disconnect from Redis (async)
         await self.event_publisher.disconnect()
         self.spawn_listener.disconnect()
-        
-        # Shutdown Ray
-        if self.ray_initialized:
-            logger.info("   Shutting down Ray...")
-            try:
-                ray.shutdown()
-                logger.info("   Ray shutdown complete")
-            except Exception as e:
-                logger.error(f"   Error shutting down Ray: {e}")
         
         # Print statistics
         self.print_statistics()
@@ -441,46 +373,13 @@ class KinematicsEngine:
             # No aircraft to process this tick
             return
         
-        # Process all aircraft using Ray distributed execution or local fallback
-        if self.use_ray and self.ray_initialized:
+        # Process all aircraft locally
+        for aircraft in aircraft_list:
             try:
-                # Ray distributed execution - offload to ASUS cluster
-                # Submit all aircraft updates as parallel Ray tasks
-                futures = [update_aircraft_state_remote.remote(ac, DT) for ac in aircraft_list]
-                
-                # Gather results from remote workers
-                updated_aircraft = ray.get(futures)
-                
-                # Track Ray execution
-                self.stats["ray_tasks_executed"] += len(futures)
-                
-                # Process results (extract events, prepare DB updates)
-                for aircraft, updated in zip(aircraft_list, updated_aircraft):
-                    try:
-                        self._process_aircraft_results(aircraft, updated)
-                    except Exception as e:
-                        callsign = aircraft.get("callsign", "UNKNOWN")
-                        logger.error(f"Error processing results for {callsign}: {e}")
-            
+                self.process_aircraft_sync(aircraft)
             except Exception as e:
-                logger.error(f"Ray execution error: {e}")
-                logger.warning("Falling back to local execution for this tick")
-                self.stats["ray_fallbacks"] += 1
-                # Fallback to local execution
-                for aircraft in aircraft_list:
-                    try:
-                        self.process_aircraft_sync(aircraft)
-                    except Exception as e:
-                        callsign = aircraft.get("callsign", "UNKNOWN")
-                        logger.error(f"Error processing {callsign}: {e}")
-        else:
-            # Local execution fallback (no Ray available)
-            for aircraft in aircraft_list:
-                try:
-                    self.process_aircraft_sync(aircraft)
-                except Exception as e:
-                    callsign = aircraft.get("callsign", "UNKNOWN")
-                    logger.error(f"Error processing {callsign}: {e}")
+                callsign = aircraft.get("callsign", "UNKNOWN")
+                logger.error(f"Error processing {callsign}: {e}")
         
         # Update statistics
         self.stats["aircraft_processed"] += len(aircraft_list)
@@ -522,184 +421,6 @@ class KinematicsEngine:
         
         if tick_duration > TICK_WARNING_THRESHOLD_SEC:
             logger.warning(f"Tick {self.tick_count} took {tick_duration:.3f}s (threshold: {TICK_WARNING_THRESHOLD_SEC}s)")
-    
-    def _process_aircraft_results(self, original_aircraft: Dict[str, Any], updated: Dict[str, Any]):
-        """
-        Process results from Ray remote execution.
-        Extracts events, prepares DB updates, and queues telemetry.
-        
-        This mirrors process_aircraft_sync but works with pre-computed results from Ray.
-        
-        Args:
-            original_aircraft: Original aircraft data (before update)
-            updated: Updated aircraft data (from Ray remote worker)
-        """
-        aircraft_id = original_aircraft["id"]
-        callsign = original_aircraft.get("callsign", "UNKNOWN")
-        
-        # Extract updated state
-        position = updated["position"]
-        distance_nm = updated.get("distance_to_airport_nm", 999.0)
-        altitude_ft = position["altitude_ft"]
-        altitude_agl = altitude_msl_to_agl(altitude_ft, CYYZ_ELEVATION_FT)
-        
-        # Determine phase
-        phase = self.determine_phase(distance_nm, altitude_agl)
-        updated["phase"] = phase
-        
-        # ========== LLM Event Detection ==========
-        # Check zone boundary crossing
-        zone_event = self._check_zone_boundary_crossed(original_aircraft, updated)
-        if zone_event:
-            self.redis_events_buffer.append((
-                "zone.boundary_crossed",
-                zone_event
-            ))
-            self.stats["events_fired"] += 1
-        
-        # Check clearance completion
-        clearance_event = self._check_clearance_completed(original_aircraft, updated)
-        if clearance_event:
-            self.redis_events_buffer.append((
-                "clearance.completed",
-                clearance_event
-            ))
-            self.stats["events_fired"] += 1
-        
-        # Check runway landing
-        landing_event = self._check_runway_landed(original_aircraft, updated)
-        if landing_event:
-            self.redis_events_buffer.append((
-                "runway.landed",
-                landing_event
-            ))
-            self.stats["events_fired"] += 1
-        
-        # Check runway vacated
-        vacated_event = self._check_runway_vacated(original_aircraft, updated)
-        if vacated_event:
-            self.redis_events_buffer.append((
-                "runway.vacated",
-                vacated_event
-            ))
-            self.stats["events_fired"] += 1
-        
-        # Check threshold events (existing)
-        last_event = original_aircraft.get("last_event_fired") or ""
-        new_event = None
-        
-        if altitude_agl < TOUCHDOWN_ALTITUDE_FT and EVENT_TOUCHDOWN not in last_event:
-            new_event = EVENT_TOUCHDOWN
-            if config.DEBUG_PRINTS:
-                logger.debug(f"TOUCHDOWN: {callsign} at {altitude_agl:.0f} ft AGL")
-            
-            self.db_updates_buffer.append({
-                "aircraft_id": aircraft_id,
-                "status": "landed",
-                "controller": "GROUND",
-                "phase": "TOUCHDOWN"
-            })
-            
-            self.pending_db_events.append({
-                "level": "INFO",
-                "type": "aircraft.touchdown",
-                "message": f"{callsign} touchdown at {altitude_agl:.0f} ft AGL",
-                "details": {
-                    "callsign": callsign,
-                    "altitude_agl": altitude_agl,
-                    "position": position,
-                    "event_type": new_event
-                },
-                "aircraft_id": aircraft_id,
-                "sector": "TWR",
-                "direction": "SYS"
-            })
-            
-            threshold_event = self.event_publisher.prepare_threshold_event(new_event, updated)
-            self.redis_events_buffer.append(threshold_event)
-            self.stats["events_fired"] += 1
-            return
-        
-        elif distance_nm <= HANDOFF_READY_THRESHOLD_NM and EVENT_HANDOFF_READY not in last_event:
-            new_event = EVENT_HANDOFF_READY
-            if config.DEBUG_PRINTS:
-                logger.debug(f"HANDOFF_READY: {callsign} at {distance_nm:.1f} NM")
-            
-            self.pending_db_events.append({
-                "level": "INFO",
-                "type": "aircraft.handoff_ready",
-                "message": f"{callsign} ready for handoff at {distance_nm:.1f} NM",
-                "details": {
-                    "callsign": callsign,
-                    "distance_nm": distance_nm,
-                    "position": position,
-                    "event_type": new_event
-                },
-                "aircraft_id": aircraft_id,
-                "sector": "APP",
-                "direction": "SYS"
-            })
-            
-            threshold_event = self.event_publisher.prepare_threshold_event(new_event, updated)
-            self.redis_events_buffer.append(threshold_event)
-            self.stats["events_fired"] += 1
-        
-        elif distance_nm <= ENTRY_ZONE_THRESHOLD_NM and EVENT_ENTERED_ENTRY_ZONE not in last_event:
-            new_event = EVENT_ENTERED_ENTRY_ZONE
-            if config.DEBUG_PRINTS:
-                logger.debug(f"ENTERED_ENTRY_ZONE: {callsign} at {distance_nm:.1f} NM")
-            
-            self.pending_db_events.append({
-                "level": "INFO",
-                "type": "aircraft.entered_entry_zone",
-                "message": f"{callsign} entered entry zone at {distance_nm:.1f} NM",
-                "details": {
-                    "callsign": callsign,
-                    "distance_nm": distance_nm,
-                    "position": position,
-                    "event_type": new_event
-                },
-                "aircraft_id": aircraft_id,
-                "sector": "CTR",
-                "direction": "SYS"
-            })
-            
-            threshold_event = self.event_publisher.prepare_threshold_event(new_event, updated)
-            self.redis_events_buffer.append(threshold_event)
-            self.stats["events_fired"] += 1
-        
-        # Update last_event_fired
-        if new_event:
-            if last_event:
-                updated["last_event_fired"] = f"{last_event},{new_event}"
-            else:
-                updated["last_event_fired"] = new_event
-        
-        # Prepare database update
-        db_update = {
-            "aircraft_id": aircraft_id,
-            "position": position,
-            "vertical_speed_fpm": updated.get("vertical_speed_fpm"),
-            "phase": phase,
-            "distance_to_airport_nm": distance_nm,
-        }
-        
-        # Update current_zone if it changed
-        if "current_zone" in updated:
-            db_update["current_zone"] = updated["current_zone"]
-        
-        if new_event:
-            db_update["last_event_fired"] = updated["last_event_fired"]
-        
-        # Queue DB update
-        self.db_updates_buffer.append(db_update)
-        
-        # Queue Redis position update
-        position_event = self.event_publisher.prepare_aircraft_position_event(updated)
-        self.redis_events_buffer.append(position_event)
-        
-        # Add to telemetry buffer
-        self.add_telemetry_snapshot(updated)
     
     def process_aircraft_sync(self, aircraft: Dict[str, Any]):
         """
@@ -948,7 +669,7 @@ class KinematicsEngine:
         vertical_speed = updated.get("vertical_speed_fpm", 0)
         
         completed_item = None
-        clearance_id = aircraft.get("last_completed_clearance_id")  # Placeholder - will be from DB
+        clearance_id = aircraft.get("clearance_seq", 0)
         
         # Check altitude clearance
         if target_alt is not None:
@@ -1081,29 +802,22 @@ class KinematicsEngine:
     
     def _find_intersecting_runway(self, lat: float, lon: float) -> Optional[str]:
         """
-        Find which runway the aircraft position intersects (simplified).
-        
+        Find which runway the aircraft position intersects using polygon check.
+
         Args:
             lat, lon: Aircraft position
-            
+
         Returns:
             Runway name or None
         """
         if not self.airport or not self.airport.runways:
             return None
-        
-        # Simple distance-based check (can be enhanced with polygon intersection)
+
         for runway in self.airport.runways:
-            coords = runway.get("coordinates", [])
-            if coords and len(coords) > 0:
-                # Check distance to runway centerline
-                if isinstance(coords[0], list) and len(coords[0]) >= 2:
-                    rw_lat = coords[0][1] if len(coords[0]) > 1 else coords[0][0]
-                    rw_lon = coords[0][0]
-                    distance = distance_to_airport(lat, lon, rw_lat, rw_lon)
-                    if distance < 0.1:  # Within 0.1 NM of runway
-                        return runway.get("ref") or runway.get("name", "UNKNOWN")
-        
+            polygon = self.airport.compute_runway_polygon(runway)
+            if polygon and self.airport.point_in_polygon(lon, lat, polygon):
+                return runway.get("ref") or runway.get("name", "UNKNOWN")
+
         return None
     
     def _find_nearest_taxiway(self, lat: float, lon: float) -> Optional[str]:
@@ -1181,11 +895,6 @@ class KinematicsEngine:
         logger.info(f"   Aircraft processed: {self.stats['aircraft_processed']}")
         logger.info(f"   Events fired: {self.stats['events_fired']}")
         logger.info(f"   Avg tick duration: {self.stats['avg_tick_duration']*1000:.2f}ms")
-        
-        if self.use_ray:
-            logger.info("\nRay Distributed Statistics:")
-            logger.info(f"   Ray tasks executed: {self.stats['ray_tasks_executed']}")
-            logger.info(f"   Ray fallbacks: {self.stats['ray_fallbacks']}")
         
         logger.info("\nWorker Statistics:")
         logger.info(f"   DB writes: {self.stats['db_writes']} (batches: {self.worker_stats['db_batches']})")

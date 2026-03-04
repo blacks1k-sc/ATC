@@ -4,8 +4,9 @@ Loads airport coordinates, runways, and entry waypoints from JSON.
 """
 
 import json
+import math
 import os
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any, Optional, Tuple
 from .constants import CYYZ_LAT, CYYZ_LON, CYYZ_ELEVATION_FT
 
 
@@ -144,6 +145,66 @@ class AirportData:
         
         return nearest
     
+    def compute_runway_polygon(self, runway: Dict[str, Any]) -> List[Tuple[float, float]]:
+        """
+        Expand a runway centerline (start+end + width) into a 4-corner polygon.
+
+        Returns list of (lon, lat) tuples forming the corners.
+        """
+        coords = runway.get("coordinates", [])
+        if not coords or len(coords) < 2:
+            return []
+
+        width_ft = float(runway.get("width") or 200)
+        # Half-width in approximate degrees latitude
+        half_width_deg = (width_ft / 2.0) / 364000.0
+
+        lon1, lat1 = float(coords[0][0]), float(coords[0][1])
+        lon2, lat2 = float(coords[1][0]), float(coords[1][1])
+
+        # Perpendicular direction (rotate centerline 90°)
+        dx = lon2 - lon1
+        dy = lat2 - lat1
+        length = math.sqrt(dx * dx + dy * dy)
+        if length == 0:
+            return []
+
+        perp_lon = (-dy / length) * half_width_deg
+        perp_lat = (dx / length) * half_width_deg
+
+        return [
+            (lon1 + perp_lon, lat1 + perp_lat),
+            (lon1 - perp_lon, lat1 - perp_lat),
+            (lon2 - perp_lon, lat2 - perp_lat),
+            (lon2 + perp_lon, lat2 + perp_lat),
+        ]
+
+    @staticmethod
+    def point_in_polygon(lon: float, lat: float, polygon: List[Tuple[float, float]]) -> bool:
+        """
+        Ray-casting point-in-polygon test.
+
+        Args:
+            lon, lat: Point to test.
+            polygon: List of (lon, lat) corner tuples (convex or concave).
+
+        Returns:
+            True if the point is inside the polygon.
+        """
+        n = len(polygon)
+        if n < 3:
+            return False
+
+        inside = False
+        j = n - 1
+        for i in range(n):
+            xi, yi = polygon[i]
+            xj, yj = polygon[j]
+            if ((yi > lat) != (yj > lat)) and (lon < (xj - xi) * (lat - yi) / (yj - yi) + xi):
+                inside = not inside
+            j = i
+        return inside
+
     def get_runway_heading(self, runway_name: str) -> Optional[float]:
         """
         Get magnetic heading for a runway.
