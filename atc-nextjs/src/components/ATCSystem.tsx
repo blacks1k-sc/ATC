@@ -8,9 +8,11 @@ import RunwayDisplay from './RunwayDisplay';
 import ControlPanels from './ControlPanels';
 import Communications from './Communications';
 import ControlButtons from './ControlButtons';
+import RunwaySelector from './RunwaySelector';
 
 export default function ATCSystem() {
   const [systemActive, setSystemActive] = useState(false);
+  const [activeRunway, setActiveRunway] = useState<string | null>(null);
   const [currentTime, setCurrentTime] = useState('');
   const [activeTab, setActiveTab] = useState('tower');
   const [emergencyAlert, setEmergencyAlert] = useState(false);
@@ -183,13 +185,11 @@ export default function ATCSystem() {
     return () => clearInterval(interval);
   }, []);
 
-  // Auto-start system after 1.2 seconds
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      startSystem();
-    }, 1200);
-    return () => clearTimeout(timer);
-  }, []);
+  // Runway selection callback — called by RunwaySelector when user confirms
+  const handleRunwaySelected = useCallback((runway: string) => {
+    setActiveRunway(runway);
+    startSystem();
+  }, [startSystem]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -276,6 +276,10 @@ export default function ATCSystem() {
 
   return (
     <div className="atc-system">
+      {!activeRunway && (
+        <RunwaySelector onSelectRunway={handleRunwaySelected} />
+      )}
+
       <ControlButtons
         onStartSystem={startSystem}
         onAddAircraft={addAircraft}
@@ -292,6 +296,7 @@ export default function ATCSystem() {
         aircraft={aircraft}
         emergencyAircraft={emergencyAircraft}
         emergencyAlert={emergencyAlert}
+        activeRunway={activeRunway ?? undefined}
       />
 
       <RunwayDisplay icao={currentAirport} />

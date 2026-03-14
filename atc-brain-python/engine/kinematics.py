@@ -438,6 +438,76 @@ def calculate_heading_to_yyz(lat: float, lon: float) -> float:
     return (heading + 360) % 360
 
 
+def apply_waypoint_guided_physics(aircraft: Dict[str, Any], dt: float = DT) -> Dict[str, Any]:
+    """
+    Waypoint-guided ILS approach physics.
+
+    Steers toward waypoint_sequence[0] using realistic bank-limited turns.
+    For FAF/THRESHOLD waypoints, follows the 3° glideslope.
+    Falls back to apply_logical_approach_physics if sequence is empty.
+    """
+    waypoint_sequence = aircraft.get("waypoint_sequence")
+    if not waypoint_sequence or not isinstance(waypoint_sequence, list) or len(waypoint_sequence) == 0:
+        return apply_logical_approach_physics(aircraft, dt)
+
+    position = aircraft.get("position", {})
+    lat = position.get("lat", 0.0)
+    lon = position.get("lon", 0.0)
+    altitude_ft = position.get("altitude_ft", 0.0)
+    speed_kts = position.get("speed_kts", 0.0)
+    heading = position.get("heading", 0.0)
+
+    from .geo_utils import distance_to_airport, update_position, bearing_to_point, flat_earth_distance
+
+    wp = waypoint_sequence[0]
+    wp_lat = wp.get("lat", 0.0)
+    wp_lon = wp.get("lon", 0.0)
+    wp_type = wp.get("type", "")
+
+    # Compute heading to steer toward active waypoint
+    target_heading = bearing_to_point(lat, lon, wp_lat, wp_lon)
+
+    # Target speed from waypoint definition
+    target_speed = wp.get("target_speed_kts", speed_kts)
+
+    # Target altitude: THRESHOLD and FAF use live glideslope; others use fixed altitude
+    if wp_type == "THRESHOLD":
+        dist_to_thr = flat_earth_distance(lat, lon, wp_lat, wp_lon)
+        target_altitude = calculate_glideslope_altitude(dist_to_thr)
+    elif wp_type == "FAF":
+        dist_to_faf = flat_earth_distance(lat, lon, wp_lat, wp_lon)
+        gs_alt = calculate_glideslope_altitude(dist_to_faf)
+        fixed_alt = wp.get("target_altitude_ft", gs_alt)
+        # Use whichever is lower (intercept glideslope from above)
+        target_altitude = min(fixed_alt, max(gs_alt, CYYZ_ELEVATION_FT + 200))
+    else:
+        target_altitude = wp.get("target_altitude_ft", altitude_ft)
+
+    is_approach = wp_type in ("FAF", "THRESHOLD")
+    distance_nm = distance_to_airport(lat, lon)
+
+    new_speed = update_speed(speed_kts, target_speed, dt)
+    new_heading = update_heading(heading, target_heading, speed_kts, dt)
+    new_altitude, vertical_speed = update_altitude(
+        altitude_ft, target_altitude, distance_nm, is_approach, dt
+    )
+
+    new_lat, new_lon = update_position(lat, lon, new_heading, new_speed, dt)
+
+    updated = aircraft.copy()
+    updated["position"] = {
+        "lat": new_lat,
+        "lon": new_lon,
+        "altitude_ft": new_altitude,
+        "speed_kts": new_speed,
+        "heading": new_heading,
+    }
+    updated["vertical_speed_fpm"] = vertical_speed
+    updated["distance_to_airport_nm"] = distance_nm
+
+    return updated
+
+
 def apply_logical_approach_physics(aircraft: Dict[str, Any], dt: float = DT) -> Dict[str, Any]:
     """
     Apply logical approach physics instead of random drift.
@@ -569,10 +639,15 @@ def update_aircraft_state(aircraft: Dict[str, Any], dt: float = DT) -> Dict[str,
     target_heading = aircraft.get("target_heading_deg")
     target_altitude = aircraft.get("target_altitude_ft")
     
+    # Waypoint-guided ILS approach takes highest priority
+    waypoint_sequence = aircraft.get("waypoint_sequence")
+    if waypoint_sequence and isinstance(waypoint_sequence, list) and len(waypoint_sequence) > 0:
+        return apply_waypoint_guided_physics(aircraft, dt)
+
     # If LLM has provided targets, use them (even for ENGINE-controlled arrivals)
     # This allows LLM to guide aircraft instead of default approach logic
     has_llm_targets = target_speed is not None or target_heading is not None or target_altitude is not None
-    
+
     if not has_llm_targets and controller == "ENGINE" and flight_type == "ARRIVAL":
         # No LLM targets - use default logical approach physics
         return apply_logical_approach_physics(aircraft, dt)

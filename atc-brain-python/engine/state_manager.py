@@ -62,7 +62,7 @@ class StateManager:
             await self.connect()
         
         query = """
-            SELECT 
+            SELECT
                 ai.*,
                 at.icao_type,
                 at.cruise_speed_kts,
@@ -78,6 +78,7 @@ class StateManager:
             ORDER BY ai.created_at DESC
             LIMIT 100;
         """
+        # NOTE: waypoint_sequence is included via ai.* above
         
         try:
             async with self.pool.acquire() as conn:
@@ -95,7 +96,16 @@ class StateManager:
                     if isinstance(aircraft.get("flight_plan"), str):
                         import json
                         aircraft["flight_plan"] = json.loads(aircraft["flight_plan"])
-                    
+
+                    if isinstance(aircraft.get("waypoint_sequence"), str):
+                        import json
+                        try:
+                            aircraft["waypoint_sequence"] = json.loads(aircraft["waypoint_sequence"])
+                        except Exception:
+                            aircraft["waypoint_sequence"] = []
+                    elif aircraft.get("waypoint_sequence") is None:
+                        aircraft["waypoint_sequence"] = []
+
                     aircraft_list.append(aircraft)
                     
                     # Update cache
@@ -130,6 +140,10 @@ class StateManager:
             if key == "position":
                 import json
                 set_clauses.append(f"position = ${param_idx}::jsonb")
+                values.append(json.dumps(value))
+            elif key == "waypoint_sequence":
+                import json
+                set_clauses.append(f"waypoint_sequence = ${param_idx}::jsonb")
                 values.append(json.dumps(value))
             elif key in ["target_speed_kts", "target_heading_deg", "target_altitude_ft",
                         "vertical_speed_fpm", "phase", "last_event_fired", "controller",
@@ -243,7 +257,7 @@ class StateManager:
         
         query = """
             UPDATE aircraft_instances
-            SET 
+            SET
                 position = COALESCE($2::jsonb, position),
                 vertical_speed_fpm = COALESCE($3, vertical_speed_fpm),
                 phase = COALESCE($4, phase),
@@ -251,6 +265,7 @@ class StateManager:
                 last_event_fired = COALESCE($6, last_event_fired),
                 controller = COALESCE($7, controller),
                 current_zone = COALESCE($8, current_zone),
+                waypoint_sequence = COALESCE($9::jsonb, waypoint_sequence),
                 updated_at = NOW()
             WHERE id = $1
         """
@@ -273,7 +288,9 @@ class StateManager:
                     last_event = update.get("last_event_fired")
                     controller = update.get("controller")
                     current_zone = update.get("current_zone")
-                    
+                    waypoint_seq = update.get("waypoint_sequence")
+                    waypoint_seq_json = json.dumps(waypoint_seq) if waypoint_seq is not None else None
+
                     batch_params.append((
                         aircraft_id,
                         position_json,
@@ -282,7 +299,8 @@ class StateManager:
                         distance,
                         last_event,
                         controller,
-                        current_zone
+                        current_zone,
+                        waypoint_seq_json,
                     ))
                 
                 if not batch_params:

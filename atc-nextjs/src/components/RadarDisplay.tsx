@@ -35,9 +35,10 @@ interface RadarDisplayProps {
   aircraft: Aircraft[];
   emergencyAircraft: Aircraft | null;
   emergencyAlert: boolean;
+  activeRunway?: string;
 }
 
-export default function RadarDisplay({ aircraft, emergencyAircraft, emergencyAlert }: RadarDisplayProps) {
+export default function RadarDisplay({ aircraft, emergencyAircraft, emergencyAlert, activeRunway }: RadarDisplayProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
@@ -287,13 +288,23 @@ export default function RadarDisplay({ aircraft, emergencyAircraft, emergencyAle
       iframeReadyRef.current = true;
       needsBroadcastRef.current = true;
       broadcastSnapshot();
+      // Send active runway to iframe once it's ready
+      if (activeRunway && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({ type: 'SET_ACTIVE_RUNWAY', runway: activeRunway }, '*');
+      }
     };
 
     iframe.addEventListener('load', handleLoad);
     return () => {
       iframe.removeEventListener('load', handleLoad);
     };
-  }, [broadcastSnapshot]);
+  }, [broadcastSnapshot, activeRunway]);
+
+  // When activeRunway changes after initial load, push it to the iframe
+  useEffect(() => {
+    if (!activeRunway || !iframeReadyRef.current || !iframeRef.current?.contentWindow) return;
+    iframeRef.current.contentWindow.postMessage({ type: 'SET_ACTIVE_RUNWAY', runway: activeRunway }, '*');
+  }, [activeRunway]);
 
   useEffect(() => {
     const intervalId = window.setInterval(() => {

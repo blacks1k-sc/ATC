@@ -9,6 +9,16 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+# Lazy import to avoid circular deps at module load time
+_ils_geometry = None
+
+def _get_ils():
+    global _ils_geometry
+    if _ils_geometry is None:
+        from engine.ils_geometry import compute_waypoint_sequence, CYYZ_RUNWAYS
+        _ils_geometry = (compute_waypoint_sequence, CYYZ_RUNWAYS)
+    return _ils_geometry
+
 
 class RuleEngine:
     """
@@ -16,13 +26,19 @@ class RuleEngine:
     All decisions are side-effect free — caller applies them.
     """
 
-    def decide(self, aircraft: dict, registry_snapshot: dict) -> dict | None:
+    def decide(
+        self,
+        aircraft: dict,
+        registry_snapshot: dict,
+        active_runway: str = "23",
+        queue_position: int = 0,
+    ) -> dict | None:
         """
         Returns a clearance dict or None (hand off to LLM).
 
         Clearance dict keys (all optional):
             target_altitude_ft, target_speed_kts, target_heading_deg,
-            runway, gate, action_type, taxi_instruction
+            runway, gate, action_type, taxi_instruction, waypoint_sequence
         """
         phase = aircraft.get("phase", "")
         position = aircraft.get("position", {})
@@ -32,6 +48,26 @@ class RuleEngine:
         free_gates = registry_snapshot.get("free_gates", [])
         approach_queue = registry_snapshot.get("approach_queue", [])
         aircraft_id = aircraft.get("id")
+
+        # ------------------------------------------------------------------
+        # CASE 0: Assign ILS waypoints to aircraft that don't have them yet
+        # ------------------------------------------------------------------
+        existing_wps = aircraft.get("waypoint_sequence")
+        if (not existing_wps or len(existing_wps) == 0) and active_runway:
+            try:
+                compute_wp_seq, cyyz_runways = _get_ils()
+                if active_runway in cyyz_runways:
+                    ac_lat = position.get("lat", 0.0)
+                    ac_lon = position.get("lon", 0.0)
+                    waypoints = compute_wp_seq(ac_lat, ac_lon, active_runway, queue_position)
+                    logger.info(
+                        "[RuleEngine] %s CASE0: assigning ILS waypoints for RWY %s "
+                        "(queue pos %d)",
+                        aircraft.get("callsign"), active_runway, queue_position,
+                    )
+                    return {"waypoint_sequence": waypoints}
+            except Exception as exc:
+                logger.warning("[RuleEngine] CASE0 failed: %s", exc)
 
         # ------------------------------------------------------------------
         # CASE 1: Initial descent trigger — cruise aircraft with no target

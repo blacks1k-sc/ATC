@@ -1995,7 +1995,76 @@
                 if (event.data.type === 'TOGGLE_GRID') {
                     toggleGrid();
                 }
+                if (event.data.type === 'SET_ACTIVE_RUNWAY') {
+                    setActiveRunway(event.data.runway);
+                }
             });
-        
+
+            // ── ILS Centerline ─────────────────────────────────────────────
+            var centerlineLayer = null;
+            var fafMarker = null;
+
+            var CYYZ_RUNWAYS_ILS = {
+                '05':  { heading: 50,  threshold: [43.673889, -79.663889] },
+                '23':  { heading: 230, threshold: [43.694722, -79.633333] },
+                '06L': { heading: 60,  threshold: [43.660000, -79.622222] },
+                '24R': { heading: 240, threshold: [43.679133, -79.596761] },
+                '06R': { heading: 60,  threshold: [43.658300, -79.621928] },
+                '24L': { heading: 240, threshold: [43.675292, -79.597236] },
+                '15L': { heading: 150, threshold: [43.691944, -79.642219] },
+                '33R': { heading: 330, threshold: [43.669997, -79.613892] },
+                '15R': { heading: 150, threshold: [43.685833, -79.651667] },
+                '33L': { heading: 330, threshold: [43.667500, -79.628333] },
+            };
+
+            function offsetPointILS(lat, lon, bearingDeg, distanceNm) {
+                var NM_PER_DEG = 60.0;
+                var brad = (bearingDeg * Math.PI) / 180;
+                var cosLat = Math.cos((lat * Math.PI) / 180);
+                var dLat = (distanceNm / NM_PER_DEG) * Math.cos(brad);
+                var dLon = (distanceNm / NM_PER_DEG) * Math.sin(brad) / Math.max(cosLat, 0.001);
+                return [lat + dLat, lon + dLon];
+            }
+
+            function setActiveRunway(runwayId) {
+                var map = map_525126c534f98a722348a1c6ebe7053b;
+
+                // Remove previous centerline and FAF marker
+                if (centerlineLayer) { map.removeLayer(centerlineLayer); centerlineLayer = null; }
+                if (fafMarker)        { map.removeLayer(fafMarker); fafMarker = null; }
+
+                var rwy = CYYZ_RUNWAYS_ILS[runwayId];
+                if (!rwy) return;
+
+                var approachDir = (rwy.heading + 180) % 360;
+                var thrLat = rwy.threshold[0];
+                var thrLon = rwy.threshold[1];
+
+                // Extended centerline: threshold → 25 NM outbound in approach direction
+                var points = [[thrLat, thrLon]];
+                for (var d = 2; d <= 25; d += 1) {
+                    points.push(offsetPointILS(thrLat, thrLon, approachDir, d));
+                }
+
+                centerlineLayer = L.polyline(points, {
+                    color: '#ffdd00',
+                    weight: 2,
+                    opacity: 0.75,
+                    dashArray: '12, 7',
+                }).addTo(map);
+                centerlineLayer.bindTooltip('ILS ' + runwayId + ' Centerline', { sticky: false });
+
+                // FAF marker at 15 NM
+                var fafPos = offsetPointILS(thrLat, thrLon, approachDir, 15);
+                fafMarker = L.circleMarker(fafPos, {
+                    color: '#ffdd00',
+                    fillColor: '#ffdd00',
+                    fillOpacity: 0.9,
+                    radius: 5,
+                    weight: 2,
+                }).addTo(map);
+                fafMarker.bindTooltip('FAF ' + runwayId + ' (15 NM)', { sticky: false });
+            }
+
 </script>
 </html>

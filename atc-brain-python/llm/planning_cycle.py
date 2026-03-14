@@ -26,17 +26,21 @@ class PlanningCycle:
 
     INTERVAL_SEC = 10
 
+    DEFAULT_RUNWAY = "23"
+
     def __init__(
         self,
         db_pool: asyncpg.Pool,
         registry: ResourceRegistry,
         rule_engine: RuleEngine,
         qwen: QwenClient,
+        redis_client=None,
     ):
         self.db_pool = db_pool
         self.registry = registry
         self.rule_engine = rule_engine
         self.qwen = qwen
+        self.redis_client = redis_client
 
     async def run(self):
         logger.info("[PlanningCycle] Started — interval=%ds", self.INTERVAL_SEC)
@@ -56,6 +60,16 @@ class PlanningCycle:
         if not aircraft_list:
             return
 
+        # Read active runway from Redis (set by frontend via /api/runway)
+        active_runway = self.DEFAULT_RUNWAY
+        if self.redis_client:
+            try:
+                val = await self.redis_client.get("atc:active_runway")
+                if val:
+                    active_runway = val if isinstance(val, str) else val.decode()
+            except Exception as exc:
+                logger.warning("[PlanningCycle] Redis read error: %s", exc)
+
         snap = self.registry.snapshot()
         snap["free_runways"] = [r for r, o in snap["runways"].items() if o is None]
         snap["free_gates"] = [g for g, o in snap["gates"].items() if o is None]
@@ -67,13 +81,25 @@ class PlanningCycle:
                 "[PlanningCycle] %d separation conflict(s) detected", len(conflicts)
             )
 
+        # Count aircraft already assigned to this runway's approach sequence
+        # (used to stagger intercept points for the next aircraft)
+        already_sequenced = sum(
+            1 for ac in aircraft_list
+            if ac.get("waypoint_sequence") and len(ac.get("waypoint_sequence", [])) > 0
+        )
+        next_queue_pos = already_sequenced
+
         # Tier 1 — Rule engine
         rule_decisions: list[dict] = []
         llm_candidates: list[dict] = []
 
         for ac in aircraft_list:
-            decision = self.rule_engine.decide(ac, snap)
+            needs_waypoints = not ac.get("waypoint_sequence") or len(ac.get("waypoint_sequence", [])) == 0
+            qp = next_queue_pos if needs_waypoints else 0
+            decision = self.rule_engine.decide(ac, snap, active_runway, qp)
             if decision is not None:
+                if "waypoint_sequence" in decision:
+                    next_queue_pos += 1  # reserve the next slot for subsequent aircraft
                 rule_decisions.append({"aircraft_id": ac["id"], **decision})
             else:
                 llm_candidates.append(ac)
@@ -117,21 +143,28 @@ class PlanningCycle:
                     target_altitude_ft, target_speed_kts, target_heading_deg,
                     runway_assigned, gate_assigned, clearance_seq,
                     position,
-                    distance_to_airport_nm
+                    distance_to_airport_nm,
+                    waypoint_sequence
                 FROM aircraft_instances
                 WHERE active = TRUE
                 ORDER BY id;
             """)
+        import json
         result = []
         for row in rows:
             ac = dict(row)
-            # position is stored as JSON string in some setups
             if isinstance(ac.get("position"), str):
-                import json
                 try:
                     ac["position"] = json.loads(ac["position"])
                 except Exception:
                     ac["position"] = {}
+            if isinstance(ac.get("waypoint_sequence"), str):
+                try:
+                    ac["waypoint_sequence"] = json.loads(ac["waypoint_sequence"])
+                except Exception:
+                    ac["waypoint_sequence"] = []
+            elif ac.get("waypoint_sequence") is None:
+                ac["waypoint_sequence"] = []
             result.append(ac)
         return result
 
@@ -213,6 +246,13 @@ class PlanningCycle:
                 updates.append(f"{col} = ${idx}")
                 params.append(val)
                 idx += 1
+
+        # Handle waypoint_sequence (JSONB)
+        if "waypoint_sequence" in decision:
+            import json
+            updates.append(f"waypoint_sequence = ${idx}::jsonb")
+            params.append(json.dumps(decision["waypoint_sequence"]))
+            idx += 1
 
         if not updates:
             return

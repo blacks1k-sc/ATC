@@ -437,7 +437,26 @@ class KinematicsEngine:
         
         # Apply kinematics formulas (pure computation)
         updated = update_aircraft_state(aircraft, DT)
-        
+
+        # ── Waypoint advancement ──────────────────────────────────────────
+        waypoint_sequence = aircraft.get("waypoint_sequence", [])
+        if waypoint_sequence and isinstance(waypoint_sequence, list) and len(waypoint_sequence) > 0:
+            wp = waypoint_sequence[0]
+            wp_lat = wp.get("lat", 0.0)
+            wp_lon = wp.get("lon", 0.0)
+            ac_pos = updated["position"]
+            wp_dist = distance_to_airport(
+                ac_pos.get("lat", 0.0), ac_pos.get("lon", 0.0), wp_lat, wp_lon
+            )
+            if wp_dist < 1.0:  # Within 1 NM — advance to next waypoint
+                new_sequence = waypoint_sequence[1:]
+                updated["waypoint_sequence"] = new_sequence
+                if config.DEBUG_PRINTS:
+                    logger.debug(
+                        f"[ENGINE] {callsign} passed waypoint {wp.get('name')} "
+                        f"→ {len(new_sequence)} waypoint(s) remaining"
+                    )
+
         # Extract updated state
         position = updated["position"]
         distance_nm = updated.get("distance_to_airport_nm", 999.0)
@@ -593,10 +612,14 @@ class KinematicsEngine:
             "phase": phase,
             "distance_to_airport_nm": distance_nm,
         }
-        
+
         # Update current_zone if it changed
         if "current_zone" in updated:
             db_update["current_zone"] = updated["current_zone"]
+
+        # Persist waypoint_sequence if it was advanced this tick
+        if "waypoint_sequence" in updated:
+            db_update["waypoint_sequence"] = updated["waypoint_sequence"]
         
         if new_event:
             db_update["last_event_fired"] = updated["last_event_fired"]

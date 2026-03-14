@@ -100,7 +100,7 @@ async def main():
     event_sub = RegistryEventSubscriber(registry, redis_client)
 
     # --- Planning cycle ---
-    cycle = PlanningCycle(db_pool, registry, rule_engine, qwen)
+    cycle = PlanningCycle(db_pool, registry, rule_engine, qwen, redis_client)
 
     logger.info("Starting tasks...")
     tasks = [
