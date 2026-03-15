@@ -358,7 +358,7 @@ export default function EngineOpsPage() {
             </div>
           </div>
         ) : (
-          <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
+          <div className="bg-gray-800 rounded-lg border border-gray-700">
             {/* Table Header */}
             <div className="bg-gray-700 px-6 py-3 border-b border-gray-600">
               <h2 className="text-lg font-semibold text-green-400">
@@ -370,7 +370,7 @@ export default function EngineOpsPage() {
             </div>
 
             {/* Table */}
-            <div className="overflow-x-auto overflow-y-auto" style={{ border: '2px solid #9CA3AF', maxHeight: '60vh' }}>
+            <div style={{ overflowX: 'auto', overflowY: 'auto', maxHeight: '55vh', border: '2px solid #9CA3AF', scrollbarWidth: 'none', msOverflowStyle: 'none' }} className="hide-scrollbar">
               <table className="w-full" style={{ borderCollapse: 'collapse', border: '2px solid #9CA3AF' }}>
                 <thead className="bg-gray-700 sticky top-0 z-10">
                   <tr>

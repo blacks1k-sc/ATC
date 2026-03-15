@@ -541,3 +541,5 @@ body{font-family:'Courier New',monospace;background:var(--bg);color:var(--ink);o
   white-space: nowrap;
 }
 .dark-tooltip__inner tr:last-child td { border-bottom: 0; }
+
+.hide-scrollbar::-webkit-scrollbar { display: none; }
