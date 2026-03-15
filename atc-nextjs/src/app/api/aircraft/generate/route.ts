@@ -142,16 +142,27 @@ export async function POST(request: NextRequest) {
         
         // Generate position and flight data using logic-based calculations
         const positionData = generateRealisticPosition(flightType);
-        const { lat, lon, altitude_ft, heading, speed_kts, distance_to_airport_nm } = positionData;
-        
+        const { lat, lon, altitude_ft, heading, speed_kts, distance_to_airport_nm, entry_fix } = positionData;
+
         const position = { lat, lon, altitude_ft, heading, speed_kts };
+
+        // Pre-assign entry fix as first waypoint so aircraft navigates there autonomously
+        const initialWaypointSequence = entry_fix ? [{
+          name: entry_fix.name,
+          type: 'ENTRY_FIX',
+          lat: entry_fix.lat,
+          lon: entry_fix.lon,
+          target_altitude_ft: 15000,
+          target_speed_kts: 280,
+          target_heading_deg: null,
+        }] : [];
         const squawkCode = generateSquawkCode();
         const flightPlan = generateFlightPlan(flightType, airlineName);
         
         // Calculate sector based on actual distance
         const sector = calculateSector(distance_to_airport_nm);
 
-        // Create aircraft instance with calculated distance and sector
+        // Create aircraft instance with entry fix waypoint pre-assigned
         const aircraft = await aircraftRepo.create({
           icao24,
           registration,
@@ -165,7 +176,8 @@ export async function POST(request: NextRequest) {
           flight_type: flightType,
           controller: 'ENGINE',
           distance_to_airport_nm: distance_to_airport_nm,
-          sector: sector
+          sector: sector,
+          waypoint_sequence: initialWaypointSequence,
         });
 
         // Create event with calculated sector

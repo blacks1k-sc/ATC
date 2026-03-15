@@ -59,6 +59,15 @@ class EventPublisher:
             self.redis_client = None
             logger.info("EventPublisher: Redis connection closed")
     
+    async def get_key(self, key: str) -> Optional[str]:
+        """Read a Redis key value."""
+        if not self.redis_client:
+            return None
+        try:
+            return await self.redis_client.get(key)
+        except Exception:
+            return None
+
     async def publish_event(self, event_type: str, data: Dict[str, Any]) -> bool:
         """
         Publish event to Redis channel (async).

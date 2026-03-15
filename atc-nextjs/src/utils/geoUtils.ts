@@ -97,6 +97,26 @@ export function calculateGlideslopeAltitude(
  * @param flightType - Type of flight (ARRIVAL/DEPARTURE)
  * @returns Position object with calculated distance
  */
+// Named entry fixes at ~55 NM from CYYZ (8 cardinal/intercardinal points)
+const ENTRY_FIXES: { name: string; bearing: number }[] = [
+  { name: 'BOXUM', bearing: 0 },    // N
+  { name: 'DUVOS', bearing: 45 },   // NE
+  { name: 'NUBER', bearing: 90 },   // E
+  { name: 'KEDMA', bearing: 135 },  // SE
+  { name: 'PILMU', bearing: 180 },  // S
+  { name: 'VERKO', bearing: 225 },  // SW
+  { name: 'IMEBA', bearing: 270 },  // W
+  { name: 'RAGID', bearing: 315 },  // NW
+];
+
+function offsetPoint(lat: number, lon: number, distanceNm: number, bearingDeg: number): { lat: number; lon: number } {
+  const bearingRad = (bearingDeg * Math.PI) / 180;
+  return {
+    lat: lat + (distanceNm / 60) * Math.cos(bearingRad),
+    lon: lon + (distanceNm / (60 * Math.cos((lat * Math.PI) / 180))) * Math.sin(bearingRad),
+  };
+}
+
 export function generateRealisticPosition(flightType: string = 'ARRIVAL'): {
   lat: number;
   lon: number;
@@ -104,45 +124,52 @@ export function generateRealisticPosition(flightType: string = 'ARRIVAL'): {
   heading: number;
   speed_kts: number;
   distance_to_airport_nm: number;
+  entry_fix: { name: string; lat: number; lon: number } | null;
 } {
   if (flightType === 'ARRIVAL') {
-    // Generate aircraft at 70-80 NM from YYZ with proper distance calculation
-    const targetDistance = Math.random() * 10 + 70; // 70-80 NM
-    const bearing = Math.random() * 360; // Random direction around YYZ
+    // Spawn at 80-100 NM, outside the managed ENTRY sector
+    const targetDistance = Math.random() * 20 + 80; // 80-100 NM
+    const bearing = Math.random() * 360;
     const bearingRad = (bearing * Math.PI) / 180;
-    
-    // Convert distance and bearing to lat/lon using proper calculation
+
     const lat = CYYZ_LAT + (targetDistance / 60) * Math.cos(bearingRad);
     const lon = CYYZ_LON + (targetDistance / (60 * Math.cos((CYYZ_LAT * Math.PI) / 180))) * Math.sin(bearingRad);
-    
-    // Calculate actual distance (should be close to targetDistance)
     const actualDistance = calculateDistanceToAirport(lat, lon);
-    
-    // Calculate heading toward YYZ with small variation
-    const headingToYYZ = calculateHeading(lat, lon, CYYZ_LAT, CYYZ_LON);
-    const headingVariation = (Math.random() - 0.5) * 30; // ±15 degrees variation
-    const finalHeading = (headingToYYZ + headingVariation + 360) % 360;
-    
+
+    // Assign nearest named entry fix (~55 NM on same bearing)
+    const nearestFix = ENTRY_FIXES.reduce((best, fix) => {
+      const diff = Math.abs(((fix.bearing - bearing + 540) % 360) - 180);
+      const bestDiff = Math.abs(((best.bearing - bearing + 540) % 360) - 180);
+      return diff < bestDiff ? fix : best;
+    });
+    const fixPos = offsetPoint(CYYZ_LAT, CYYZ_LON, 55, nearestFix.bearing);
+    const entry_fix = { name: nearestFix.name, lat: fixPos.lat, lon: fixPos.lon };
+
+    // Head toward the entry fix
+    const headingToFix = calculateHeading(lat, lon, entry_fix.lat, entry_fix.lon);
+
     return {
-      lat: lat,
-      lon: lon,
-      altitude_ft: Math.floor(Math.random() * 5000) + 20000, // 20,000-25,000 ft
-      heading: Math.floor(finalHeading),
-      speed_kts: Math.floor(Math.random() * 50) + 300, // 300-350 kts
-      distance_to_airport_nm: actualDistance
+      lat,
+      lon,
+      altitude_ft: Math.floor(Math.random() * 5000) + 28000, // FL280-FL330 (cruise)
+      heading: Math.floor(headingToFix),
+      speed_kts: Math.floor(Math.random() * 30) + 440, // 440-470 kts (cruise)
+      distance_to_airport_nm: actualDistance,
+      entry_fix,
     };
   } else {
     // Departures start at airport
     return {
       lat: CYYZ_LAT + (Math.random() - 0.5) * 0.01,
       lon: CYYZ_LON + (Math.random() - 0.5) * 0.01,
-      altitude_ft: Math.floor(Math.random() * 1000) + 500, // 500-1500 ft
+      altitude_ft: Math.floor(Math.random() * 1000) + 500,
       heading: Math.floor(Math.random() * 360),
-      speed_kts: Math.floor(Math.random() * 50) + 150, // 150-200 kts
+      speed_kts: Math.floor(Math.random() * 50) + 150,
       distance_to_airport_nm: calculateDistanceToAirport(
         CYYZ_LAT + (Math.random() - 0.5) * 0.01,
         CYYZ_LON + (Math.random() - 0.5) * 0.01
-      )
+      ),
+      entry_fix: null,
     };
   }
 }

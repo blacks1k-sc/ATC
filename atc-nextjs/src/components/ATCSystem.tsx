@@ -299,7 +299,6 @@ export default function ATCSystem() {
       <RunwayDisplay icao={currentAirport} />
 
       <ControlPanels
-        flightStrips={flightStrips}
         emergencyCoord={emergencyCoord}
       />
 

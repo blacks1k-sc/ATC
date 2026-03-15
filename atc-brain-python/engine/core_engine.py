@@ -63,6 +63,7 @@ class KinematicsEngine:
         self.tick_count = 0
         self.running = False
         self.start_time = 0.0
+        self.speed_multiplier = 1  # 1x/2x/4x/8x — read from Redis
 
         # ========== Async Queue and Workers ==========
         # Shared queue for physics loop -> async workers
@@ -435,8 +436,8 @@ class KinematicsEngine:
         aircraft_id = aircraft["id"]
         callsign = aircraft.get("callsign", "UNKNOWN")
         
-        # Apply kinematics formulas (pure computation)
-        updated = update_aircraft_state(aircraft, DT)
+        # Apply kinematics formulas (pure computation, scaled by speed multiplier)
+        updated = update_aircraft_state(aircraft, DT * self.speed_multiplier)
 
         # ── Waypoint advancement ──────────────────────────────────────────
         waypoint_sequence = aircraft.get("waypoint_sequence", [])
@@ -953,7 +954,19 @@ class KinematicsEngine:
             while self.running:
                 self.tick_count += 1
                 tick_start = time.time()
-                
+
+                # Refresh speed multiplier from Redis every 10 ticks
+                if self.tick_count % 10 == 0:
+                    try:
+                        val = await self.event_publisher.get_key('atc:speed_multiplier')
+                        if val:
+                            m = int(val)
+                            if m in (1, 2, 4, 8) and m != self.speed_multiplier:
+                                logger.info(f"Speed multiplier changed: {self.speed_multiplier}x → {m}x")
+                                self.speed_multiplier = m
+                    except Exception:
+                        pass
+
                 # Execute tick (deterministic physics)
                 await self.tick()
                 

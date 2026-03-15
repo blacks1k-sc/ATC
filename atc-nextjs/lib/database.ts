@@ -194,13 +194,14 @@ export class AircraftInstanceRepository {
     controller?: string;
     distance_to_airport_nm?: number;
     sector?: string;
+    waypoint_sequence?: any[];
   }): Promise<AircraftInstance> {
     const result = await this.client.query(`
       INSERT INTO aircraft_instances (
         icao24, registration, callsign, aircraft_type_id, airline_id,
         position, status, squawk_code, flight_plan, flight_type, controller,
-        distance_to_airport_nm, phase
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+        distance_to_airport_nm, phase, waypoint_sequence
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14::jsonb)
       RETURNING *
     `, [
       data.icao24,
@@ -215,7 +216,8 @@ export class AircraftInstanceRepository {
       data.flight_type || 'ARRIVAL',
       data.controller || 'ENGINE',
       data.distance_to_airport_nm || null,
-      data.sector || 'CRUISE'
+      data.sector || 'CRUISE',
+      data.waypoint_sequence ? JSON.stringify(data.waypoint_sequence) : '[]',
     ]);
     return result.rows[0];
   }

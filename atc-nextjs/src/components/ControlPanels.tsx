@@ -1,15 +1,27 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FlightStrip, LLMClearance } from '@/types/atc';
+import { LLMClearance } from '@/types/atc';
 
 interface ControlPanelsProps {
-  flightStrips: FlightStrip[];
   emergencyCoord: boolean;
 }
 
-export default function ControlPanels({ flightStrips, emergencyCoord }: ControlPanelsProps) {
+interface LiveAircraft {
+  id: number;
+  callsign: string;
+  registration?: string;
+  aircraft_type?: { icao_type: string };
+  airline?: { icao: string };
+  position?: { altitude_ft?: number; speed_kts?: number };
+  phase?: string;
+  distance_to_airport_nm?: number;
+  status?: string;
+}
+
+export default function ControlPanels({ emergencyCoord }: ControlPanelsProps) {
   const [clearances, setClearances] = useState<LLMClearance[]>([]);
+  const [liveAircraft, setLiveAircraft] = useState<LiveAircraft[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -28,8 +40,20 @@ export default function ControlPanels({ flightStrips, emergencyCoord }: ControlP
     };
 
     fetchClearances();
-    // Refresh every 2 seconds
     const interval = setInterval(fetchClearances, 2000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const fetchAircraft = async () => {
+      try {
+        const r = await fetch('/api/aircraft?limit=20');
+        const d = await r.json();
+        if (d.aircraft) setLiveAircraft(d.aircraft.slice(0, 10));
+      } catch {}
+    };
+    fetchAircraft();
+    const interval = setInterval(fetchAircraft, 2000);
     return () => clearInterval(interval);
   }, []);
 
@@ -70,16 +94,21 @@ export default function ControlPanels({ flightStrips, emergencyCoord }: ControlP
       <div className="panel">
         <h4>ACTIVE FLIGHT STRIPS</h4>
         <div className="strip-container">
-          {flightStrips.map((strip) => (
-            <div
-              key={strip.id}
-              className={`flight-strip ${strip.status === 'active' ? 'active' : ''} ${strip.status === 'emergency' ? 'emergency' : ''}`}
-            >
-              <strong>{strip.callsign}</strong> {strip.type} {strip.route}<br/>
-              <span className="strip-phase">{strip.phase}</span><br/>
-              {strip.details}
-            </div>
-          ))}
+          {liveAircraft.length === 0 ? (
+            <div style={{ color: '#666', fontSize: '9px' }}>No active aircraft</div>
+          ) : liveAircraft.map((ac) => {
+            const alt = ac.position?.altitude_ft;
+            const fl = alt ? `FL${Math.round(alt / 100)}` : 'N/A';
+            const dist = ac.distance_to_airport_nm ? `${Number(ac.distance_to_airport_nm).toFixed(0)}NM` : '';
+            const phase = ac.phase || 'CRUISE';
+            return (
+              <div key={ac.id} className={`flight-strip ${ac.status === 'active' ? 'active' : ''}`}>
+                <strong>{ac.callsign}</strong> {ac.aircraft_type?.icao_type || ''} {ac.airline?.icao || ''}<br/>
+                <span className="strip-phase">{phase}</span><br/>
+                {fl} {dist}
+              </div>
+            );
+          })}
         </div>
       </div>
 

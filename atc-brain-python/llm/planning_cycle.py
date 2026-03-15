@@ -146,7 +146,7 @@ class PlanningCycle:
                     distance_to_airport_nm,
                     waypoint_sequence
                 FROM aircraft_instances
-                WHERE active = TRUE
+                WHERE status = 'active'
                 ORDER BY id;
             """)
         import json
