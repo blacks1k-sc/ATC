@@ -21,6 +21,8 @@ export default function EngineOpsPage() {
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
   const [sectorFilter, setSectorFilter] = useState<string>('ENTRY');
   const [autoRefresh, setAutoRefresh] = useState(true);
+  const [deleting, setDeleting] = useState<number | null>(null);
+  const [clearingAll, setClearingAll] = useState(false);
 
   // Use the logic-based sector calculation from geoUtils
   const getSectorFromDistance = (distance: number | string | undefined): string => {
@@ -57,6 +59,31 @@ export default function EngineOpsPage() {
       setError(err instanceof Error ? err.message : 'Failed to fetch aircraft');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const deleteAircraft = async (id: number) => {
+    setDeleting(id);
+    try {
+      await fetch(`/api/aircraft/${id}`, { method: 'DELETE' });
+      await fetchAircraft();
+    } catch (err) {
+      console.error('Error deleting aircraft:', err);
+    } finally {
+      setDeleting(null);
+    }
+  };
+
+  const clearAllAircraft = async () => {
+    if (!confirm('Delete ALL aircraft? This cannot be undone.')) return;
+    setClearingAll(true);
+    try {
+      await fetch('/api/aircraft/clear', { method: 'DELETE' });
+      await fetchAircraft();
+    } catch (err) {
+      console.error('Error clearing aircraft:', err);
+    } finally {
+      setClearingAll(false);
     }
   };
 
@@ -231,6 +258,15 @@ export default function EngineOpsPage() {
               {aircraft.length} aircraft in {sectorFilter} sector
             </div>
 
+            {/* Delete All */}
+            <button
+              onClick={clearAllAircraft}
+              disabled={clearingAll}
+              className="px-3 py-1 bg-red-700 hover:bg-red-800 disabled:bg-gray-600 text-sm rounded text-white"
+            >
+              {clearingAll ? 'Clearing...' : 'Delete All'}
+            </button>
+
             {/* Error Display */}
             {error && (
               <div className="text-red-400 text-sm">
@@ -334,9 +370,9 @@ export default function EngineOpsPage() {
             </div>
 
             {/* Table */}
-            <div className="overflow-x-auto" style={{ border: '2px solid #9CA3AF' }}>
+            <div className="overflow-x-auto overflow-y-auto" style={{ border: '2px solid #9CA3AF', maxHeight: '60vh' }}>
               <table className="w-full" style={{ borderCollapse: 'collapse', border: '2px solid #9CA3AF' }}>
-                <thead className="bg-gray-700">
+                <thead className="bg-gray-700 sticky top-0 z-10">
                   <tr>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider" style={{ border: '1px solid #9CA3AF' }}>
                       ID
@@ -385,6 +421,9 @@ export default function EngineOpsPage() {
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider" style={{ border: '1px solid #9CA3AF' }}>
                       Status
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider" style={{ border: '1px solid #9CA3AF' }}>
+                      Delete
                     </th>
                   </tr>
                 </thead>
@@ -459,12 +498,21 @@ export default function EngineOpsPage() {
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap" style={{ border: '1px solid #9CA3AF' }}>
                         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          ac.status === 'active' 
-                            ? 'bg-green-900 text-green-300 border border-green-500' 
+                          ac.status === 'active'
+                            ? 'bg-green-900 text-green-300 border border-green-500'
                             : 'bg-gray-700 text-gray-300 border border-gray-400'
                         }`}>
                           {ac.status || 'active'}
                         </span>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap" style={{ border: '1px solid #9CA3AF' }}>
+                        <button
+                          onClick={() => deleteAircraft(ac.id)}
+                          disabled={deleting === ac.id}
+                          className="px-2 py-1 bg-red-700 hover:bg-red-800 disabled:bg-gray-600 text-xs rounded text-white"
+                        >
+                          {deleting === ac.id ? '...' : 'Del'}
+                        </button>
                       </td>
                     </tr>
                   ))}

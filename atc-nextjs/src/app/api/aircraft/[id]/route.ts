@@ -54,6 +54,35 @@ export async function GET(
   }
 }
 
+// DELETE /api/aircraft/[id] - Delete aircraft
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    if (!pool) {
+      return NextResponse.json({ error: 'Database not available' }, { status: 503 });
+    }
+
+    const aircraftId = parseInt(params.id);
+    if (isNaN(aircraftId)) {
+      return NextResponse.json({ error: 'Invalid aircraft ID' }, { status: 400 });
+    }
+
+    await withTransaction(async (client) => {
+      await client.query('DELETE FROM clearances WHERE aircraft_id = $1', [aircraftId]);
+      await client.query('DELETE FROM events WHERE aircraft_id = $1', [aircraftId]);
+      await client.query('DELETE FROM aircraft_instances WHERE id = $1', [aircraftId]);
+    });
+
+    return NextResponse.json({ success: true, message: `Aircraft ${aircraftId} deleted` });
+
+  } catch (error) {
+    console.error('Error deleting aircraft:', error);
+    return NextResponse.json({ error: 'Failed to delete aircraft' }, { status: 500 });
+  }
+}
+
 // PUT /api/aircraft/[id] - Update aircraft
 export async function PUT(
   request: NextRequest,

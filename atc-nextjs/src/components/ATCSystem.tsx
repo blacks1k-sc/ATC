@@ -12,6 +12,7 @@ import RunwaySelector from './RunwaySelector';
 
 export default function ATCSystem() {
   const [systemActive, setSystemActive] = useState(false);
+  const [showRunwaySelector, setShowRunwaySelector] = useState(false);
   const [activeRunway, setActiveRunway] = useState<string | null>(null);
   const [currentTime, setCurrentTime] = useState('');
   const [activeTab, setActiveTab] = useState('tower');
@@ -185,12 +186,6 @@ export default function ATCSystem() {
     return () => clearInterval(interval);
   }, []);
 
-  // Runway selection callback — called by RunwaySelector when user confirms
-  const handleRunwaySelected = useCallback((runway: string) => {
-    setActiveRunway(runway);
-    startSystem();
-  }, [startSystem]);
-
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -235,14 +230,16 @@ export default function ATCSystem() {
     setTimeout(() => addStageLog('gate', 'arrival', { flight: 'ACA551', type: 'A220', text: 'arrived at GATE B15' }), 80);
   }, [addStageLog]);
 
+  // Runway selection callback — called by RunwaySelector when user confirms
+  const handleRunwaySelected = useCallback((runway: string) => {
+    setActiveRunway(runway);
+    setShowRunwaySelector(false);
+    startSystem();
+  }, [startSystem]);
+
   const addAircraft = useCallback(() => {
-    if (!systemActive) {
-      alert('Please start the system first');
-      return;
-    }
-    // Add something illustrative to Sequencing
     addStageLog('seq', 'arrival', { flight: 'ENY495', type: 'E175', text: 'join downwind runway 25L' });
-  }, [systemActive, addStageLog]);
+  }, [addStageLog]);
 
   const simulateEmergency = useCallback(() => {
     if (!systemActive) {
@@ -276,12 +273,12 @@ export default function ATCSystem() {
 
   return (
     <div className="atc-system">
-      {!activeRunway && (
+      {showRunwaySelector && (
         <RunwaySelector onSelectRunway={handleRunwaySelected} />
       )}
 
       <ControlButtons
-        onStartSystem={startSystem}
+        onStartSystem={() => setShowRunwaySelector(true)}
         onAddAircraft={addAircraft}
         onSimulateEmergency={simulateEmergency}
       />

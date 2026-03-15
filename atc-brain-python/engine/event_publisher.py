@@ -7,6 +7,7 @@ import redis.asyncio as redis
 import json
 import os
 import logging
+from decimal import Decimal
 from typing import Dict, Any, Optional, List
 from datetime import datetime
 from dotenv import load_dotenv
@@ -14,6 +15,12 @@ from dotenv import load_dotenv
 load_dotenv()
 
 logger = logging.getLogger(__name__)
+
+
+def _default(obj):
+    if isinstance(obj, Decimal):
+        return float(obj)
+    raise TypeError(f"Object of type {type(obj)} is not JSON serializable")
 
 
 class EventPublisher:
@@ -76,7 +83,7 @@ class EventPublisher:
                 "data": data
             }
             
-            message_json = json.dumps(message)
+            message_json = json.dumps(message, default=_default)
             await self.redis_client.publish(self.channel, message_json)
             
             return True
@@ -113,7 +120,7 @@ class EventPublisher:
                     "timestamp": datetime.utcnow().isoformat() + "Z",
                     "data": data
                 }
-                message_json = json.dumps(message)
+                message_json = json.dumps(message, default=_default)
                 pipe.publish(self.channel, message_json)
             
             # Execute all publishes at once
