@@ -30,7 +30,7 @@ coverage/
 # IDE files
 .vscode/
 .idea/
-*.md/
+*.md
 *.swp
 *.swo
 
