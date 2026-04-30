@@ -20,7 +20,20 @@ class ResourceRegistry:
     """In-memory registry of runway/gate assignments and approach queue."""
 
     RUNWAYS = ["05L", "05R", "23L", "23R", "06L", "06R", "15L", "15R", "33L", "33R"]
-    GATES = ["A12", "A15", "B12", "B15", "C12", "C15", "D12", "D15"]
+    GATES = [
+        # T1 Pier A
+        "A1", "A4", "A8", "A12", "A16", "A20", "A24",
+        # T1 Pier B
+        "B2", "B6", "B12", "B18", "B24", "B30", "B36",
+        # T1 Pier C
+        "C1", "C6", "C12", "C18", "C22",
+        # T1 Pier D
+        "D1", "D6", "D12", "D18", "D24",
+        # T1 Pier F
+        "F71", "F75", "F79", "F83", "F87", "F91", "F95",
+        # Terminal 3
+        "T3-1", "T3-2", "T3-3", "T3-4", "T3-5", "T3-6",
+    ]
 
     def __init__(self):
         self._lock = asyncio.Lock()
@@ -147,3 +160,13 @@ class RegistryEventSubscriber:
                 distance = aircraft_data.get("distance_to_airport_nm", 99)
                 if distance <= 15 and aircraft_id:
                     await self.registry.enqueue_approach(aircraft_id, distance)
+
+        elif event_type == "aircraft.taxi_clearance":
+            gate = data.get("gate")
+            if gate and aircraft_id:
+                await self.registry.assign_gate(gate, aircraft_id)
+
+        elif event_type == "aircraft.at_gate":
+            gate = data.get("gate")
+            if gate:
+                await self.registry.release_gate(gate)

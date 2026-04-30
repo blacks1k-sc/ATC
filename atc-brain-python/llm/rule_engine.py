@@ -125,19 +125,33 @@ class RuleEngine:
             return None
 
         # ------------------------------------------------------------------
-        # CASE 4: Touchdown — needs taxi clearance to gate
+        # CASE 4: Ground — aircraft has a gate assigned by the engine.
+        #         Return the pre-computed taxi clearance for LLM/comms layer.
         # ------------------------------------------------------------------
-        if phase == "TOUCHDOWN" and not aircraft.get("gate_assigned"):
-            if free_gates:
-                gate = free_gates[0]
+        if phase in ("TAXI", "TOUCHDOWN"):
+            gate = aircraft.get("gate_assigned")
+            route = aircraft.get("taxiway_route") or []
+
+            if gate:
+                route_str = " → ".join(route) if route else "direct"
                 logger.info(
-                    f"[RuleEngine] {aircraft.get('callsign')} CASE4: "
-                    f"taxi to gate {gate}"
+                    "[RuleEngine] %s CASE4: taxi to gate %s via %s",
+                    aircraft.get("callsign"), gate, route_str,
                 )
                 return {
                     "gate": gate,
-                    "taxi_instruction": f"Taxi to gate {gate} via Taxiway Alpha",
+                    "action_type": "taxi_to_gate",
+                    "taxi_instruction": f"Taxi to gate {gate} via {route_str}",
                 }
+
+            # Gate not yet assigned (engine assigns async — very brief window)
+            return {"action_type": "hold_position", "taxi_instruction": "Hold position"}
+
+        # ------------------------------------------------------------------
+        # CASE 5: Parked — no further action needed
+        # ------------------------------------------------------------------
+        if phase == "PARKED":
+            return {"action_type": "parked"}
 
         return None  # Unhandled → LLM
 

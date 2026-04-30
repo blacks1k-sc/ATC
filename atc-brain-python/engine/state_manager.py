@@ -117,6 +117,54 @@ class StateManager:
             logger.error(f"StateManager: Error fetching aircraft: {e}")
             return []
     
+    async def get_ground_aircraft(self) -> List[Dict[str, Any]]:
+        """
+        Fetch aircraft under GROUND control that are still taxiing (status='active').
+        These are processed by the ground movement loop separate from the ENGINE loop.
+        """
+        if not self.pool:
+            await self.connect()
+
+        query = """
+            SELECT
+                ai.*,
+                at.icao_type,
+                at.cruise_speed_kts,
+                at.max_speed_kts,
+                al.icao as airline_icao,
+                al.name as airline_name
+            FROM aircraft_instances ai
+            LEFT JOIN aircraft_types at ON ai.aircraft_type_id = at.id
+            LEFT JOIN airlines al ON ai.airline_id = al.id
+            WHERE ai.status = 'active'
+              AND ai.controller = 'GROUND'
+              AND ai.flight_type = 'ARRIVAL'
+            ORDER BY ai.updated_at ASC
+            LIMIT 100;
+        """
+
+        try:
+            async with self.pool.acquire() as conn:
+                rows = await conn.fetch(query)
+                aircraft_list = []
+                for row in rows:
+                    aircraft = dict(row)
+                    import json
+                    for field in ("position", "flight_plan", "waypoint_sequence", "taxiway_route"):
+                        if isinstance(aircraft.get(field), str):
+                            try:
+                                aircraft[field] = json.loads(aircraft[field])
+                            except Exception:
+                                aircraft[field] = {} if field == "position" else []
+                        elif aircraft.get(field) is None:
+                            aircraft[field] = [] if field in ("waypoint_sequence", "taxiway_route") else {}
+                    aircraft_list.append(aircraft)
+                    self.cache[aircraft["id"]] = aircraft
+                return aircraft_list
+        except Exception as e:
+            logger.error(f"StateManager: Error fetching ground aircraft: {e}")
+            return []
+
     async def update_aircraft_state(self, aircraft_id: int, updates: Dict[str, Any]) -> bool:
         """
         Update aircraft state in database.
@@ -136,20 +184,22 @@ class StateManager:
         values = []
         param_idx = 1
         
+        import json as _json
         for key, value in updates.items():
-            if key == "position":
-                import json
-                set_clauses.append(f"position = ${param_idx}::jsonb")
-                values.append(json.dumps(value))
-            elif key == "waypoint_sequence":
-                import json
-                set_clauses.append(f"waypoint_sequence = ${param_idx}::jsonb")
-                values.append(json.dumps(value))
-            elif key in ["target_speed_kts", "target_heading_deg", "target_altitude_ft",
-                        "vertical_speed_fpm", "phase", "last_event_fired", "controller",
-                        "distance_to_airport_nm", "current_zone"]:
+            if key in ("position", "waypoint_sequence", "taxiway_route"):
+                set_clauses.append(f"{key} = ${param_idx}::jsonb")
+                values.append(_json.dumps(value))
+            elif key in [
+                "target_speed_kts", "target_heading_deg", "target_altitude_ft",
+                "vertical_speed_fpm", "phase", "last_event_fired", "controller",
+                "distance_to_airport_nm", "current_zone",
+                "gate_assigned", "landing_runway", "status",
+            ]:
                 set_clauses.append(f"{key} = ${param_idx}")
                 values.append(value)
+            else:
+                param_idx += 1
+                continue
             param_idx += 1
         
         if not set_clauses:
@@ -266,6 +316,10 @@ class StateManager:
                 controller = COALESCE($7, controller),
                 current_zone = COALESCE($8, current_zone),
                 waypoint_sequence = COALESCE($9::jsonb, waypoint_sequence),
+                status = COALESCE($10, status),
+                gate_assigned = COALESCE($11, gate_assigned),
+                landing_runway = COALESCE($12, landing_runway),
+                taxiway_route = COALESCE($13::jsonb, taxiway_route),
                 updated_at = NOW()
             WHERE id = $1
         """
@@ -290,6 +344,11 @@ class StateManager:
                     current_zone = update.get("current_zone")
                     waypoint_seq = update.get("waypoint_sequence")
                     waypoint_seq_json = json.dumps(waypoint_seq) if waypoint_seq is not None else None
+                    status = update.get("status")
+                    gate_assigned = update.get("gate_assigned")
+                    landing_runway = update.get("landing_runway")
+                    taxiway_route = update.get("taxiway_route")
+                    taxiway_route_json = json.dumps(taxiway_route) if taxiway_route is not None else None
 
                     batch_params.append((
                         aircraft_id,
@@ -301,6 +360,10 @@ class StateManager:
                         controller,
                         current_zone,
                         waypoint_seq_json,
+                        status,
+                        gate_assigned,
+                        landing_runway,
+                        taxiway_route_json,
                     ))
                 
                 if not batch_params:

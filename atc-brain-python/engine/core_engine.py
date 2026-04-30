@@ -24,6 +24,7 @@ from .event_publisher import EventPublisher
 from .spawn_listener import SpawnListener
 from .kinematics import update_aircraft_state
 from .airport_data import get_airport_data
+from .taxiway_network import get_taxiway_network, GROUND_WP_ADVANCE_NM
 from .config import config
 from .constants import (
     DT,
@@ -59,6 +60,10 @@ class KinematicsEngine:
         self.spawn_listener = SpawnListener(self.state_manager, self.on_aircraft_spawned)
 
         self.airport = get_airport_data()
+        self.taxiway_network = get_taxiway_network()
+
+        # Aircraft that touched down this tick and need async gate+route assignment
+        self.pending_ground_assignments: List[Dict[str, Any]] = []
 
         self.tick_count = 0
         self.running = False
@@ -369,18 +374,35 @@ class KinematicsEngine:
         
         # Fetch active arrivals controlled by ENGINE (only blocking DB call)
         aircraft_list = await self.state_manager.get_active_arrivals(controller="ENGINE")
-        
-        if not aircraft_list:
-            # No aircraft to process this tick
+
+        # Also fetch aircraft under GROUND control (taxiing to gate)
+        ground_list = await self.state_manager.get_ground_aircraft()
+
+        if not aircraft_list and not ground_list:
             return
-        
-        # Process all aircraft locally
+
+        # Process airborne aircraft (pure sync physics)
         for aircraft in aircraft_list:
             try:
                 self.process_aircraft_sync(aircraft)
             except Exception as e:
                 callsign = aircraft.get("callsign", "UNKNOWN")
                 logger.error(f"Error processing {callsign}: {e}")
+
+        # Assign gate + route for aircraft that just landed (async, uses taxiway_network)
+        if self.pending_ground_assignments:
+            assignments = self.pending_ground_assignments[:]
+            self.pending_ground_assignments.clear()
+            for assignment in assignments:
+                await self._assign_ground_resources(assignment)
+
+        # Process ground aircraft (taxi movement)
+        for aircraft in ground_list:
+            try:
+                self.process_ground_aircraft_sync(aircraft)
+            except Exception as e:
+                callsign = aircraft.get("callsign", "UNKNOWN")
+                logger.error(f"Error processing ground aircraft {callsign}: {e}")
         
         # Update statistics
         self.stats["aircraft_processed"] += len(aircraft_list)
@@ -511,39 +533,53 @@ class KinematicsEngine:
         
         if altitude_agl < TOUCHDOWN_ALTITUDE_FT and EVENT_TOUCHDOWN not in last_event:
             new_event = EVENT_TOUCHDOWN
+            landing_runway = self._find_intersecting_runway(
+                position.get("lat", 0), position.get("lon", 0)
+            ) or "UNKNOWN"
+
             if config.DEBUG_PRINTS:
-                logger.debug(f"TOUCHDOWN: {callsign} at {altitude_agl:.0f} ft AGL")
-            
-            # Queue DB update to mark as landed
+                logger.debug(f"TOUCHDOWN: {callsign} on {landing_runway} at {altitude_agl:.0f} ft AGL")
+
+            # Keep status='active', transfer to GROUND controller for taxi phase
             self.db_updates_buffer.append({
                 "aircraft_id": aircraft_id,
-                "status": "landed",
                 "controller": "GROUND",
-                "phase": "TOUCHDOWN"
+                "phase": "TAXI",
+                "landing_runway": landing_runway,
+                # Zero out airborne targets so kinematics coasts to a stop
+                "target_altitude_ft": int(position.get("altitude_ft", 569)),
+                "target_speed_kts": 15,
             })
-            
+
+            # Queue async gate+route assignment for this aircraft
+            self.pending_ground_assignments.append({
+                "aircraft_id": aircraft_id,
+                "callsign": callsign,
+                "landing_runway": landing_runway,
+                "lat": position.get("lat", 0),
+                "lon": position.get("lon", 0),
+            })
+
             # Queue database event
             self.pending_db_events.append({
                 "level": "INFO",
                 "type": "aircraft.touchdown",
-                "message": f"{callsign} touchdown at {altitude_agl:.0f} ft AGL",
+                "message": f"{callsign} touchdown on {landing_runway}",
                 "details": {
                     "callsign": callsign,
+                    "landing_runway": landing_runway,
                     "altitude_agl": altitude_agl,
                     "position": position,
-                    "event_type": new_event
                 },
                 "aircraft_id": aircraft_id,
                 "sector": "TWR",
                 "direction": "SYS"
             })
-            
+
             # Queue Redis event
             threshold_event = self.event_publisher.prepare_threshold_event(new_event, updated)
             self.redis_events_buffer.append(threshold_event)
             self.stats["events_fired"] += 1
-            
-            # Stop processing this aircraft
             return
         
         elif distance_nm <= HANDOFF_READY_THRESHOLD_NM and EVENT_HANDOFF_READY not in last_event:
@@ -808,19 +844,16 @@ class KinematicsEngine:
         altitude_agl = altitude_msl_to_agl(altitude_ft, CYYZ_ELEVATION_FT)
         
         if altitude_agl < 10:  # On ground
-            # Check if near taxiway (simplified - within airport bounds)
-            if distance_nm < 0.3:  # Within airport
-                taxiway_name = self._find_nearest_taxiway(lat, lon)
-                if taxiway_name:
-                    # Find which runway was vacated from aircraft state
-                    vacated_runway = aircraft.get("landing_runway") or "UNKNOWN"
-                    event_data = {
+            if distance_nm < 1.5:  # Within airport bounds
+                vacated_runway = aircraft.get("landing_runway") or "UNKNOWN"
+                taxiway_node = self._find_nearest_taxiway(lat, lon, vacated_runway)
+                if taxiway_node:
+                    return {
                         "aircraft_id": aircraft.get("id"),
                         "vacated_runway": vacated_runway,
-                        "taxiway": taxiway_name,
-                        "timestamp": datetime.utcnow().isoformat() + "Z"
+                        "taxiway": taxiway_node,
+                        "timestamp": datetime.utcnow().isoformat() + "Z",
                     }
-                    return event_data
         
         return None
     
@@ -844,23 +877,178 @@ class KinematicsEngine:
 
         return None
     
-    def _find_nearest_taxiway(self, lat: float, lon: float) -> Optional[str]:
-        """
-        Find nearest taxiway to aircraft position (simplified).
-        
-        Args:
-            lat, lon: Aircraft position
-            
-        Returns:
-            Taxiway name or None
-        """
-        # Placeholder - would need taxiway data from airport_data
-        # For now, return a generic taxiway name if within airport bounds
+    def _find_nearest_taxiway(self, lat: float, lon: float, runway: str = "UNKNOWN") -> Optional[str]:
+        """Return the nearest taxiway exit node name for a position + runway."""
         distance_nm = distance_to_airport(lat, lon)
-        if distance_nm < 0.3:
-            return "TAXIWAY_A"  # Placeholder
-        return None
+        if distance_nm > 1.5:
+            return None
+        return self.taxiway_network.get_nearest_exit_node(lat, lon, runway)
     
+    async def _assign_ground_resources(self, assignment: Dict[str, Any]) -> None:
+        """
+        Assign a unique gate and taxi route for an aircraft that just landed,
+        or release resources when the aircraft reaches its gate.
+        Called async after each tick's sync phase so it can await the network lock.
+        """
+        # Release path: aircraft reached gate, free up segments + gate slot
+        if assignment.get("_release_only"):
+            await self.taxiway_network.release_aircraft(assignment["aircraft_id"])
+            return
+
+        aircraft_id = assignment["aircraft_id"]
+        callsign = assignment["callsign"]
+        landing_runway = assignment["landing_runway"]
+        lat = assignment["lat"]
+        lon = assignment["lon"]
+
+        # 1. Assign a free gate (unique, atomically locked)
+        gate = await self.taxiway_network.assign_gate(aircraft_id)
+        if not gate:
+            logger.warning("[ENGINE] No free gate for %s — holding on runway", callsign)
+            return
+
+        # 2. Compute route + reserve taxiway segments
+        route_info = await self.taxiway_network.find_and_reserve_route(
+            aircraft_id, landing_runway, gate
+        )
+        if not route_info:
+            logger.warning("[ENGINE] No taxi route found for %s to gate %s", callsign, gate)
+            return
+
+        segments = route_info["segments"]
+        waypoints = route_info["waypoints"]
+        taxi_str = " → ".join(segments) if segments else "direct"
+
+        logger.info(
+            "[ENGINE] %s: gate %s via %s (%d waypoints)",
+            callsign, gate, taxi_str, len(waypoints),
+        )
+
+        # 3. Persist gate, route, and waypoint sequence to DB immediately
+        await self.state_manager.update_aircraft_state(aircraft_id, {
+            "gate_assigned": gate,
+            "landing_runway": landing_runway,
+            "taxiway_route": segments,
+            "waypoint_sequence": waypoints,
+            "phase": "TAXI",
+        })
+
+        # 4. Publish taxi clearance event to Redis
+        self.redis_events_buffer.append((
+            "aircraft.taxi_clearance",
+            {
+                "aircraft_id": aircraft_id,
+                "callsign": callsign,
+                "gate": gate,
+                "landing_runway": landing_runway,
+                "taxi_route": segments,
+                "taxi_instruction": f"Taxi to gate {gate} via {taxi_str}",
+                "timestamp": datetime.utcnow().isoformat() + "Z",
+            }
+        ))
+
+        # 5. Log to DB events
+        self.pending_db_events.append({
+            "level": "INFO",
+            "type": "aircraft.taxi_clearance",
+            "message": f"{callsign} cleared to gate {gate} via {taxi_str}",
+            "details": {
+                "gate": gate,
+                "landing_runway": landing_runway,
+                "taxi_route": segments,
+            },
+            "aircraft_id": aircraft_id,
+            "sector": "GND",
+            "direction": "TX",
+        })
+
+    def process_ground_aircraft_sync(self, aircraft: Dict[str, Any]) -> None:
+        """
+        Process one taxiing aircraft: advance along taxiway waypoints at ground speed.
+        Uses tighter waypoint advance threshold (GROUND_WP_ADVANCE_NM).
+        Fires aircraft.at_gate when the final waypoint (gate) is reached.
+        """
+        aircraft_id = aircraft["id"]
+        callsign = aircraft.get("callsign", "UNKNOWN")
+        position = aircraft.get("position", {})
+        lat = position.get("lat", 0.0)
+        lon = position.get("lon", 0.0)
+
+        waypoints = aircraft.get("waypoint_sequence", [])
+
+        # No waypoints → assignment still pending or already at gate
+        if not waypoints:
+            return
+
+        # Check distance to the current (first) waypoint
+        wp = waypoints[0]
+        wp_lat = wp.get("lat", 0.0)
+        wp_lon = wp.get("lon", 0.0)
+        wp_dist = distance_to_airport(lat, lon, wp_lat, wp_lon)
+
+        db_update: Dict[str, Any] = {"aircraft_id": aircraft_id}
+
+        if wp_dist < GROUND_WP_ADVANCE_NM:
+            remaining = waypoints[1:]
+            db_update["waypoint_sequence"] = remaining
+
+            if not remaining:
+                # Reached the gate — final waypoint consumed
+                gate = aircraft.get("gate_assigned", "UNKNOWN")
+                logger.info("[ENGINE] %s reached gate %s", callsign, gate)
+
+                db_update["phase"] = "PARKED"
+                db_update["status"] = "parked"
+                db_update["controller"] = "GROUND"
+                db_update["target_speed_kts"] = 0
+
+                # Schedule async release of taxiway segments
+                self.pending_ground_assignments.append({
+                    "_release_only": True,
+                    "aircraft_id": aircraft_id,
+                    "callsign": callsign,
+                })
+
+                # Publish at_gate event
+                self.redis_events_buffer.append((
+                    "aircraft.at_gate",
+                    {
+                        "aircraft_id": aircraft_id,
+                        "callsign": callsign,
+                        "gate": gate,
+                        "timestamp": datetime.utcnow().isoformat() + "Z",
+                    }
+                ))
+                self.pending_db_events.append({
+                    "level": "INFO",
+                    "type": "aircraft.at_gate",
+                    "message": f"{callsign} arrived at gate {gate}",
+                    "details": {"gate": gate},
+                    "aircraft_id": aircraft_id,
+                    "sector": "GND",
+                    "direction": "SYS",
+                })
+                self.stats["events_fired"] += 1
+            else:
+                # Advance: steer toward next waypoint
+                next_wp = remaining[0]
+                db_update["target_speed_kts"] = int(next_wp.get("speed_kts", 15))
+
+            if config.DEBUG_PRINTS:
+                logger.debug(
+                    "[ENGINE] %s passed taxiway wp %s → %d remaining",
+                    callsign, wp.get("name"), len(db_update.get("waypoint_sequence", [])),
+                )
+
+        self.db_updates_buffer.append(db_update)
+
+        # Publish position update for radar display
+        updated_pos = dict(position)
+        position_event = self.event_publisher.prepare_aircraft_position_event(
+            {**aircraft, "position": updated_pos}
+        )
+        self.redis_events_buffer.append(position_event)
+
     def determine_phase(self, distance_nm: float, altitude_agl: float) -> str:
         """
         Determine flight phase based on distance and altitude.

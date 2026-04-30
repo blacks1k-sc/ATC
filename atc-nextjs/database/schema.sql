@@ -52,6 +52,11 @@ CREATE TABLE IF NOT EXISTS aircraft_instances (
     target_altitude_ft INTEGER,
     vertical_speed_fpm INTEGER,
     distance_to_airport_nm DECIMAL(8,2),
+    waypoint_sequence JSONB,
+    current_zone VARCHAR(50),
+    gate_assigned VARCHAR(10),
+    landing_runway VARCHAR(10),
+    taxiway_route JSONB,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
@@ -82,6 +87,8 @@ CREATE INDEX IF NOT EXISTS idx_aircraft_instances_callsign ON aircraft_instances
 CREATE INDEX IF NOT EXISTS idx_aircraft_instances_type_id ON aircraft_instances(aircraft_type_id);
 CREATE INDEX IF NOT EXISTS idx_aircraft_instances_airline_id ON aircraft_instances(airline_id);
 CREATE INDEX IF NOT EXISTS idx_aircraft_instances_status ON aircraft_instances(status);
+CREATE INDEX IF NOT EXISTS idx_aircraft_instances_controller ON aircraft_instances(controller);
+CREATE INDEX IF NOT EXISTS idx_aircraft_instances_gate ON aircraft_instances(gate_assigned);
 CREATE INDEX IF NOT EXISTS idx_aircraft_instances_position ON aircraft_instances USING GIN(position);
 CREATE INDEX IF NOT EXISTS idx_aircraft_instances_created_at ON aircraft_instances(created_at);
 
