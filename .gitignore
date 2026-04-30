@@ -48,3 +48,8 @@ Thumbs.db
 
 
 atc-brain-python/telemetry/phaseA/
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+*.pyo
